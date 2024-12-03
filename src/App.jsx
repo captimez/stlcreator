@@ -1,16 +1,16 @@
 import React from "react";
+import MainView from "./view/views/mainView";
+import { AppProvider } from '@toolpad/core/AppProvider';
+import { AppProvider as CustomProvider } from "./model/store";
 import { Button, Typography, Container } from "@mui/material";
 
 const App = () => {
   return (
-    <Container maxWidth="sm">
-      <Typography variant="h4" component="h1" gutterBottom>
-        Welcome to Material-UI with Electron
-      </Typography>
-      <Button variant="contained" color="primary">
-        Click Me
-      </Button>
-    </Container>
+    <AppProvider>
+        <CustomProvider>
+            <MainView></MainView>
+        </CustomProvider>
+    </AppProvider>
   );
 };
 
