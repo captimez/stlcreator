@@ -54,17 +54,7 @@ const demoTheme = createTheme({
 
 function DemoPageContent({ pathname }) {
   return (
-    <Box
-      sx={{
-        py: 4,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        textAlign: 'center',
-      }}
-    >
       <StlView></StlView>
-    </Box>
   );
 }
 

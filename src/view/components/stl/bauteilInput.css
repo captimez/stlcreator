@@ -1,0 +1,11 @@
+.input-box{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 20em;
+}
+
+.input-label{
+    font-family: Roboto;
+    font-size: 95%;
+}

@@ -2,20 +2,26 @@ import * as React from 'react';
 import Grid from '@mui/material/Grid2';
 import Box from '@mui/material/Box';
 import Katalog from '../components/stl/Katalog';
-
+import { WidthFull, WidthWide } from '@mui/icons-material';
+import { AppProvider as CustomProvider, useAppContext } from "./../../model/store";
+import BauteilInput from '../components/stl/BauteilInput';
 
 const StlView = () => {
-    return(
-        <Box sx={{ flexGrow: 1 }}>
-            <Grid container spacing={5}>
-                <Grid size={7}>
-                    <Katalog></Katalog>
-                </Grid>
-                <Grid size={5} sx={{backgroundColor:"#88888"}}>
-                </Grid>
-            </Grid>
-        </Box>
-    )
-}
+
+    const { selectedBauteil } = useAppContext();
+
+    return (
+        <div style={{ width: "100%", display: "flex" }}>
+            <div style={{ width: "30%", borderRight: "1px solid #ddd" }}>
+                    <Katalog />
+                
+            </div>
+            <div style={{ width: "70%" }}>
+                    <BauteilInput></BauteilInput>
+            </div>
+        </div>
+    );
+};
+
 
 export default StlView;

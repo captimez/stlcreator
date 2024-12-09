@@ -2,7 +2,8 @@ import * as React from 'react';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import { useAppContext } from '../../../model/store';
-import { ListItemButton, ListItemText } from '@mui/material';
+import { ListItemAvatar, ListItemButton, ListItemText,Avatar,IconButton } from '@mui/material';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 const bauteile = [
     {
@@ -50,20 +51,34 @@ const bauteile = [
 ];
 
 const Katalog = () => {
-    const { setSelectedBauteil } = useAppContext();
+
+    const { selectedBauteil, setSelectedBauteil } = useAppContext();
+
+    const handleBauteilSelect = (bauteil,index) => {
+        setSelectedBauteil(bauteil);
+    }
+
 
     return (
-        <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+        <List sx={{ bgcolor: 'background.paper' }}>
             {bauteile.map((teil, index) => (
-                <ListItem 
-                    key={index} 
-                    disablePadding
-                    sx={{ borderBottom: '1px solid #ddd' }} // Optional: Trennung zwischen Items
-                >
-                    <ListItemButton onClick={() => setSelectedBauteil(teil)}>
-                        <ListItemText primary={teil.name} />
-                    </ListItemButton>
-                </ListItem>
+                 <ListItem
+                    selected={selectedBauteil?.name === teil.name}
+                    key={index}
+                    secondaryAction={
+                    <IconButton edge="end" aria-label="select" onClick={() => handleBauteilSelect(teil,index)}>
+                        <ArrowForwardIosIcon></ArrowForwardIosIcon>
+                    </IconButton>
+                    }
+               >
+                        <ListItemAvatar>
+                            <Avatar>
+                            </Avatar>
+                        </ListItemAvatar>
+                        <ListItemText
+                        primary={teil.name}
+                        />
+              </ListItem>
             ))}
         </List>
     );

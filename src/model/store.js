@@ -5,19 +5,11 @@ const AppContext = createContext();
 
 // Create the Provider Component
 export const AppProvider = ({ children }) => {
-  const [state, setState] = useState({
-    selectedBauteil: null,
-  });
-
-  const setSelectedBauteil = (bauteil) => {
-    setState((prevState) => ({
-        ...prevState,
-        bauteil
-    }))
-  }
+  const [selectedBauteil, setSelectedBauteil] = useState(null)
+  
 
   return (
-    <AppContext.Provider value={{ state, setSelectedBauteil }}>
+    <AppContext.Provider value={{ selectedBauteil, setSelectedBauteil }}>
       {children}
     </AppContext.Provider>
   );
