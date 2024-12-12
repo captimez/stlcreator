@@ -5,7 +5,7 @@ const AppContext = createContext();
 
 // Create the Provider Component
 export const AppProvider = ({ children }) => {
-  const [selectedBauteil, setSelectedBauteil] = useState(null)
+  const [selectedBauteil, setSelectedBauteil] = useState(null);
   
 
   return (

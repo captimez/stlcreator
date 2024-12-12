@@ -28,10 +28,13 @@
   "dependencies": {
     "@emotion/react": "^11.13.5",
     "@emotion/styled": "^11.13.5",
+    "@jscad/modeling": "^2.12.4",
+    "@jscad/stl-serializer": "^2.1.19",
     "@mui/icons-material": "^6.1.9",
     "@mui/material": "^6.1.9",
     "@toolpad/core": "^0.10.0",
     "css-loader": "^7.1.2",
+    "fs": "^0.0.1-security",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "style-loader": "^4.0.0"
