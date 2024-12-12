@@ -1,9 +1,9 @@
 import React from "react";
 import MainView from "./view/views/mainView";
 import { AppProvider } from '@toolpad/core/AppProvider';
-import { AppProvider as CustomProvider } from "./model/store";
 import { Button, Typography, Container } from "@mui/material";
 import DashboardLayoutBranding from "./view/components/layout/DashboardLayout";
+import { AppProvider as CustomProvider } from "./model/store";
 
 const App = () => {
   return (

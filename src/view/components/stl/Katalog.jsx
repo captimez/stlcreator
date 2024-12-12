@@ -7,14 +7,14 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 const bauteile = [
     {
-        name: "Außenring1",
+        name: "Aussenring1",
         inputs: {
-            aussendurchmesser: "",
-            innendurchmesser: "",
-            hoehe: "",
-            breite_aussen: "",
-            breite_innen: "",
-            tiefe_innen: "",
+            aussendurchmesser: 0,
+            innendurchmesser: 0,
+            hoehe: 0,
+            breite_aussen: 0,
+            breite_innen: 0,
+            tiefe_innen: 0,
         }
     },
     {
