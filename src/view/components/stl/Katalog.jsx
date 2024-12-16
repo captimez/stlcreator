@@ -4,6 +4,7 @@ import ListItem from '@mui/material/ListItem';
 import { useAppContext } from '../../../model/store';
 import { ListItemAvatar, ListItemButton, ListItemText,Avatar,IconButton } from '@mui/material';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import { Height } from '@mui/icons-material';
 
 const bauteile = [
     {
@@ -20,32 +21,32 @@ const bauteile = [
     {
         name: "Aussenring2",
         inputs: {
-            innendurchmesser_klein: "",
-            innendurchmesser_gross: "",
-            aussendurchmesser: "",
-            hoehe: "",
+            innendurchmesser_klein: 0,
+            innendurchmesser_gross: 0,
+            aussendurchmesser: 0,
+            hoehe: 0,
         }
     },
     {
         name: "Innenring1",
         inputs: {
-            durchmesser_or: "",
-            durchmesser_so: "",
-            durchmesser_su: "",
-            durchmesser_ur: "",
-            innendurchmesser: "",
-            hoehe_or: "",
-            hoehe: "",
-            hoehe_ur: "",
+            durchmesser_or: 0,
+            durchmesser_so: 0,
+            durchmesser_su: 0,
+            durchmesser_ur: 0,
+            innendurchmesser: 0,
+            hoehe_or: 0,
+            hoehe: 0,
+            hoehe_ur: 0,
         }
     },
     {
         name: "Innenring2",
         inputs: {
-            innendurchmesser: "",
-            aussendurchmesser: "",
-            hoehe: "",
-            radius_ausstich: "",
+            innendurchmesser: 0,
+            aussendurchmesser: 0,
+            hoehe: 0,
+            radius_ausstich: 0,
         }
     }
 ];
@@ -72,7 +73,7 @@ const Katalog = () => {
                     }
                >
                         <ListItemAvatar>
-                            <Avatar>
+                            <Avatar src={"images/" + teil.name + ".png"} sx={{ mr: 5, height: 80, width:80,}}>
                             </Avatar>
                         </ListItemAvatar>
                         <ListItemText

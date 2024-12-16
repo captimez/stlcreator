@@ -1,3 +1,7 @@
+.three{
+    margin-left: 100px;
+}
+
 .input-box{
     display: flex;
     flex-direction: column;
@@ -6,6 +10,5 @@
 }
 
 .input-label{
-    font-family: Roboto;
     font-size: 95%;
 }
