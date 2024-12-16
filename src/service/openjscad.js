@@ -1,79 +1,107 @@
+import { roundedCylinder } from '@jscad/modeling/src/primitives';
+import { height } from '@mui/system';
+
 // Import der JSCAD-Bibliotheken
 const { cylinder, cuboid, cylinderElliptic } = require('@jscad/modeling').primitives;
 const { subtract, union } = require('@jscad/modeling').booleans;
 const { translate, rotate} = require('@jscad/modeling').transforms;
 const { serialize } = require('@jscad/stl-serializer');
 
-function createAussenring1(inputs) {
-
-    console.log(inputs)
-    
-    // Inputs sicherstellen, dass sie Zahlen sind
-    let Durchmesser_aussen = Number(inputs.aussendurchmesser);
-    let Durchmesser_Schulter = Number(inputs.innendurchmesser);
-    let Breite = Number(inputs.hoehe);
-    let Durchmesser_Laufbahn = Number(inputs.breite_aussen);
-    let Breite_Laufbahn = Number(inputs.breite_innen);
-
-
+function createAussenring1({
+    aussendurchmesser,
+    innendurchmesser,
+    hoehe,
+    breite_aussen,
+    breite_innen,
+    tiefe_innen,
+  }) {
+    // Eingabewerte validieren
+    if (
+      !aussendurchmesser || aussendurchmesser <= 0 ||
+      !innendurchmesser || innendurchmesser <= 0 ||
+      !hoehe || hoehe <= 0 ||
+      !breite_aussen || breite_aussen <= 0 ||
+      !breite_innen || breite_innen <= 0 ||
+      !tiefe_innen || tiefe_innen <= 0
+    ) {
+      throw new Error('Alle Eingabeparameter müssen positive Werte haben.');
+    }
+  
     console.log('Eingabeparameter:');
-    console.log('Durchmesser_aussen:', Durchmesser_aussen);
-    console.log('Durchmesser_Schulter:', Durchmesser_Schulter);
-    console.log('Breite:', Breite);
-    console.log('Durchmesser_Laufbahn:', Durchmesser_Laufbahn);
-    console.log('Breite_Laufbahn:', Breite_Laufbahn);
+    console.log('aussendurchmesser:', aussendurchmesser);
+    console.log('innendurchmesser:', innendurchmesser);
+    console.log('hoehe:', hoehe);
+    console.log('breite_aussen:', breite_aussen);
+    console.log('breite_innen:', breite_innen);
+    console.log('tiefe_innen:', tiefe_innen);
   
-    // Parameter berechnen
-    const R_aussen = Durchmesser_aussen / 2;
-    const R_innen = Durchmesser_Schulter / 2;
-    const rak = (Breite - (Breite - 2)) / 2;
+    // Umrechnen der Maße
+    const Durchmesser_aussen = Number(aussendurchmesser) / 10;
+    const Durchmesser_innen = Number(innendurchmesser) / 10;
+    const Breite = Number(hoehe) / 10;
+    const Breite_aussen = Number(breite_aussen) / 10;
+    const Breite_innen = Number(breite_innen) / 10;
+    const Tiefe_innen = Number(tiefe_innen) / 10;
 
-    console.log("R_aussen: ", R_aussen);
-    console.log("R_innen: ", R_innen);
-    console.log("rak: ", rak);
+    //Aussen Zylinder
+    const aussen_zylinder = roundedCylinder({ radius: Durchmesser_aussen / 2, roundRadius: (Breite - Breite_aussen ) / 10 ,height: Breite});
+
+    //Innen Zylinder 
+    const innen_zylinder = cylinder({ radius: Durchmesser_innen/2 , height: Breite });
+
+    //InnenLaufbahn Zylinder 
+    const laufbahn = cylinder({ radius: (Durchmesser_innen / 2 ) + Tiefe_innen, height: Breite_innen });
+
+    const mainRing = subtract(aussen_zylinder,innen_zylinder);
+
+    return subtract(mainRing,laufbahn); 
   
-    // Zylinder für den äußeren Ring
-    const outerCylinder = cylinder({ height: Breite - 2 * rak, radius: R_aussen });
-  
-    // Innerer Zylinder
-    const innerCylinder = cylinder({ height: Breite, radius: R_innen });
-  
-    // Ausstich-Zylinder
-    const ausstichRadius = (Durchmesser_Laufbahn - Durchmesser_Schulter) / 2 + R_innen;
-    const ausstich = translate(
-      [0, 0, ((Breite - 2) - Breite_Laufbahn) / 2],
-      cylinder({ height: Breite_Laufbahn, radius: ausstichRadius })
-    );
-  
-    // Unterschied der Hauptzylinder
-    const mainDifference = subtract(outerCylinder, innerCylinder, ausstich);
-  
-    // Konus oben
-    const topCone = translate(
-      [0, 0, Breite - rak],
-      subtract(
-        cylinderElliptic({ height: rak, startRadius: [R_aussen, R_aussen], endRadius: [R_aussen - rak, R_aussen - rak] }),
-        cylinder({ height: rak, radius: R_innen })
-      )
-    );
-  
-    // Konus unten
-    const bottomCone = subtract(
-      cylinderElliptic({ height: rak, startRadius: [R_aussen, R_aussen], endRadius: [R_aussen - rak, R_aussen - rak] }),
-      cylinder({ height: rak, radius: R_innen })
-    );
-  
-    // Rotieren und Zusammenfügen
-    return rotate([0, 90, 0], translate([0, 0, rak], subtract(mainDifference, topCone, bottomCone)));
+    
   }
 
 // Funktion für Außenring2
-function createAussenring2({ innendurchmesser_klein, innendurchmesser_gross, aussendurchmesser, hoehe }) {
-    const outer = cylinder({ radius: aussendurchmesser / 2, height: hoehe });
-    const innerSmall = cylinder({ radius: innendurchmesser_klein / 2, height: hoehe + 1 });
-    const innerLarge = cylinder({ radius: innendurchmesser_gross / 2, height: hoehe + 1 });
-    return subtract(outer, union(innerSmall, innerLarge));
-}
+function createAussenring2({
+    innendurchmesser_klein,
+    innendurchmesser_gross,
+    aussendurchmesser,
+    hoehe,
+  }) {
+    // Parameterberechnung
+    const D_aussen = Number(aussendurchmesser) / 10;
+    const D_gr_innen = Number(innendurchmesser_gross) / 10;
+    const D_kl_innen = Number(innendurchmesser_klein) / 10;
+
+    console.log(hoehe);
+    console.log(D_aussen);
+    console.log(D_gr_innen);
+    console.log(D_kl_innen);
+  
+    const aussenradius = D_aussen / 2;
+    const rklein = D_kl_innen / 2;
+    const rgross = D_gr_innen / 2;
+  
+    const resolution = 50; // Auflösung für glatte Zylinder
+  
+    // Äußerer Zylinder
+    const outerCylinder = cylinder({ height: hoehe, radius: aussenradius, segments: resolution });
+  
+    // Innerer Zylinder
+    const innerCylinder = cylinder({ height: hoehe + 1, radius: rklein, segments: resolution });
+  
+    // Bauteilschräge mit elliptischer Geometrie
+    const slopedCylinder = cylinderElliptic({
+        height: hoehe + 1, 
+        startRadius: [rgross, rgross], // Start-Ellipse
+        endRadius: [rklein, rklein],   // End-Ellipse
+        segments: 50
+    });
+  
+    // Subtraktion der inneren Zylinder und der Schräge
+    const result = subtract(outerCylinder, innerCylinder, slopedCylinder);
+  
+    // Rotation für die richtige Ausrichtung (90 Grad um Y-Achse)
+    return rotate([0, Math.PI / 2, 0], result);
+  }
 
 // Funktion für Innenring1
 function createInnenring1({ durchmesser_or, durchmesser_so, durchmesser_su, durchmesser_ur, hoehe_or, hoehe, hoehe_ur }) {
