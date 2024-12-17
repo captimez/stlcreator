@@ -60,6 +60,14 @@ function MyThree(props) {
     dirLight.position.set(10, 10, 10);
     scene.add(dirLight);
 
+    // GridHelper hinzufügen
+    const gridSize = 100;  // Größe des Rasters
+    const gridDivisions = 50; // Anzahl der Unterteilungen im Raster
+    const gridHelper = new THREE.GridHelper(gridSize, gridDivisions, 0x888888, 0x444444);
+
+    // GridHelper zur Szene hinzufügen
+    scene.add(gridHelper);
+
     // Animation
     const animate = () => {
       requestAnimationFrame(animate);

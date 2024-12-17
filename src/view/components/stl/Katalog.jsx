@@ -48,7 +48,27 @@ const bauteile = [
             hoehe: 0,
             radius_ausstich: 0,
         }
-    }
+    },
+    {
+        name: "T-Stueck",
+        inputs:{
+            zylinder_duchmesser_aussen: 0,
+            zylinder_duchmesser_innen: 0,
+            zylinder2_durchmesser_aussen: 0,
+            zylinder2_duchemsser_innen: 0,
+            laenge: 0,
+            hoehe: 0,
+        }
+    },
+    {
+        name: "Rohrbogen",
+        inputs:{
+            durchmesser: 20,
+            winkel: 90,
+            schenkel_laenge_1: 60,
+            schenkel_laenge_2: 60,
+        }
+    },
 ];
 
 const Katalog = () => {
@@ -64,10 +84,10 @@ const Katalog = () => {
         <List sx={{ bgcolor: 'background.paper' }}>
             {bauteile.map((teil, index) => (
                  <ListItem
-                    selected={selectedBauteil?.name === teil.name}
+                    
                     key={index}
                     secondaryAction={
-                    <IconButton edge="end" aria-label="select" onClick={() => handleBauteilSelect(teil,index)}>
+                    <IconButton selected={selectedBauteil?.name === teil.name} edge="end" aria-label="select" onClick={() => handleBauteilSelect(teil,index)}>
                         <ArrowForwardIosIcon></ArrowForwardIosIcon>
                     </IconButton>
                     }

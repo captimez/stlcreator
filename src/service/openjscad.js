@@ -1,8 +1,9 @@
-import { roundedCylinder } from '@jscad/modeling/src/primitives';
+import { extrudeRotate } from '@jscad/modeling/src/operations/extrusions';
+import { ellipse, roundedCylinder } from '@jscad/modeling/src/primitives';
 import { height } from '@mui/system';
 
 // Import der JSCAD-Bibliotheken
-const { cylinder, cuboid, cylinderElliptic } = require('@jscad/modeling').primitives;
+const { cylinder, cuboid, cylinderElliptic, torus } = require('@jscad/modeling').primitives;
 const { subtract, union } = require('@jscad/modeling').booleans;
 const { translate, rotate} = require('@jscad/modeling').transforms;
 const { serialize } = require('@jscad/stl-serializer');
@@ -120,6 +121,99 @@ function createInnenring2({ innendurchmesser, aussendurchmesser, hoehe, radius_a
     return subtract(subtract(outer, inner), notch);
 }
 
+function createTstueck({
+  zylinder_duchmesser_aussen,
+  zylinder_duchmesser_innen,
+  zylinder2_durchmesser_aussen,
+  zylinder2_duchemsser_innen,
+  laenge,
+  hoehe,
+}) {
+
+  let zylinderBottomHeight = (hoehe + (zylinder_duchmesser_aussen / 2));
+
+  // Top-Zylinder (horizontaler Zylinder)
+  const topZylinderAussen = cylinder({ 
+    radius: zylinder_duchmesser_aussen / 2, 
+    height: laenge, 
+    segments: 64
+  });
+
+  // Rotation um 90 Grad und Positionierung
+  const topZylinder = translate(
+    [0, 0, hoehe / 2], // Verschiebe den Zylinder zur Mitte des vertikalen Zylinders
+    rotate([Math.PI / 2, 0, 0], topZylinderAussen) // Rotation um die X-Achse
+  );
+
+  // Bottom-Zylinder (vertikaler Zylinder)
+  const bottomZylinder = cylinder({ 
+    radius: zylinder2_durchmesser_aussen / 2, 
+    height: zylinderBottomHeight, 
+    segments: 64
+  });
+
+  // Innerer Hohlraum (falls benötigt)
+  const innerTopZylinder = translate(
+    [0, 0, hoehe / 2],
+    rotate([Math.PI / 2, 0, 0], cylinder({
+      radius: zylinder_duchmesser_innen / 2,
+      height: laenge,
+      segments: 64
+    }))
+  );
+
+  const innerBottomZylinder = cylinder({
+    radius: zylinder2_duchemsser_innen / 2,
+    height: zylinderBottomHeight,
+    segments: 64
+  });
+
+  // Außenkörper: Vereinigung von Top- und Bottom-Zylinder
+  const tStueckAussen = union(topZylinder, bottomZylinder);
+
+  // Innerer Hohlraum: Subtrahiere die inneren Zylinder
+  const tStueck = subtract(tStueckAussen, innerTopZylinder, innerBottomZylinder);
+
+  return rotate([2 * Math.PI, 0, 0],tStueck);
+}
+
+function createRohrbogen({
+  durchmesser,
+  winkel,             // Winkel in Grad
+  schenkel_laenge_1,  // Länge des ersten Zylinders
+  schenkel_laenge_2,  // Länge des zweiten Zylinders
+}) {
+  const radius = durchmesser / 2; // Außenradius des Rohres
+  const winkelInRad = (winkel * Math.PI) / 180; // Grad in Radiant umrechnen
+
+  const abstand = radius
+
+
+  // Zylinder 1: Horizontal
+  let schenkel1 = cylinder({ radius, height: schenkel_laenge_1, segments: 64 });
+  schenkel1 = rotate([Math.PI / 2, 0, 0], schenkel1); // Um X-Achse rotieren
+  schenkel1 = translate([0, (schenkel_laenge_1 / 2), 0], schenkel1);   // Positionieren
+
+  // Zylinder 2: Schräg mit korrektem Winkel
+  let schenkel2 = cylinder({ radius, height: schenkel_laenge_2, segments: 64 });
+  schenkel2 = rotate([0, 0, -winkelInRad], schenkel2); // Zylinder rotieren
+  schenkel2 = translate([0,schenkel_laenge_1 + radius + abstand ,(schenkel_laenge_2 / 2 )+ radius + abstand], schenkel2);
+
+  // Bogen erstellen: Verbinden der beiden Zylinder
+  let kreis = ellipse({ radius: [radius, radius], center:[abstand * 2, 0], segments: 64}); // Querschnitt des Rohres
+  const bogen = extrudeRotate(
+    { segments: 64, startAngle: 0, angle: winkelInRad }, // Start und Bogenwinkel
+    kreis
+  );
+
+  // Bogen positionieren
+  const bogenPositioniert = translate([0, schenkel_laenge_1, radius + abstand], rotate([0, Math.PI / 2, 0], bogen));
+
+  // Zylinder und Bogen zusammenführen
+  const winkelObject = union(schenkel1, bogenPositioniert, schenkel2);
+
+  return winkelObject;
+}
 
 async function exportSTL(fileName, model) {
     const stlData = serialize({ binary: false }, model);
@@ -150,6 +244,13 @@ export async function createSTL(bauteil) {
             model = createInnenring2(bauteil.inputs);
             
             break;
+        case 'T-Stueck':
+            model = createTstueck(bauteil.inputs);
+            break;
+        case "Rohrbogen":
+            model = createRohrbogen(bauteil.inputs);
+            break;
+
     }
 
     if(model){
