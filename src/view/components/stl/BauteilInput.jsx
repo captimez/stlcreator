@@ -11,6 +11,7 @@ import {createSTL} from '../../../service/openjscad'
 import { create } from '@mui/material/styles/createTransitions';
 import MyThree from '../threejs/viewer';
 import { IconButton } from '@mui/material';
+import Typography from '@mui/material/Typography';
 
 const BauteilInput = () => {
 
@@ -45,13 +46,17 @@ const BauteilInput = () => {
 
     return (
         <Box id="boxbox" sx={{ flexGrow: 1, p:2 }}>
+                <Typography variant="h5" gutterBottom>
+                    {selectedBauteil.name}
+                </Typography>
                 <Grid2 container spacing={{xs:2, md:3 }} columns={{ xs:4, sm:8, md: 12}}>
                     {Object.entries(selectedBauteil?.inputs).map(([key,value,index]) =>{
                         return (
                             <Grid2 key={key}>
+                                
                                 <div className="input-box" key={key}>
                                     
-                                    <TextField  name={key}  type='number'  id="outlined-basic" label={key} variant="outlined" size='small'
+                                    <TextField disabled={ key === 'winkel' ? true : false } name={key}  type='number'  id="outlined-basic" label={key} variant="outlined" size='small'
                                      onChange={(e) => {handleInputChange(key, e.target.value)}}/>
                                 </div>
                             </Grid2>
