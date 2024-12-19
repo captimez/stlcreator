@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import { createTheme } from '@mui/material/styles';
+import { createTheme, styled } from '@mui/material/styles';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import BuildIcon from '@mui/icons-material/Build';
@@ -9,12 +9,14 @@ import { AppProvider } from '@toolpad/core/AppProvider';
 import { DashboardLayout } from '@toolpad/core/DashboardLayout';
 import { useDemoRouter } from '@toolpad/core/internal';
 import StlView from '../../views/StlView';
-import logo from '../../../res/logo.jpg';
+import logo from '../../../res/logo.png';
+import './main.css'
+import { Padding } from '@mui/icons-material';
 
 const NAVIGATION = [
   {
     kind: 'header',
-    title: 'Main items',
+    title: 'Programms',
   },
   {
     segment: 'dashboard',
@@ -31,7 +33,7 @@ const NAVIGATION = [
 const demoTheme = createTheme({
     palette: {
         primary: {
-          main: "#FFFFFF",
+          main: "#ffffff",
         },
         secondary: {
           main: "#1943ED",
@@ -52,11 +54,13 @@ const demoTheme = createTheme({
   },
 });
 
+
 function DemoPageContent({ pathname }) {
   return (
       <StlView></StlView>
   );
 }
+
 
 export default function DashboardLayoutBasic(props) {
   const { window } = props;
@@ -64,20 +68,38 @@ export default function DashboardLayoutBasic(props) {
   const router = useDemoRouter('/dashboard');
 
   return (
-    // preview-start
     <AppProvider
       branding={{
-        logo: <img src={logo} alt="MUI logo" />,
-        title: 'MUI',
+        logo: <img src={logo} alt="MUI logo" style={{ height: "100"}} />,
+        title: ''
       }}
       navigation={NAVIGATION}
       router={router}
       theme={demoTheme}
     >
-      <DashboardLayout>
-        <DemoPageContent pathname={router.pathname} />
+    <DashboardLayout
+      sx={{
+        // Anpassung der Drawer-Farbe
+        '& .MuiDrawer-paper': {
+          backgroundColor: '#66666', // Farbe für den Drawer
+        },
+        // Anpassung der Paper-Komponente (falls andere Paper-Komponenten betroffen sind)
+        '& .MuiPaper-root': {
+          backgroundColor: '#66666', // Farbe für alle anderen Paper-Komponenten
+        },
+        // Optional: Anpassung des Inhaltsbereichs
+        '& .DashboardLayout-content': {
+          backgroundColor: '#f0f0f0', // Hintergrundfarbe für den Inhalt
+        },
+        // Optional: Anpassung der AppBar, falls vorhanden
+        '& .MuiAppBar-root': {
+          backgroundColor: '#3f51b5', // Header-Farbe
+        },
+      }}
+    >
+          <DemoPageContent pathname={router.pathname} />
       </DashboardLayout>
     </AppProvider>
-    // preview-end
+
   );
 }
