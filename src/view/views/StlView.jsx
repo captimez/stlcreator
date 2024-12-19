@@ -12,11 +12,11 @@ const StlView = () => {
 
     return (
         <div style={{ width: "100%", display: "flex" }}>
-            <div style={{ width: "30%", borderRight: "1px solid #ddd" }}>
+            <div style={{ width: "20%", borderRight: "1px solid #ddd" }}>
                     <Katalog />
                 
             </div>
-            <div style={{ width: "70%" }}>
+            <div style={{ width: "80%", marginLeft:"30px" }}>
                     <BauteilInput></BauteilInput>
             </div>
         </div>

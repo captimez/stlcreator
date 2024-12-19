@@ -215,6 +215,48 @@ function createRohrbogen({
   return winkelObject;
 }
 
+function createRohrbogen2({
+  durchmesser,
+  winkel,             // Winkel in Grad
+  schenkel_laenge_1,  // Länge des ersten Zylinders
+  schenkel_laenge_2,  // Länge des zweiten Zylinders
+}) {
+  const radius = durchmesser / 2; // Außenradius des Rohres
+  const winkelInRad = (winkel * Math.PI) / 180; // Grad in Radiant umrechnen
+  const abstand = radius;
+
+  // Zylinder 1: Horizontal
+  let schenkel1 = cylinder({ radius, height: schenkel_laenge_1, segments: 64 });
+  schenkel1 = rotate([Math.PI / 2, 0, 0], schenkel1); // Um X-Achse rotieren
+  schenkel1 = translate([0, schenkel_laenge_1 / 2, 0], schenkel1); // Positionieren
+
+  // Bogen erstellen: Verbinden der beiden Zylinder
+  let kreis = ellipse({ radius: [radius, radius], segments: 64 }); // Querschnitt des Rohres
+  const bogen = extrudeRotate(
+    { segments: 64, startAngle: 0, angle: winkelInRad }, // Start und Bogenwinkel
+    kreis
+  );
+
+  // Bogen positionieren
+  const bogenPositioniert = translate([0, schenkel_laenge_1, radius+abstand], rotate([0, Math.PI / 2, 0], bogen));
+
+  // Zylinder 2: Schräg mit korrektem Winkel
+  let schenkel2 = cylinder({ radius, height: schenkel_laenge_2, segments: 64 });
+  // Position des zweiten Zylinders: Am Ende des Bogens
+  const schenkel2_x = Math.sin(winkelInRad) * (schenkel_laenge_2 / 2 + radius + abstand);
+  const schenkel2_y = schenkel_laenge_1 + Math.cos(winkelInRad) * (radius + abstand);
+  schenkel2 = rotate([-winkelInRad, 0, 0], schenkel2);
+  schenkel2 = translate([schenkel2_x, 0, schenkel2_y], schenkel2);
+
+  // Zylinder und Bogen zusammenführen
+  const winkelObject = union(schenkel1, bogenPositioniert, schenkel2);
+
+  return winkelObject;
+}
+
+
+
+
 async function exportSTL(fileName, model) {
     const stlData = serialize({ binary: false }, model);
     const outputPath = `./output/${fileName}.stl`;
@@ -248,7 +290,7 @@ export async function createSTL(bauteil) {
             model = createTstueck(bauteil.inputs);
             break;
         case "Rohrbogen":
-            model = createRohrbogen(bauteil.inputs);
+            model = createRohrbogen2(bauteil.inputs);
             break;
 
     }

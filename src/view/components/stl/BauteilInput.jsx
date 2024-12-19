@@ -56,7 +56,7 @@ const BauteilInput = () => {
                                 
                                 <div className="input-box" key={key}>
                                     
-                                    <TextField disabled={ key === 'winkel' ? true : false } name={key}  type='number'  id="outlined-basic" label={key} variant="outlined" size='small'
+                                    <TextField disabled={ key === 'winkel' ? false : false } name={key}  type='number'  id="outlined-basic" label={key} variant="outlined" size='small'
                                      onChange={(e) => {handleInputChange(key, e.target.value)}}/>
                                 </div>
                             </Grid2>
