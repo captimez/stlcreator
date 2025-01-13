@@ -1,4 +1,5 @@
 import { extrudeRotate } from '@jscad/modeling/src/operations/extrusions';
+import { center } from '@jscad/modeling/src/operations/transforms';
 import { ellipse, roundedCylinder } from '@jscad/modeling/src/primitives';
 import { height } from '@mui/system';
 
@@ -231,7 +232,7 @@ function createRohrbogen2({
   schenkel1 = translate([0, schenkel_laenge_1 / 2, 0], schenkel1); // Positionieren
 
   // Bogen erstellen: Verbinden der beiden Zylinder
-  let kreis = ellipse({ radius: [radius, radius], segments: 64 }); // Querschnitt des Rohres
+  let kreis = ellipse({ radius: [radius, radius], center: [abstand * 2, 0] , segments: 64 }); // Querschnitt des Rohres
   const bogen = extrudeRotate(
     { segments: 64, startAngle: 0, angle: winkelInRad }, // Start und Bogenwinkel
     kreis
@@ -241,7 +242,7 @@ function createRohrbogen2({
   const bogenPositioniert = translate([0, schenkel_laenge_1, radius+abstand], rotate([0, Math.PI / 2, 0], bogen));
 
   // Zylinder 2: Schräg mit korrektem Winkel
-  let schenkel2 = cylinder({ radius, height: schenkel_laenge_2, segments: 64 });
+  let schenkel2 = cylinder({ radius, height: schenkel_laenge_2, center: [0,0], segments: 64 });
   // Position des zweiten Zylinders: Am Ende des Bogens
   const schenkel2_x = Math.sin(winkelInRad) * (schenkel_laenge_2 / 2 + radius + abstand);
   const schenkel2_y = schenkel_laenge_1 + Math.cos(winkelInRad) * (radius + abstand);
