@@ -1,4 +1,5 @@
 import { extrudeRotate } from '@jscad/modeling/src/operations/extrusions';
+import { center } from '@jscad/modeling/src/operations/transforms';
 import { ellipse, roundedCylinder } from '@jscad/modeling/src/primitives';
 import { height } from '@mui/system';
 
@@ -222,37 +223,67 @@ function createRohrbogen2({
   schenkel_laenge_2,  // Länge des zweiten Zylinders
 }) {
   const radius = durchmesser / 2; // Außenradius des Rohres
-  const winkelInRad = (winkel * Math.PI) / 180; // Grad in Radiant umrechnen
-  const abstand = radius;
+  const winkelInRad = (winkel * Math.PI) / 180; // Winkel in Radiant umrechnen
 
-  // Zylinder 1: Horizontal
+  // **Zylinder 1 (horizontaler Schenkel)**
   let schenkel1 = cylinder({ radius, height: schenkel_laenge_1, segments: 64 });
-  schenkel1 = rotate([Math.PI / 2, 0, 0], schenkel1); // Um X-Achse rotieren
+  schenkel1 = rotate([Math.PI / 2, 0, 0], schenkel1);
   schenkel1 = translate([0, schenkel_laenge_1 / 2, 0], schenkel1); // Positionieren
 
-  // Bogen erstellen: Verbinden der beiden Zylinder
-  let kreis = ellipse({ radius: [radius, radius], segments: 64 }); // Querschnitt des Rohres
-  const bogen = extrudeRotate(
-    { segments: 64, startAngle: 0, angle: winkelInRad }, // Start und Bogenwinkel
-    kreis
-  );
-
-  // Bogen positionieren
-  const bogenPositioniert = translate([0, schenkel_laenge_1, radius+abstand], rotate([0, Math.PI / 2, 0], bogen));
-
-  // Zylinder 2: Schräg mit korrektem Winkel
+  // **Zylinder 2 (vertikaler Schenkel)**
   let schenkel2 = cylinder({ radius, height: schenkel_laenge_2, segments: 64 });
-  // Position des zweiten Zylinders: Am Ende des Bogens
-  const schenkel2_x = Math.sin(winkelInRad) * (schenkel_laenge_2 / 2 + radius + abstand);
-  const schenkel2_y = schenkel_laenge_1 + Math.cos(winkelInRad) * (radius + abstand);
-  schenkel2 = rotate([-winkelInRad, 0, 0], schenkel2);
-  schenkel2 = translate([schenkel2_x, 0, schenkel2_y], schenkel2);
 
-  // Zylinder und Bogen zusammenführen
-  const winkelObject = union(schenkel1, bogenPositioniert, schenkel2);
+  // Position der unteren Vorderseite (Ecke) vor der Rotation
+  const untereEckeVorRotation = {
+    x: 0, // Keine Verschiebung entlang der X-Achse
+    y: -schenkel_laenge_2 / 2, // Untere Hälfte des Zylinders
+    z: radius, // Verschiebung nach hinten entlang der Z-Achse
+  };
 
-  return winkelObject;
+  // Berechne die Position der unteren Ecke nach der Rotation (um die X-Achse)
+  const untereEckeNachRotation = {
+    x: untereEckeVorRotation.x, // X-Koordinate bleibt unverändert
+    y: (untereEckeVorRotation.y * Math.cos(winkelInRad)) - (untereEckeVorRotation.z * Math.sin(winkelInRad)), // Neue Y-Position
+    z: (untereEckeVorRotation.y * Math.sin(winkelInRad)) + (untereEckeVorRotation.z * Math.cos(winkelInRad)), // Neue Z-Position
+  };
+  const kreisVerschiebungY = radius * Math.sin(winkelInRad);
+  const kreisVerschiebungZ = radius * (-Math.cos(winkelInRad));
+  // Zielposition der unteren Ecke
+  const zielPosition = {
+    x: 0,                             // X bleibt unverändert
+    y: schenkel_laenge_1 + kreisVerschiebungY,    // Ende von Zylinder 1 + Radius
+    z: radius+radius + kreisVerschiebungZ,                             // Z bleibt am Ursprung
+  };
+
+  // Berechne die Verschiebung
+  const verschiebung = {
+    x: zielPosition.x - untereEckeNachRotation.x,
+    y: zielPosition.y - untereEckeNachRotation.y,
+    z: zielPosition.z - untereEckeNachRotation.z,
+  };
+
+   // Bogen erstellen: Verbinden der beiden Zylinder
+   let kreis = ellipse({ radius: [radius, radius], center:[radius + radius, 0], segments: 64}); // Querschnitt des Rohres
+   const bogen = extrudeRotate(
+     { segments: 64, startAngle: 0, angle: winkelInRad }, // Start und Bogenwinkel
+     kreis
+   );
+ 
+   // Bogen positionieren
+   const bogenPositioniert = translate([0, schenkel_laenge_1, radius + radius], rotate([0, Math.PI / 2, 0], bogen));
+
+
+  // Wende die Verschiebung und Rotation auf Zylinder 2 an
+  schenkel2 = rotate([winkelInRad, 0, 0], schenkel2); // Rotation um die X-Achse
+  schenkel2 = rotate([Math.PI / 2, 0, 0], schenkel2);
+  schenkel2 = translate([verschiebung.x, verschiebung.y, verschiebung.z], schenkel2);
+
+  // **Zusammenfügen**
+  const rohrbogen = union(schenkel1, bogenPositioniert, schenkel2);
+
+  return rohrbogen;
 }
+
 
 
 
