@@ -2,6 +2,8 @@ import { extrudeRotate } from '@jscad/modeling/src/operations/extrusions';
 import { center } from '@jscad/modeling/src/operations/transforms';
 import { ellipse, roundedCylinder } from '@jscad/modeling/src/primitives';
 import { height } from '@mui/system';
+import { radixSort } from 'three/examples/jsm/utils/SortUtils.js';
+import { difference } from 'three/tsl';
 
 // Import der JSCAD-Bibliotheken
 const { cylinder, cuboid, cylinderElliptic, torus } = require('@jscad/modeling').primitives;
@@ -142,7 +144,7 @@ function createTstueck({
 
   // Rotation um 90 Grad und Positionierung
   const topZylinder = translate(
-    [0, 0, hoehe / 2], // Verschiebe den Zylinder zur Mitte des vertikalen Zylinders
+    [0, 0, (hoehe / 2)], // Verschiebe den Zylinder zur Mitte des vertikalen Zylinders
     rotate([Math.PI / 2, 0, 0], topZylinderAussen) // Rotation um die X-Achse
   );
 
@@ -155,7 +157,7 @@ function createTstueck({
 
   // Innerer Hohlraum (falls benötigt)
   const innerTopZylinder = translate(
-    [0, 0, hoehe / 2],
+    [0, 0, (hoehe / 2)],
     rotate([Math.PI / 2, 0, 0], cylinder({
       radius: zylinder_duchmesser_innen / 2,
       height: laenge,
@@ -225,13 +227,20 @@ function createRohrbogen2({
   const radius = durchmesser / 2; // Außenradius des Rohres
   const winkelInRad = (winkel * Math.PI) / 180; // Winkel in Radiant umrechnen
 
+  const innerRadius = radius -2;
   // **Zylinder 1 (horizontaler Schenkel)**
+  let innerSchenkel1 = cylinder({radius: innerRadius, height: schenkel_laenge_1, segments: 64 });
   let schenkel1 = cylinder({ radius, height: schenkel_laenge_1, segments: 64 });
+
+  innerSchenkel1 = rotate([Math.PI / 2, 0 ,0], innerSchenkel1)
   schenkel1 = rotate([Math.PI / 2, 0, 0], schenkel1);
   schenkel1 = translate([0, schenkel_laenge_1 / 2, 0], schenkel1); // Positionieren
+  schenkel1 = subtract(schenkel1, innerSchenkel1)
 
   // **Zylinder 2 (vertikaler Schenkel)**
-  let schenkel2 = cylinder({ radius, height: schenkel_laenge_2, segments: 64 });
+  let outerSchenkel2 = cylinder({ radius, height: schenkel_laenge_2, segments: 64 });
+  let innerSchenkel2 = cylinder({ radius: innerRadius, height: schenkel_laenge_2, segments: 64 });
+  let schenkel2 = subtract(outerSchenkel2, innerSchenkel2);
 
   // Position der unteren Vorderseite (Ecke) vor der Rotation
   const untereEckeVorRotation = {
@@ -277,6 +286,7 @@ function createRohrbogen2({
   schenkel2 = rotate([winkelInRad, 0, 0], schenkel2); // Rotation um die X-Achse
   schenkel2 = rotate([Math.PI / 2, 0, 0], schenkel2);
   schenkel2 = translate([verschiebung.x, verschiebung.y, verschiebung.z], schenkel2);
+  
 
   // **Zusammenfügen**
   const rohrbogen = union(schenkel1, bogenPositioniert, schenkel2);
