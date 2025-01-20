@@ -33,11 +33,17 @@ function MyThree(props) {
   }
 
   React.useEffect(() => {
-    const width = 900;
+
+    const container = document.getElementById("boxbox");
+    const scene = sceneRef.current;
+
+    if (!container) return;
+
+    // Initiale Breite und Höhe berechnen
+    const { width } = container.getBoundingClientRect();
     const height = 500;
 
-    // Szene und Kamera
-    const scene = sceneRef.current;
+    // THREE.js Kamera, Szene und Renderer initialisieren
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(width, height);
@@ -61,12 +67,21 @@ function MyThree(props) {
     scene.add(dirLight);
 
     // GridHelper hinzufügen
-    const gridSize = 100;  // Größe des Rasters
-    const gridDivisions = 50; // Anzahl der Unterteilungen im Raster
+    const gridSize = 100;
+    const gridDivisions = 50;
     const gridHelper = new THREE.GridHelper(gridSize, gridDivisions, 0x888888, 0x444444);
-
-    // GridHelper zur Szene hinzufügen
     scene.add(gridHelper);
+
+    // EventListener für Fenstergröße
+    const handleResize = () => {
+        const { width } = container.getBoundingClientRect();
+        renderer.setSize(width, height);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+    };
+
+    window.addEventListener('resize', handleResize);
+
 
     // Animation
     const animate = () => {

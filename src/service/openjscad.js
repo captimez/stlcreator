@@ -1,9 +1,6 @@
 import { extrudeRotate } from '@jscad/modeling/src/operations/extrusions';
-import { center } from '@jscad/modeling/src/operations/transforms';
 import { ellipse, roundedCylinder } from '@jscad/modeling/src/primitives';
-import { height } from '@mui/system';
-import { radixSort } from 'three/examples/jsm/utils/SortUtils.js';
-import { difference } from 'three/tsl';
+import { Buffer } from 'buffer';
 
 // Import der JSCAD-Bibliotheken
 const { cylinder, cuboid, cylinderElliptic, torus } = require('@jscad/modeling').primitives;
@@ -11,57 +8,73 @@ const { subtract, union } = require('@jscad/modeling').booleans;
 const { translate, rotate} = require('@jscad/modeling').transforms;
 const { serialize } = require('@jscad/stl-serializer');
 
+const resolution = 30;
+
 function createAussenring1({
-    aussendurchmesser,
-    innendurchmesser,
-    hoehe,
-    breite_aussen,
-    breite_innen,
-    tiefe_innen,
-  }) {
-    // Eingabewerte validieren
-    if (
-      !aussendurchmesser || aussendurchmesser <= 0 ||
-      !innendurchmesser || innendurchmesser <= 0 ||
-      !hoehe || hoehe <= 0 ||
-      !breite_aussen || breite_aussen <= 0 ||
-      !breite_innen || breite_innen <= 0 ||
-      !tiefe_innen || tiefe_innen <= 0
-    ) {
-      throw new Error('Alle Eingabeparameter müssen positive Werte haben.');
-    }
-  
-    console.log('Eingabeparameter:');
-    console.log('aussendurchmesser:', aussendurchmesser);
-    console.log('innendurchmesser:', innendurchmesser);
-    console.log('hoehe:', hoehe);
-    console.log('breite_aussen:', breite_aussen);
-    console.log('breite_innen:', breite_innen);
-    console.log('tiefe_innen:', tiefe_innen);
-  
-    // Umrechnen der Maße
-    const Durchmesser_aussen = Number(aussendurchmesser) / 10;
-    const Durchmesser_innen = Number(innendurchmesser) / 10;
-    const Breite = Number(hoehe) / 10;
-    const Breite_aussen = Number(breite_aussen) / 10;
-    const Breite_innen = Number(breite_innen) / 10;
-    const Tiefe_innen = Number(tiefe_innen) / 10;
-
-    //Aussen Zylinder
-    const aussen_zylinder = roundedCylinder({ radius: Durchmesser_aussen / 2, roundRadius: (Breite - Breite_aussen ) / 10 ,height: Breite});
-
-    //Innen Zylinder 
-    const innen_zylinder = cylinder({ radius: Durchmesser_innen/2 , height: Breite });
-
-    //InnenLaufbahn Zylinder 
-    const laufbahn = cylinder({ radius: (Durchmesser_innen / 2 ) + Tiefe_innen, height: Breite_innen });
-
-    const mainRing = subtract(aussen_zylinder,innen_zylinder);
-
-    return subtract(mainRing,laufbahn); 
-  
-    
+  aussendurchmesser,
+  innendurchmesser,
+  hoehe,
+  breite_aussen,
+  breite_innen,
+  tiefe_innen,
+  resolution = 64, // Standardauflösung, falls nicht angegeben
+}) {
+  // Eingabewerte validieren
+  if (
+    !aussendurchmesser || aussendurchmesser <= 0 ||
+    !innendurchmesser || innendurchmesser <= 0 ||
+    !hoehe || hoehe <= 0 ||
+    !breite_aussen || breite_aussen <= 0 ||
+    !breite_innen || breite_innen <= 0 ||
+    !tiefe_innen || tiefe_innen <= 0
+  ) {
+    throw new Error('Alle Eingabeparameter müssen positive Werte haben.');
   }
+
+  console.log('Eingabeparameter:');
+  console.log('aussendurchmesser:', aussendurchmesser);
+  console.log('innendurchmesser:', innendurchmesser);
+  console.log('hoehe:', hoehe);
+  console.log('breite_aussen:', breite_aussen);
+  console.log('breite_innen:', breite_innen);
+  console.log('tiefe_innen:', tiefe_innen);
+  console.log('resolution:', resolution);
+
+  // Umrechnen der Maße
+  const Durchmesser_aussen = Number(aussendurchmesser) / 10;
+  const Durchmesser_innen = Number(innendurchmesser) / 10;
+  const Breite = Number(hoehe) / 10;
+  const Breite_aussen = Number(breite_aussen) / 10;
+  const Breite_innen = Number(breite_innen) / 10;
+  const Tiefe_innen = Number(tiefe_innen) / 10;
+
+  // Außen Zylinder
+  const aussen_zylinder = roundedCylinder({
+    radius: Durchmesser_aussen / 2,
+    roundRadius: (Breite - Breite_aussen) / 10,
+    height: Breite,
+    segments: resolution,
+  });
+
+  // Innen Zylinder
+  const innen_zylinder = cylinder({
+    radius: Durchmesser_innen / 2,
+    height: Breite,
+    segments: resolution,
+  });
+
+  // Innenlaufbahn Zylinder
+  const laufbahn = cylinder({
+    radius: (Durchmesser_innen / 2) + Tiefe_innen,
+    height: Breite_innen,
+    segments: resolution,
+  });
+
+  const mainRing = subtract(aussen_zylinder, innen_zylinder);
+
+  return subtract(mainRing, laufbahn);
+}
+
 
 // Funktion für Außenring2
 function createAussenring2({
@@ -109,18 +122,32 @@ function createAussenring2({
 
 // Funktion für Innenring1
 function createInnenring1({ durchmesser_or, durchmesser_so, durchmesser_su, durchmesser_ur, hoehe_or, hoehe, hoehe_ur }) {
-    const outer = cylinder({ radius: durchmesser_or / 2, height: hoehe });
-    const stepOuter = cylinder({ radius: durchmesser_so / 2, height: hoehe_or });
-    const stepInner = cylinder({ radius: durchmesser_su / 2, height: hoehe_ur });
-    const inner = cylinder({ radius: durchmesser_ur / 2, height: hoehe + 1 });
+  durchmesser_or = Number(durchmesser_or) / 10;
+  durchmesser_so = Number(durchmesser_so) / 10;
+  durchmesser_su = Number(durchmesser_su) / 10;
+  durchmesser_ur = Number(durchmesser_ur) / 10;
+  hoehe_or = Number(hoehe_or) / 10;
+  hoehe = Number(hoehe) / 10;
+  
+  hoehe_ur = Number(hoehe_ur) / 10;
+    const outer = cylinder({  radius: durchmesser_or / 2, height: hoehe, segments: resolution });
+    const stepOuter = cylinder({ radius: durchmesser_so / 2, height: hoehe_or, segments: resolution  });
+    const stepInner = cylinder({ radius: durchmesser_su / 2, height: hoehe_ur, segments: resolution  });
+    const inner = cylinder({ radius: durchmesser_ur / 2, height: hoehe + 1, segments: resolution  });
     return subtract(union(outer, stepOuter, stepInner), inner);
 }
 
 // Funktion für Innenring2
 function createInnenring2({ innendurchmesser, aussendurchmesser, hoehe, radius_ausstich }) {
-    const outer = cylinder({ radius: aussendurchmesser / 2, height: hoehe });
-    const inner = cylinder({ radius: innendurchmesser / 2, height: hoehe + 1 });
-    const notch = cylinder({ radius: radius_ausstich, height: hoehe + 1 });
+  innendurchmesser = Number(innendurchmesser) / 10;
+  aussendurchmesser = Number(aussendurchmesser) /10;
+  hoehe = Number(hoehe) / 10;
+  
+  radius_ausstich = Number(radius_ausstich);
+
+    const outer = cylinder({ radius: aussendurchmesser / 2, height: hoehe, segments: resolution  });
+    const inner = cylinder({ radius: innendurchmesser / 2, height: hoehe + 1, segments: resolution  });
+    const notch = cylinder({ radius: radius_ausstich, height: hoehe + 1, segments: resolution  });
     return subtract(subtract(outer, inner), notch);
 }
 
@@ -133,13 +160,20 @@ function createTstueck({
   hoehe,
 }) {
 
+  zylinder_duchmesser_aussen = Number(zylinder_duchmesser_aussen) / 10;
+  zylinder_duchmesser_innen = Number(zylinder_duchmesser_innen) / 10;
+  zylinder2_durchmesser_aussen = Number(zylinder2_durchmesser_aussen) / 10;
+  zylinder2_duchemsser_innen = Number(zylinder2_duchemsser_innen) / 10;
+  laenge = Number(laenge) / 10;
+  hoehe = Number(hoehe) / 10;
+
   let zylinderBottomHeight = (hoehe + (zylinder_duchmesser_aussen / 2));
 
   // Top-Zylinder (horizontaler Zylinder)
   const topZylinderAussen = cylinder({ 
     radius: zylinder_duchmesser_aussen / 2, 
     height: laenge, 
-    segments: 64
+    segments: resolution
   });
 
   // Rotation um 90 Grad und Positionierung
@@ -152,7 +186,7 @@ function createTstueck({
   const bottomZylinder = cylinder({ 
     radius: zylinder2_durchmesser_aussen / 2, 
     height: zylinderBottomHeight, 
-    segments: 64
+    segments: resolution
   });
 
   // Innerer Hohlraum (falls benötigt)
@@ -161,14 +195,14 @@ function createTstueck({
     rotate([Math.PI / 2, 0, 0], cylinder({
       radius: zylinder_duchmesser_innen / 2,
       height: laenge,
-      segments: 64
+      segments: resolution
     }))
   );
 
   const innerBottomZylinder = cylinder({
     radius: zylinder2_duchemsser_innen / 2,
     height: zylinderBottomHeight,
-    segments: 64
+    segments: resolution
   });
 
   // Außenkörper: Vereinigung von Top- und Bottom-Zylinder
@@ -224,23 +258,20 @@ function createRohrbogen2({
   schenkel_laenge_1,  // Länge des ersten Zylinders
   schenkel_laenge_2,  // Länge des zweiten Zylinders
 }) {
-  const radius = durchmesser / 2; // Außenradius des Rohres
+
+  durchmesser = Number(durchmesser) / 10;
+  schenkel_laenge_1 = Number(schenkel_laenge_1) / 10;
+  schenkel_laenge_2 = Number(schenkel_laenge_2) / 10;
+
+  const radius = Number(durchmesser / 2); // Außenradius des Rohres
   const winkelInRad = (winkel * Math.PI) / 180; // Winkel in Radiant umrechnen
 
-  const innerRadius = radius -2;
-  // **Zylinder 1 (horizontaler Schenkel)**
-  let innerSchenkel1 = cylinder({radius: innerRadius, height: schenkel_laenge_1, segments: 64 });
-  let schenkel1 = cylinder({ radius, height: schenkel_laenge_1, segments: 64 });
-
-  innerSchenkel1 = rotate([Math.PI / 2, 0 ,0], innerSchenkel1)
+  let schenkel1 = cylinder({ radius, height: schenkel_laenge_1, segments: resolution });
   schenkel1 = rotate([Math.PI / 2, 0, 0], schenkel1);
   schenkel1 = translate([0, schenkel_laenge_1 / 2, 0], schenkel1); // Positionieren
-  schenkel1 = subtract(schenkel1, innerSchenkel1)
 
   // **Zylinder 2 (vertikaler Schenkel)**
-  let outerSchenkel2 = cylinder({ radius, height: schenkel_laenge_2, segments: 64 });
-  let innerSchenkel2 = cylinder({ radius: innerRadius, height: schenkel_laenge_2, segments: 64 });
-  let schenkel2 = subtract(outerSchenkel2, innerSchenkel2);
+  let schenkel2 = cylinder({ radius, height: schenkel_laenge_2, segments: resolution });
 
   // Position der unteren Vorderseite (Ecke) vor der Rotation
   const untereEckeVorRotation = {
@@ -272,9 +303,9 @@ function createRohrbogen2({
   };
 
    // Bogen erstellen: Verbinden der beiden Zylinder
-   let kreis = ellipse({ radius: [radius, radius], center:[radius + radius, 0], segments: 64}); // Querschnitt des Rohres
+   let kreis = ellipse({ radius: [radius, radius], center:[radius + radius, 0], segments: resolution}); // Querschnitt des Rohres
    const bogen = extrudeRotate(
-     { segments: 64, startAngle: 0, angle: winkelInRad }, // Start und Bogenwinkel
+     { segments: resolution, startAngle: 0, angle: winkelInRad }, // Start und Bogenwinkel
      kreis
    );
  
@@ -299,10 +330,29 @@ function createRohrbogen2({
 
 
 async function exportSTL(fileName, model) {
-    const stlData = serialize({ binary: false }, model);
-    const outputPath = `./output/${fileName}.stl`;
+     // Serialisiere das Modell als binäre STL-Daten
+     const stlData = serialize({ binary: true }, model); // Gibt ein Array von ArrayBuffer zurück
 
-    await window.api.saveSTL(outputPath,stlData[0]);
+     // Zusammenführen aller ArrayBuffer in einen einzigen Buffer
+     let totalLength = 0;
+     stlData.forEach(buffer=> {
+        totalLength += buffer.byteLength;
+     })
+     const mergedArray = new Uint8Array(totalLength); // Erstellt einen neuen ArrayBuffer mit der Gesamtlänge
+ 
+     let offset = 0;
+     stlData.forEach(buffer => {
+         mergedArray.set(new Uint8Array(buffer), offset); // Kopiert den Inhalt jedes ArrayBuffer
+         offset += buffer.byteLength; // Verschiebt den Offset für den nächsten Block
+     });
+ 
+     const finalBuffer = Buffer.from(mergedArray.buffer);
+ 
+     // Definiere den Speicherpfad
+     const outputPath = `./output/${fileName}.stl`;
+ 
+     // Speichere die Datei mit der API
+     await window.api.saveSTL(outputPath, finalBuffer);
 }
 
 

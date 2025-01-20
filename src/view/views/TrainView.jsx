@@ -6,22 +6,22 @@ import { WidthFull, WidthWide } from '@mui/icons-material';
 import { AppProvider as CustomProvider, useAppContext } from "./../../model/store";
 import BauteilInput from '../components/stl/BauteilInput';
 
-const StlView = () => {
+const TrainView = () => {
 
     const { selectedBauteil } = useAppContext();
 
     return (
-        <div style={{height: "100%", width: "100%", display: "flex" }}>
+        <div style={{ height:"100%", width: "100%", display: "flex" }}>
             <div style={{ width: "20%", borderRight: "1px solid #ddd" }}>
-                    <Katalog />
+                    TREESDFDSF
                 
             </div>
-            <div style={{width: "80%", marginLeft:"30px", marginRight:"30px" }}>
-                    <BauteilInput></BauteilInput>
+            <div style={{ width: "80%", marginLeft:"30px" }}>
+                    SDFSDFSDFSDf
             </div>
         </div>
     );
 };
 
 
-export default StlView;
+export default TrainView;

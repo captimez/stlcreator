@@ -9,6 +9,7 @@ import { AppProvider } from '@toolpad/core/AppProvider';
 import { DashboardLayout } from '@toolpad/core/DashboardLayout';
 import { useDemoRouter } from '@toolpad/core/internal';
 import StlView from '../../views/StlView';
+import TrainView from '../../views/TrainView'
 import logo from '../../../res/logo.png';
 import './main.css'
 import { Padding } from '@mui/icons-material';
@@ -24,7 +25,7 @@ const NAVIGATION = [
     icon: <DashboardIcon />,
   },
   {
-    segment: 'orders',
+    segment: 'training',
     title: 'Training Tool',
     icon: <BuildIcon />,
   },
@@ -55,10 +56,18 @@ const demoTheme = createTheme({
 });
 
 
-function DemoPageContent({ pathname }) {
-  return (
+function PageContent({ pathname }) {
+  console.log("PATHNAME : ", pathname)
+  if(pathname == "/dashboard"){
+    return (
       <StlView></StlView>
-  );
+    );
+  }else if( pathname == "/training"){
+    return(
+      <TrainView></TrainView>
+    );
+  }
+  
 }
 
 
@@ -97,7 +106,7 @@ export default function DashboardLayoutBasic(props) {
         },
       }}
     >
-          <DemoPageContent pathname={router.pathname} />
+          <PageContent pathname={router.pathname} />
       </DashboardLayout>
     </AppProvider>
 

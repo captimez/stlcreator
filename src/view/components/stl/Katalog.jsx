@@ -90,15 +90,32 @@ const Katalog = () => {
 
     const { selectedBauteil, setSelectedBauteil } = useAppContext();
 
-    const [open, setOpen] = React.useState(true);
+    const [katalogOpen, setKatalogOpen] = React.useState(new Map());
 
-    const handleOpen = () => {
-        setOpen(!open);
+    const handleOpen = (key) => {
+        const newKatalogOpen = new Map(katalogOpen); // Kopiere die Map
+        if (newKatalogOpen.has(key)) {
+            newKatalogOpen.set(key, !newKatalogOpen.get(key));
+        } else {
+            newKatalogOpen.set(key, true);
+        }
+        setKatalogOpen(newKatalogOpen); // Aktualisiere den State
     };
 
     const handleBauteilSelect = (bauteil,index) => {
         setSelectedBauteil(bauteil);
     }
+
+     // Setze "Aussenring1" nach dem ersten Rendern
+     React.useEffect(() => {
+        const defaultBauteil = bauteile
+            .flatMap(reiter => reiter.teile) // Alle Teile aus allen Reitern sammeln
+            .find(bauteil => bauteil.name === "Aussenring1"); // Suche nach "Aussenring1"
+
+        if (defaultBauteil) {
+            setSelectedBauteil(defaultBauteil); // Setze den Zustand
+        }
+    }, [setSelectedBauteil]);
 
 
     return (
@@ -109,8 +126,8 @@ const Katalog = () => {
                     
                     key={index}
                     secondaryAction={
-                    <IconButton  edge="end" aria-label="select" onClick={handleOpen}>
-                        {open ? <ExpandLess /> : <ExpandMore />}  
+                    <IconButton  edge="end" aria-label="select" onClick={() => handleOpen(reiter)}>
+                        {katalogOpen.get(reiter) ? <ExpandLess /> : <ExpandMore />}  
                     </IconButton>
                     
                     }
@@ -121,7 +138,7 @@ const Katalog = () => {
                         />
                         
               </ListItem>
-                <Collapse in={open} timeout="auto">
+                <Collapse in={katalogOpen.get(reiter)} timeout="auto">
                         <List>
                             {reiter.teile.map((bauteil,index) => (
                                 <ListItem key={index}

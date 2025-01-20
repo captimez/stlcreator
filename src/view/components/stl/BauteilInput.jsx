@@ -45,7 +45,8 @@ const BauteilInput = () => {
     React.Component.didMou
 
     return (
-        <Box id="boxbox" sx={{ flexGrow: 1, p:2 }}>
+        <Box id="boxbox" sx={{ flexGrow: 1, p:2}}>
+            <div id="bauteilInputs">
                 <Typography variant="h5" gutterBottom>
                     {selectedBauteil.name}
                 </Typography>
@@ -63,8 +64,9 @@ const BauteilInput = () => {
                     )
                     })}
                 </Grid2>
+            </div>
                 <Button sx={{ mt:1.5}} variant="contained" onClick={() => handleCreateSTL()}>Create STL</Button>
-                <MyThree  name={selectedBauteil.name}></MyThree>
+                <MyThree style={{width: "100%"}} name={selectedBauteil.name}></MyThree>
         </Box>
     );
 };
