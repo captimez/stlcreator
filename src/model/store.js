@@ -7,7 +7,7 @@ const AppContext = createContext();
 export const AppProvider = ({ children }) => {
   const [selectedBauteil, setSelectedBauteil] = useState(null);
   
-
+  console
   return (
     <AppContext.Provider value={{ selectedBauteil, setSelectedBauteil }}>
       {children}

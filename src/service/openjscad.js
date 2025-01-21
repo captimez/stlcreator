@@ -17,7 +17,7 @@ function createAussenring1({
   breite_aussen,
   breite_innen,
   tiefe_innen,
-  resolution = 64, // Standardauflösung, falls nicht angegeben
+  resolution = 30, // Standardauflösung, falls nicht angegeben
 }) {
   // Eingabewerte validieren
   if (
@@ -41,12 +41,12 @@ function createAussenring1({
   console.log('resolution:', resolution);
 
   // Umrechnen der Maße
-  const Durchmesser_aussen = Number(aussendurchmesser) / 10;
-  const Durchmesser_innen = Number(innendurchmesser) / 10;
-  const Breite = Number(hoehe) / 10;
-  const Breite_aussen = Number(breite_aussen) / 10;
-  const Breite_innen = Number(breite_innen) / 10;
-  const Tiefe_innen = Number(tiefe_innen) / 10;
+  const Durchmesser_aussen = Number(aussendurchmesser) 
+  const Durchmesser_innen = Number(innendurchmesser) 
+  const Breite = Number(hoehe) 
+  const Breite_aussen = Number(breite_aussen) 
+  const Breite_innen = Number(breite_innen) 
+  const Tiefe_innen = Number(tiefe_innen) 
 
   // Außen Zylinder
   const aussen_zylinder = roundedCylinder({
@@ -84,9 +84,9 @@ function createAussenring2({
     hoehe,
   }) {
     // Parameterberechnung
-    const D_aussen = Number(aussendurchmesser) / 10;
-    const D_gr_innen = Number(innendurchmesser_gross) / 10;
-    const D_kl_innen = Number(innendurchmesser_klein) / 10;
+    const D_aussen = Number(aussendurchmesser) 
+    const D_gr_innen = Number(innendurchmesser_gross) 
+    const D_kl_innen = Number(innendurchmesser_klein) 
 
     console.log(hoehe);
     console.log(D_aussen);
@@ -122,14 +122,13 @@ function createAussenring2({
 
 // Funktion für Innenring1
 function createInnenring1({ durchmesser_or, durchmesser_so, durchmesser_su, durchmesser_ur, hoehe_or, hoehe, hoehe_ur }) {
-  durchmesser_or = Number(durchmesser_or) / 10;
-  durchmesser_so = Number(durchmesser_so) / 10;
-  durchmesser_su = Number(durchmesser_su) / 10;
-  durchmesser_ur = Number(durchmesser_ur) / 10;
-  hoehe_or = Number(hoehe_or) / 10;
-  hoehe = Number(hoehe) / 10;
-  
-  hoehe_ur = Number(hoehe_ur) / 10;
+  durchmesser_or = Number(durchmesser_or) 
+  durchmesser_so = Number(durchmesser_so) 
+  durchmesser_su = Number(durchmesser_su) 
+  durchmesser_ur = Number(durchmesser_ur) 
+  hoehe_or = Number(hoehe_or)
+  hoehe = Number(hoehe) 
+  hoehe_ur = Number(hoehe_ur) 
     const outer = cylinder({  radius: durchmesser_or / 2, height: hoehe, segments: resolution });
     const stepOuter = cylinder({ radius: durchmesser_so / 2, height: hoehe_or, segments: resolution  });
     const stepInner = cylinder({ radius: durchmesser_su / 2, height: hoehe_ur, segments: resolution  });
@@ -139,8 +138,8 @@ function createInnenring1({ durchmesser_or, durchmesser_so, durchmesser_su, durc
 
 // Funktion für Innenring2
 function createInnenring2({ innendurchmesser, aussendurchmesser, hoehe, radius_ausstich }) {
-  innendurchmesser = Number(innendurchmesser) / 10;
-  aussendurchmesser = Number(aussendurchmesser) /10;
+  innendurchmesser = Number(innendurchmesser) 
+  aussendurchmesser = Number(aussendurchmesser) 
   hoehe = Number(hoehe) / 10;
   
   radius_ausstich = Number(radius_ausstich);
@@ -160,48 +159,32 @@ function createTstueck({
   hoehe,
 }) {
 
-  zylinder_duchmesser_aussen = Number(zylinder_duchmesser_aussen) / 10;
-  zylinder_duchmesser_innen = Number(zylinder_duchmesser_innen) / 10;
-  zylinder2_durchmesser_aussen = Number(zylinder2_durchmesser_aussen) / 10;
-  zylinder2_duchemsser_innen = Number(zylinder2_duchemsser_innen) / 10;
-  laenge = Number(laenge) / 10;
-  hoehe = Number(hoehe) / 10;
+  zylinder_duchmesser_aussen = Number(zylinder_duchmesser_aussen);
+  zylinder_duchmesser_innen = Number(zylinder_duchmesser_innen);
+  zylinder2_durchmesser_aussen = Number(zylinder2_durchmesser_aussen);
+  zylinder2_duchemsser_innen = Number(zylinder2_duchemsser_innen);
+  laenge = Number(laenge);
+  hoehe = Number(hoehe);
+  console.log(zylinder_duchmesser_aussen);
 
+  
   let zylinderBottomHeight = (hoehe + (zylinder_duchmesser_aussen / 2));
-
-  // Top-Zylinder (horizontaler Zylinder)
   const topZylinderAussen = cylinder({ 
     radius: zylinder_duchmesser_aussen / 2, 
     height: laenge, 
     segments: resolution
   });
-
-  // Rotation um 90 Grad und Positionierung
+  console.log
   const topZylinder = translate(
-    [0, 0, (hoehe / 2)], // Verschiebe den Zylinder zur Mitte des vertikalen Zylinders
+  // Rotation um 90 Grad und Positionierung
+    [0, 0, (hoehe/2) + (zylinder_duchmesser_aussen / 2)], // Verschiebe den Zylinder zur Mitte des vertikalen Zylinders
     rotate([Math.PI / 2, 0, 0], topZylinderAussen) // Rotation um die X-Achse
   );
 
-  // Bottom-Zylinder (vertikaler Zylinder)
+  // Bottom-Zylinder (vertikaler Zypplinder)
   const bottomZylinder = cylinder({ 
     radius: zylinder2_durchmesser_aussen / 2, 
     height: zylinderBottomHeight, 
-    segments: resolution
-  });
-
-  // Innerer Hohlraum (falls benötigt)
-  const innerTopZylinder = translate(
-    [0, 0, (hoehe / 2)],
-    rotate([Math.PI / 2, 0, 0], cylinder({
-      radius: zylinder_duchmesser_innen / 2,
-      height: laenge,
-      segments: resolution
-    }))
-  );
-
-  const innerBottomZylinder = cylinder({
-    radius: zylinder2_duchemsser_innen / 2,
-    height: zylinderBottomHeight,
     segments: resolution
   });
 
@@ -209,10 +192,12 @@ function createTstueck({
   const tStueckAussen = union(topZylinder, bottomZylinder);
 
   // Innerer Hohlraum: Subtrahiere die inneren Zylinder
-  const tStueck = subtract(tStueckAussen, innerTopZylinder, innerBottomZylinder);
+  /* const tStueck = subtract(tStueckAussen, innerTopZylinder, innerBottomZylinder); */
+  const tStueck = tStueckAussen;
 
   return rotate([2 * Math.PI, 0, 0],tStueck);
 }
+
 
 function createRohrbogen({
   durchmesser,
@@ -220,48 +205,10 @@ function createRohrbogen({
   schenkel_laenge_1,  // Länge des ersten Zylinders
   schenkel_laenge_2,  // Länge des zweiten Zylinders
 }) {
-  const radius = durchmesser / 2; // Außenradius des Rohres
-  const winkelInRad = (winkel * Math.PI) / 180; // Grad in Radiant umrechnen
 
-  const abstand = radius
-
-
-  // Zylinder 1: Horizontal
-  let schenkel1 = cylinder({ radius, height: schenkel_laenge_1, segments: 64 });
-  schenkel1 = rotate([Math.PI / 2, 0, 0], schenkel1); // Um X-Achse rotieren
-  schenkel1 = translate([0, (schenkel_laenge_1 / 2), 0], schenkel1);   // Positionieren
-
-  // Zylinder 2: Schräg mit korrektem Winkel
-  let schenkel2 = cylinder({ radius, height: schenkel_laenge_2, segments: 64 });
-  schenkel2 = rotate([0, 0, -winkelInRad], schenkel2); // Zylinder rotieren
-  schenkel2 = translate([0,schenkel_laenge_1 + radius + abstand ,(schenkel_laenge_2 / 2 )+ radius + abstand], schenkel2);
-
-  // Bogen erstellen: Verbinden der beiden Zylinder
-  let kreis = ellipse({ radius: [radius, radius], center:[abstand * 2, 0], segments: 64}); // Querschnitt des Rohres
-  const bogen = extrudeRotate(
-    { segments: 64, startAngle: 0, angle: winkelInRad }, // Start und Bogenwinkel
-    kreis
-  );
-
-  // Bogen positionieren
-  const bogenPositioniert = translate([0, schenkel_laenge_1, radius + abstand], rotate([0, Math.PI / 2, 0], bogen));
-
-  // Zylinder und Bogen zusammenführen
-  const winkelObject = union(schenkel1, bogenPositioniert, schenkel2);
-
-  return winkelObject;
-}
-
-function createRohrbogen2({
-  durchmesser,
-  winkel,             // Winkel in Grad
-  schenkel_laenge_1,  // Länge des ersten Zylinders
-  schenkel_laenge_2,  // Länge des zweiten Zylinders
-}) {
-
-  durchmesser = Number(durchmesser) / 10;
-  schenkel_laenge_1 = Number(schenkel_laenge_1) / 10;
-  schenkel_laenge_2 = Number(schenkel_laenge_2) / 10;
+  durchmesser = Number(durchmesser) 
+  schenkel_laenge_1 = Number(schenkel_laenge_1) 
+  schenkel_laenge_2 = Number(schenkel_laenge_2) 
 
   const radius = Number(durchmesser / 2); // Außenradius des Rohres
   const winkelInRad = (winkel * Math.PI) / 180; // Winkel in Radiant umrechnen
@@ -317,7 +264,7 @@ function createRohrbogen2({
   schenkel2 = rotate([winkelInRad, 0, 0], schenkel2); // Rotation um die X-Achse
   schenkel2 = rotate([Math.PI / 2, 0, 0], schenkel2);
   schenkel2 = translate([verschiebung.x, verschiebung.y, verschiebung.z], schenkel2);
-  
+  console.log(verschiebung);
 
   // **Zusammenfügen**
   const rohrbogen = union(schenkel1, bogenPositioniert, schenkel2);
@@ -381,10 +328,12 @@ export async function createSTL(bauteil) {
             model = createTstueck(bauteil.inputs);
             break;
         case "Rohrbogen":
-            model = createRohrbogen2(bauteil.inputs);
+            model = createRohrbogen(bauteil.inputs);
             break;
 
     }
+
+
 
     if(model){
         await exportSTL(bauteil.name, model);

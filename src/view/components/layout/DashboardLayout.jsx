@@ -57,17 +57,22 @@ const demoTheme = createTheme({
 
 
 function PageContent({ pathname }) {
-  console.log("PATHNAME : ", pathname)
-  if(pathname == "/dashboard"){
+  // Normalize pathname for Electron environment
+  const normalizedPathname = pathname.replace('/C:', '');
+
+  console.log(normalizedPathname);
+
+
+  if(normalizedPathname === "/dashboard"){
     return (
       <StlView></StlView>
     );
-  }else if( pathname == "/training"){
+  }else if(normalizedPathname === "/training"){
     return(
       <TrainView></TrainView>
     );
   }
-  
+  return null; // Add a default return to avoid undefined return
 }
 
 
