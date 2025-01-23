@@ -108,6 +108,10 @@ export default function DashboardLayoutBasic(props) {
         // Optional: Anpassung der AppBar, falls vorhanden
         '& .MuiAppBar-root': {
           backgroundColor: '#3f51b5', // Header-Farbe
+          color: '#ffffff', // Textfarbe im Header
+          '& .MuiSvgIcon-root': {
+            color: '#ffffff', // Icon-Farbe
+          },
         },
       }}
     >
