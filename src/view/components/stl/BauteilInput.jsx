@@ -65,17 +65,26 @@ const BauteilInput = () => {
                     <IconButton onClick={() => showImagePopup(`${selectedBauteil.name}_info.png`)}><InfoIcon /></IconButton>
                 </Box>
                 <Grid2 container spacing={{xs:2, md:3 }} columns={{ xs:4, sm:8, md: 12}}>
-                    {Object.entries(selectedBauteil?.inputs).map(([key,value,index]) =>{
+                    {Object.entries(selectedBauteil?.inputs).map(([key, value], index) => {
+                        const shortcut = selectedBauteil?.shortcut?.[index] || '';
                         return (
                             <Grid2 key={key}>
-                                
                                 <div className="input-box" key={key}>
-                                    
-                                    <TextField disabled={ key === 'winkel' ? false : false } name={key}  type='number'  id="outlined-basic" label={key} variant="outlined" size='small'
-                                     onChange={(e) => {handleInputChange(key, e.target.value)}}/>
+                                    <TextField
+                                        name={key}
+                                        type='number'
+                                        label={`${key}${shortcut ? ` (${shortcut})` : ''}`}
+                                        variant="filled"
+                                        slotProps={{
+                                            input: { sx: { color: 'black' } },
+                                            inputLabel: { style: { color: '#000' } } // Set label color to black
+                                        }}
+                                        size='small'
+                                        onChange={(e) => {handleInputChange(key, e.target.value)}}
+                                    />
                                 </div>
                             </Grid2>
-                    )
+                        );
                     })}
                 </Grid2>
             </div>

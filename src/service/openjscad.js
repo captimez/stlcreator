@@ -47,15 +47,30 @@ function createAussenring1({
   const Breite_aussen = Number(breite_aussen) 
   const Breite_innen = Number(breite_innen) 
   const Tiefe_innen = Number(tiefe_innen) 
+  const rak = (Breite - Breite_aussen) / 2;
 
   // Außen Zylinder
-  const aussen_zylinder = roundedCylinder({
+  let aussen_zylinder =cylinder({
     radius: Durchmesser_aussen / 2,
-    roundRadius: (Breite - Breite_aussen) / 10,
-    height: Breite,
+    height: Breite_aussen,
     segments: resolution,
   });
 
+  let aussen_zylinder_rundung = cylinderElliptic({
+    height: rak,
+    startRadius: [Durchmesser_aussen / 2, Durchmesser_aussen / 2],
+    endRadius: [innendurchmesser / 2, innendurchmesser / 2],
+  })
+  let aussen_zylinder_rundung2 = cylinderElliptic({
+    height: rak,
+    startRadius: [innendurchmesser / 2, innendurchmesser / 2],
+    endRadius: [Durchmesser_aussen / 2, Durchmesser_aussen / 2],
+  });
+  aussen_zylinder_rundung2 = translate([0, 0, -(Breite_aussen / 2)], aussen_zylinder_rundung2);  
+
+  aussen_zylinder_rundung = translate([0, 0, (Breite_aussen / 2)], aussen_zylinder_rundung);
+
+  aussen_zylinder = union(aussen_zylinder, aussen_zylinder_rundung,aussen_zylinder_rundung2);
   // Innen Zylinder
   const innen_zylinder = cylinder({
     radius: Durchmesser_innen / 2,
