@@ -66,9 +66,9 @@ function createAussenring1({
     startRadius: [innendurchmesser / 2, innendurchmesser / 2],
     endRadius: [Durchmesser_aussen / 2, Durchmesser_aussen / 2],
   });
-  aussen_zylinder_rundung2 = translate([0, 0, -(Breite_aussen / 2)], aussen_zylinder_rundung2);  
+  aussen_zylinder_rundung2 = translate([0, 0, -((Breite_aussen / 2 ) + (rak/2))], aussen_zylinder_rundung2);  
 
-  aussen_zylinder_rundung = translate([0, 0, (Breite_aussen / 2)], aussen_zylinder_rundung);
+  aussen_zylinder_rundung = translate([0, 0, ((Breite_aussen / 2)+(rak/2))], aussen_zylinder_rundung);
 
   aussen_zylinder = union(aussen_zylinder, aussen_zylinder_rundung,aussen_zylinder_rundung2);
   // Innen Zylinder
@@ -155,14 +155,17 @@ function createInnenring1({ durchmesser_or, durchmesser_so, durchmesser_su, durc
 function createInnenring2({ innendurchmesser, aussendurchmesser, hoehe, radius_ausstich }) {
   innendurchmesser = Number(innendurchmesser) 
   aussendurchmesser = Number(aussendurchmesser) 
-  hoehe = Number(hoehe) / 10;
-  
+  hoehe = Number(hoehe);
   radius_ausstich = Number(radius_ausstich);
 
-    const outer = cylinder({ radius: aussendurchmesser / 2, height: hoehe, segments: resolution  });
-    const inner = cylinder({ radius: innendurchmesser / 2, height: hoehe + 1, segments: resolution  });
-    const notch = cylinder({ radius: radius_ausstich, height: hoehe + 1, segments: resolution  });
-    return subtract(subtract(outer, inner), notch);
+  const outer = cylinder({ radius: aussendurchmesser / 2, height: hoehe, segments: resolution  });
+  const inner = cylinder({ radius: innendurchmesser / 2, height: hoehe + 1, segments: resolution  });
+   
+  let kreis = ellipse({ radius: [radius_ausstich, radius_ausstich], center:[aussendurchmesser/2, 0], segments: resolution}); // Querschnitt des Rohres 
+  kreis = extrudeRotate({ segments: resolution, startAngle: 0, angle: Math.PI*2 }, kreis); // Bogen erstellen
+  kreis = translate([0, 0, 0], kreis); // Positionieren
+ 
+  return subtract(subtract(outer, inner), kreis);
 }
 
 function createTstueck({
@@ -192,7 +195,7 @@ function createTstueck({
   console.log
   const topZylinder = translate(
   // Rotation um 90 Grad und Positionierung
-    [0, 0, (hoehe/2) + (zylinder_duchmesser_aussen / 2)], // Verschiebe den Zylinder zur Mitte des vertikalen Zylinders
+    [0, 0, zylinderBottomHeight / 2], // Verschiebe den Zylinder zur Mitte des vertikalen Zylinders
     rotate([Math.PI / 2, 0, 0], topZylinderAussen) // Rotation um die X-Achse
   );
 
