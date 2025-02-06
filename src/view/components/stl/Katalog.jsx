@@ -9,6 +9,7 @@ import { string } from 'three/tsl';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 
+//Bauteile definieren
 const bauteile = [
     {
             name: "Ringe",
@@ -90,83 +91,75 @@ const bauteile = [
     
 ];
 
+/**
+ * Katalog-Komponente
+ * 
+ * Diese Komponente zeigt eine Liste von Bauteilkategorien, die ein- und ausgeklappt werden können.
+ * Jedes Bauteil kann ausgewählt werden und wird im globalen Zustand (`useAppContext`) gespeichert.
+ */
 const Katalog = () => {
-
     const { selectedBauteil, setSelectedBauteil } = useAppContext();
-
     const [katalogOpen, setKatalogOpen] = React.useState(new Map());
 
+    /**
+     * Öffnet oder schließt eine Bauteilkategorie.
+     * @param {Object} key - Die Kategorie, die geöffnet oder geschlossen werden soll.
+     */
     const handleOpen = (key) => {
-        const newKatalogOpen = new Map(katalogOpen); // Kopiere die Map
-        if (newKatalogOpen.has(key)) {
-            newKatalogOpen.set(key, !newKatalogOpen.get(key));
-        } else {
-            newKatalogOpen.set(key, true);
-        }
-        setKatalogOpen(newKatalogOpen); // Aktualisiere den State
+        const newKatalogOpen = new Map(katalogOpen);
+        newKatalogOpen.set(key, !newKatalogOpen.get(key));
+        setKatalogOpen(newKatalogOpen);
     };
 
-    const handleBauteilSelect = (bauteil,index) => {
+    /**
+     * Setzt das ausgewählte Bauteil im globalen Zustand.
+     * @param {Object} bauteil - Das ausgewählte Bauteil.
+     */
+    const handleBauteilSelect = (bauteil) => {
         setSelectedBauteil(bauteil);
-    }
+    };
 
-     // Setze "Aussenring1" nach dem ersten Rendern
-     React.useEffect(() => {
-        const defaultBauteil = bauteile
-            .flatMap(reiter => reiter.teile) // Alle Teile aus allen Reitern sammeln
-            .find(bauteil => bauteil.name === "Aussenring1"); // Suche nach "Aussenring1"
-
+    // Setzt standardmäßig "Aussenring1" als ausgewähltes Bauteil beim ersten Rendern
+    React.useEffect(() => {
+        const defaultBauteil = bauteile.flatMap(reiter => reiter.teile).find(bauteil => bauteil.name === "Aussenring1");
         if (defaultBauteil) {
-            setSelectedBauteil(defaultBauteil); // Setze den Zustand
+            setSelectedBauteil(defaultBauteil);
         }
     }, [setSelectedBauteil]);
-
 
     return (
         <List sx={{ bgcolor: 'background.paper' }}>
             {bauteile.map((reiter, index) => (
-                <div>
-                <ListItem
-                    
-                    key={index}
-                    secondaryAction={
-                    <IconButton  edge="end" aria-label="select" onClick={() => handleOpen(reiter)}>
-                        {katalogOpen.get(reiter) ? <ExpandLess /> : <ExpandMore />}  
-                    </IconButton>
-                    
-                    }
-               >
+                <div key={index}>
+                    {/* Kategorie-Listenelement mit Expand/Collapse-Button */}
+                    <ListItem
+                        secondaryAction={
+                            <IconButton edge="end" aria-label="expand" onClick={() => handleOpen(reiter)}>
+                                {katalogOpen.get(reiter) ? <ExpandLess /> : <ExpandMore />}  
+                            </IconButton>
+                        }
+                    >
+                        <ListItemText primary={reiter.name} />
+                    </ListItem>
 
-                        <ListItemText
-                        primary={reiter.name}
-                        />
-                        
-              </ListItem>
-                <Collapse in={katalogOpen.get(reiter)} timeout="auto">
+                    {/* Collapsible List für die Bauteile in der Kategorie */}
+                    <Collapse in={katalogOpen.get(reiter)} timeout="auto">
                         <List>
-                            {reiter.teile.map((bauteil,index) => (
-                                <ListItem key={index}
-                                    secondaryAction={
-                                        <IconButton  edge="end" aria-label="select" onClick={() => handleBauteilSelect(bauteil,index)}>
-                                            <ArrowForwardIosIcon sx={{ height:20, width: 20}}></ArrowForwardIosIcon> 
-                                        </IconButton>
-                                    }
-                                >
+                            {reiter.teile.map((bauteil, index) => (
+                                <ListItem key={index}>
                                     <ListItemAvatar>
-                                        <Avatar src={"images/" + bauteil.name + ".png"} sx={{ mr: 3, height: 40, width:40,}}>
-                                        </Avatar>
+                                        <Avatar src={`images/${bauteil.name}.png`} sx={{ mr: 3, height: 40, width: 40 }} />
                                     </ListItemAvatar>
-                                    <ListItemText
-                                            primary={bauteil.name}
-                                    />
+                                    <ListItemText primary={bauteil.name} />
+                                    <IconButton edge="end" aria-label="select" onClick={() => handleBauteilSelect(bauteil)}>
+                                        <ArrowForwardIosIcon sx={{ height: 20, width: 20 }} /> 
+                                    </IconButton>
                                 </ListItem>
-                                ))
-                            }
+                            ))}
                         </List>
-                </Collapse>
-            </div>
+                    </Collapse>
+                </div>
             ))}
-            
         </List>
     );
 };

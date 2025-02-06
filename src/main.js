@@ -2,6 +2,8 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('node:path');
 const { preload } = require('react-dom');
 
+if (require('electron-squirrel-startup')) app.quit();
+
 let mainWindow;
 const preloadPath = path.join(__dirname, 'preload.js');
 
@@ -15,7 +17,7 @@ app.on('ready', () => {
             preload: preloadPath, // Preload-Skript
         },
     });
-    mainWindow.loadURL(`file://${path.join(__dirname, '../dist/index.html')}`);
+    mainWindow.loadURL(`${path.join(__dirname, '../dist/index.html')}`);
 });
 
 
