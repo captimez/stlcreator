@@ -1,21 +1,32 @@
 import React, { createContext, useContext, useState } from 'react';
 
-// Create the Context
+// Erstelle den AppContext
 const AppContext = createContext();
 
-// Create the Provider Component
+/**
+ * AppProvider - Kontext-Provider für globale Zustandsverwaltung
+ *
+ * Diese Komponente stellt den AppContext bereit und verwaltet den Zustand
+ * des aktuell ausgewählten Bauteils.
+ * 
+ * @param {Object} props - Enthält die Kinderkomponenten, die den Kontext nutzen.
+ */
 export const AppProvider = ({ children }) => {
+  // Zustand für das aktuell ausgewählte Bauteil
   const [selectedBauteil, setSelectedBauteil] = useState(null);
   
-  console
   return (
     <AppContext.Provider value={{ selectedBauteil, setSelectedBauteil }}>
-      {children}
+      {children} {/* Stellt den Kontext für untergeordnete Komponenten bereit */}
     </AppContext.Provider>
   );
 };
 
-// Create a Custom Hook to Use the Context
+/**
+ * Custom Hook zum Zugriff auf den AppContext
+ * 
+ * @returns {Object} Enthält `selectedBauteil` und `setSelectedBauteil`
+ */
 export const useAppContext = () => {
   return useContext(AppContext);
 };
