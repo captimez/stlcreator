@@ -34,7 +34,7 @@ const NAVIGATION = [
 const demoTheme = createTheme({
     palette: {
         primary: {
-          main: "#ffffff",
+          main: "#3f51b5",
         },
         secondary: {
           main: "#1943ED",
