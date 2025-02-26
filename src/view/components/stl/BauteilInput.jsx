@@ -64,7 +64,7 @@ const BauteilInput = () => {
      */
     const handleCreateSTL = async () => {
         try {
-            console.log(selectedBauteil.inputs);
+            console.log(selectedBauteil);
             await createSTL(selectedBauteil);
         } catch (error) {
             console.log(error);
@@ -116,9 +116,18 @@ const BauteilInput = () => {
             </div>
             
             {/* STL-Erstellungsbutton */}
-            <Button sx={{ mt: 1.5 }} variant="contained" onClick={handleCreateSTL}>
-                Create STL
-            </Button>
+            <Box>
+                <TextField
+                    id="outlined-basic"
+                    label="STL-Dateiname"
+                    variant="outlined"
+                    size="small"
+                    onChange={(event) => setSelectedBauteil({ ...selectedBauteil, stlName: event.target.value })}
+                    style={{ width: "20%", marginRight:"10px" ,marginTop: "10px" }}    ></TextField>
+                <Button sx={{ mt: 1.5 }} variant="contained" onClick={handleCreateSTL}>
+                    Create STL
+                </Button>
+            </Box>
             
             {/* 3D-Vorschau Komponente */}
             <MyThree style={{ width: "100%" }} name={selectedBauteil.name} />
