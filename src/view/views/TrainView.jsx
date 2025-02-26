@@ -11,6 +11,15 @@ const TrainView = () => {
     // Initialize state for isSymmetric
     const [isSymmetric, setIsSymmetric] = React.useState(false);
     const { selectedBauteil } = useAppContext();
+    const [ isChecked, setIsChecked ] = React.useState({Ring: false, Winkel: false, TStueck: false});
+    const [solutionName, setSolutionName] = React.useState('');
+    const [selectedFile, setSelectedFile] = React.useState(null);
+
+    const handleCheckboxChange = (event) => {
+        const newCheckedState = { Ring: false, Winkel: false, TStueck: false, [event.target.name]: true };
+        setIsChecked(newCheckedState);
+        console.log(newCheckedState);
+    };
 
     const VisuallyHiddenInput = styled('input')({
         clip: 'rect(0 0 0 0)',
@@ -23,6 +32,22 @@ const TrainView = () => {
         whiteSpace: 'nowrap',
         width: 1,
     });
+    
+    const handleSubmit = async() => {
+        const type = Object.keys(isChecked).filter(key => isChecked[key]);
+
+        const config = {
+            solutionName: solutionName,
+            selectedFile: selectedFile.name,
+            type: type,
+        };
+        
+        console.log(selectedFile.name)
+        await window.api.saveJsonConfig('config.json', JSON.stringify(config));
+        await window.api.startPythonScript('script.py');
+
+
+    }
 
     return (
         <div style={{ height:"100%", width: "100%", display: "flex" }}>
@@ -33,7 +58,7 @@ const TrainView = () => {
                         <FormGroup>
                             <FormControl style={{ marginBottom: "10px" }}>
                                 <FormLabel>Solution Name</FormLabel>
-                                <TextField id="standard-basic" size='small' label="Name" />
+                                <TextField id="standard-basic"  onChange={(event) => setSolutionName(event.target.value)}  size='small' label="Name" />
                             </FormControl>
                             <FormControl style={{ marginBottom: "10px" }}>
                                 <FormLabel>Select STL File</FormLabel>
@@ -46,16 +71,17 @@ const TrainView = () => {
                                 >Select File
                                 <VisuallyHiddenInput
                                     type="file"
-                                    onChange={(event) => console.log(event.target.files)}
+                                    onChange={(event) => setSelectedFile(event.target.files[0])}
+                                    accept=".stl"
                                     multiple
                                 />
                                 </Button>
                             </FormControl>
-                            <FormControlLabel control={<Checkbox defaultChecked color="primary" />} label="Ring" />
-                            <FormControlLabel control={<Checkbox color="primary" />} label="Winkel" />
-                            <FormControlLabel control={<Checkbox color="blue" />} label="TStueck" />
+                            <FormControlLabel control={<Checkbox name='Ring' checked={isChecked.Ring} color="primary" onChange={handleCheckboxChange}/>} label="Ring" />
+                            <FormControlLabel control={<Checkbox name='Winkel' checked={isChecked.Winkel} color="primary" onChange={handleCheckboxChange}/>} label="Winkel" />
+                            <FormControlLabel control={<Checkbox name='TStueck' color="primary" checked={isChecked.TStueck} onChange={handleCheckboxChange}/>} label="TStueck" />
                         </FormGroup> 
-                        <Button variant='contained' sx={{ mt: 2 }}>Neue Einlernung</Button>
+                        <Button variant='contained' onClick={handleSubmit} sx={{ mt: 2 }}>Neue Einlernung</Button>
                    </Box> 
             </div>
         </div>

@@ -294,7 +294,7 @@ function createRohrbogen({
 
 
 
-async function exportSTL(fileName, model) {
+async function exportSTL(fileName, demoName, model) {
      // Serialisiere das Modell als binäre STL-Daten
      const stlData = serialize({ binary: true }, model); // Gibt ein Array von ArrayBuffer zurück
 
@@ -315,8 +315,10 @@ async function exportSTL(fileName, model) {
  
      // Definiere den Speicherpfad
      const outputPath = `./output/${fileName}.stl`;
+     const demoOutputPath = `./dist/images/output/${demoName}.stl`;
  
      // Speichere die Datei mit der API
+     await window.api.saveSTL(demoOutputPath, finalBuffer);
      await window.api.saveSTL(outputPath, finalBuffer);
 }
 
@@ -354,7 +356,7 @@ export async function createSTL(bauteil) {
 
 
     if(model){
-        await exportSTL(bauteil.name, model);
+        await exportSTL(bauteil.stlName, bauteil.name, model);
     
     }
 
