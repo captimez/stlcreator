@@ -77,11 +77,11 @@ const BauteilInput = () => {
     }
 
     return (
-        <Box id="boxbox" sx={{ flexGrow: 1, p: 2 }}>
+        <Box id="boxbox" sx={{ flexGrow: 1, p: 1 }}>
             <div id="bauteilInputs">
                 {/* Titel mit Bauteilnamen und Info-Button */}
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Typography sx={{ mb: 0 }} variant="h5" gutterBottom>
+                <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+                    <Typography sx={{ mt: 1, fontWeight: 700, color: "#757575" }} variant="h5" gutterBottom>
                         {selectedBauteil.name}
                     </Typography>
                     <IconButton onClick={() => showImagePopup(`${selectedBauteil.name}_info.png`)}>
