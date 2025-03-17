@@ -54,8 +54,8 @@ const TrainView = () => {
             <div style={{ width: "40%", marginLeft:"30px" }}>
                    <Box sx={{ mt: 2, ml: 2 }}>    
                     
-                        <Typography sx={{mb:2}} variant='h5'>Einlern Tool</Typography>
-                        <FormGroup>
+                        <Typography sx={{mb:2, color: "#757575", fontWeight: 700}} variant='h5'>Einlern Tool</Typography>
+                        <FormGroup sx={{ml:2}}>
                             <FormControl style={{ marginBottom: "10px" }}>
                                 <FormLabel>Solution Name</FormLabel>
                                 <TextField id="standard-basic"  onChange={(event) => setSolutionName(event.target.value)}  size='small' label="Name" />

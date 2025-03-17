@@ -2,7 +2,7 @@ import * as React from 'react';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import { useAppContext } from '../../../model/store';
-import { ListItemAvatar, ListItemButton, ListItemText,Avatar,IconButton, Collapse } from '@mui/material';
+import { ListItemAvatar, ListItemButton, ListItemText,Avatar,IconButton, Collapse, Typography, Box } from '@mui/material';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { Height } from '@mui/icons-material';
 import { string } from 'three/tsl';
@@ -128,39 +128,42 @@ const Katalog = () => {
     }, [setSelectedBauteil]);
 
     return (
-        <List sx={{ bgcolor: 'background.paper' }}>
-            {bauteile.map((reiter, index) => (
-                <div key={index}>
-                    {/* Kategorie-Listenelement mit Expand/Collapse-Button */}
-                    <ListItem
-                        secondaryAction={
-                            <IconButton edge="end" aria-label="expand" onClick={() => handleOpen(reiter)}>
-                                {katalogOpen.get(reiter) ? <ExpandLess /> : <ExpandMore />}  
-                            </IconButton>
-                        }
-                    >
-                        <ListItemText primary={reiter.name} />
-                    </ListItem>
+        <Box sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
+            <Typography sx={{ ml:1, mt: 2, mb: 0, color:"#757575", fontWeight: 700, fontSize: 12 }}>Katalog</Typography>
+            <List sx={{ bgcolor: 'background.paper' }}>
+                {bauteile.map((reiter, index) => (
+                    <div key={index}>
+                        {/* Kategorie-Listenelement mit Expand/Collapse-Button */}
+                        <ListItem
+                            secondaryAction={
+                                <IconButton edge="end" aria-label="expand" onClick={() => handleOpen(reiter)}>
+                                    {katalogOpen.get(reiter) ? <ExpandLess /> : <ExpandMore />}  
+                                </IconButton>
+                            }
+                        >
+                            <ListItemText primary={reiter.name} />
+                        </ListItem>
 
-                    {/* Collapsible List für die Bauteile in der Kategorie */}
-                    <Collapse in={katalogOpen.get(reiter)} timeout="auto">
-                        <List>
-                            {reiter.teile.map((bauteil, index) => (
-                                <ListItem key={index}>
-                                    <ListItemAvatar>
-                                        <Avatar src={`images/${bauteil.name}.png`} sx={{ mr: 3, height: 40, width: 40 }} />
-                                    </ListItemAvatar>
-                                    <ListItemText primary={bauteil.name} />
-                                    <IconButton edge="end" aria-label="select" onClick={() => handleBauteilSelect(bauteil)}>
-                                        <ArrowForwardIosIcon sx={{ height: 20, width: 20 }} /> 
-                                    </IconButton>
-                                </ListItem>
-                            ))}
-                        </List>
-                    </Collapse>
-                </div>
-            ))}
-        </List>
+                        {/* Collapsible List für die Bauteile in der Kategorie */}
+                        <Collapse in={katalogOpen.get(reiter)} timeout="auto">
+                            <List>
+                                {reiter.teile.map((bauteil, index) => (
+                                    <ListItem key={index}>
+                                        <ListItemAvatar>
+                                            <Avatar src={`images/${bauteil.name}.png`} sx={{ mr: 3, height: 40, width: 40 }} />
+                                        </ListItemAvatar>
+                                        <ListItemText primary={bauteil.name} />
+                                        <IconButton edge="end" aria-label="select" onClick={() => handleBauteilSelect(bauteil)}>
+                                            <ArrowForwardIosIcon sx={{ height: 20, width: 20 }} /> 
+                                        </IconButton>
+                                    </ListItem>
+                                ))}
+                            </List>
+                        </Collapse>
+                    </div>
+                ))}
+            </List>
+        </Box>
     );
 };
 
