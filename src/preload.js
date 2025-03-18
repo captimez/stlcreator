@@ -53,5 +53,7 @@ contextBridge.exposeInMainWorld('api', {
         } catch (error) {
             console.log(error);
         }
-    }
+    },
+    getPath: (name) => ipcRenderer.invoke("get-app-path",name),
+    
 });

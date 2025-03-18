@@ -314,8 +314,11 @@ async function exportSTL(fileName, demoName, model) {
      const finalBuffer = Buffer.from(mergedArray.buffer);
  
      // Definiere den Speicherpfad
-     const outputPath = `./output/${fileName}.stl`;
-     const demoOutputPath = `./dist/images/output/${demoName}.stl`;
+     //const outputPath = `./output/${fileName}.stl`;
+     //const demoOutputPath = `./dist/images/output/${demoName}.stl`;
+
+     const outputPath = `${window.api.getPath("userData")}/output${fileName}.stl`
+     const demoOutputPath = `${window.api.getPath("userData")}/output/demo/${demoName}.stl`
  
      // Speichere die Datei mit der API
      await window.api.saveSTL(demoOutputPath, finalBuffer);

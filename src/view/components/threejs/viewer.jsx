@@ -36,7 +36,8 @@ function MyThree(props) {
 
     // Lade neues STL-Modell
     const loader = new STLLoader();
-    loader.load(`images/output/${props.name}.stl`, (geometry) => {
+
+    loader.load(`/output/${props.name}.stl`, (geometry) => {
       const material = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.3, roughness: 0.6 });
       const mesh = new THREE.Mesh(geometry, material);
       meshRef.current = mesh; // Referenz speichern
