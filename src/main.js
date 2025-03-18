@@ -1,12 +1,16 @@
 const { app, Menu, BrowserWindow, ipcMain } = require('electron');
 const path = require('node:path');
+const fs = require('node:fs');
+const { dialog } = require('electron');
+
 const { preload } = require('react-dom');
 
 if (require('electron-squirrel-startup')) app.quit();
 
 let mainWindow;
 const preloadPath = path.join(__dirname, 'preload.js');
-
+const configPath = path.join(app.getPath("userData"), "config.json");
+console.log(configPath)
 app.disableHardwareAcceleration();
 
 app.on('ready', () => {
@@ -34,6 +38,36 @@ app.on('ready', () => {
     mainWindow.webContents.on("did-fail-load",(event, errorCode, errorDescription) =>{
             console.error("Error loading index.html:", errorDescription)
     } )
+});
+
+function loadConfig() {
+    if (fs.existsSync(configPath)) {
+        return JSON.parse(fs.readFileSync(configPath, "utf-8"));
+    }
+    return { stlSavePath: app.getPath("documents") }; // Default path
+}
+
+function saveConfig(newPath) {
+    const config = { stlSavePath: newPath };
+    fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+}
+
+ipcMain.handle("select-folder", async () => {
+    const result = await dialog.showOpenDialog({
+        title: "Select STL Save Folder",
+        properties: ["openDirectory"]
+    });
+
+    if (!result.canceled && result.filePaths.length > 0) {
+        saveConfig(result.filePaths[0]); // Save selected directory
+        return result.filePaths[0]; // Return new path to renderer
+    }
+    return null; // User canceled selection
+});
+
+// 📌 Provide current save path to the renderer
+ipcMain.handle("get-save-folder", () => {
+    return loadConfig().stlSavePath;
 });
 
 ipcMain.handle("get-app-path", (event, name) => {

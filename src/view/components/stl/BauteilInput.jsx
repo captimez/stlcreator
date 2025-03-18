@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import Grid2 from '@mui/material/Grid2';
 import Box from '@mui/material/Box';
@@ -114,21 +113,28 @@ const BauteilInput = () => {
                     })}
                 </Grid2>
             </div>
-            
-            {/* STL-Erstellungsbutton */}
-            <Box>
-                <TextField
-                    id="outlined-basic"
-                    label="STL-Dateiname"
-                    variant="outlined"
-                    size="small"
-                    onChange={(event) => setSelectedBauteil({ ...selectedBauteil, stlName: event.target.value })}
-                    style={{ width: "20%", marginRight:"10px" ,marginTop: "10px" }}    ></TextField>
-                <Button sx={{ mt: 1.5 }} variant="contained" onClick={handleCreateSTL}>
-                    Create STL
-                </Button>
-            </Box>
-            
+            <Grid2 sx={{mt:2}} container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}> {/* ✅ Use same column width as other inputs */}
+                <Grid2>
+                    <div class="input-box">
+                        <TextField
+                            id="outlined-basic"
+                            label="STL-Dateiname"
+                            variant="filled"
+                            size="small"
+                            onChange={(event) => setSelectedBauteil({ ...selectedBauteil, stlName: event.target.value })}
+                            style={{ width: "100%" }} 
+                        />
+                    </div>
+                </Grid2>
+                <Grid2>
+                    <div class="input-box">
+                        <Button sx={{ mt: 1.5 }} variant="contained" onClick={handleCreateSTL}>
+                            Create STL
+                        </Button>
+                    </div>
+                </Grid2>
+            </Grid2>
+
             {/* 3D-Vorschau Komponente */}
             <MyThree style={{ width: "100%" }} name={selectedBauteil.name} />
 

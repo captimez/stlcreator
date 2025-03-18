@@ -317,12 +317,20 @@ async function exportSTL(fileName, demoName, model) {
      //const outputPath = `./output/${fileName}.stl`;
      //const demoOutputPath = `./dist/images/output/${demoName}.stl`;
 
-     const outputPath = `${window.api.getPath("userData")}/output${fileName}.stl`
-     const demoOutputPath = `${window.api.getPath("userData")}/output/demo/${demoName}.stl`
- 
-     // Speichere die Datei mit der API
-     await window.api.saveSTL(demoOutputPath, finalBuffer);
-     await window.api.saveSTL(outputPath, finalBuffer);
+    window.api.getSaveFolder().then((saveFolderPath) => {
+      const outputPath = `${saveFolderPath}/${fileName}.stl`;
+      const demoOutputPath = `${saveFolderPath}/demo/${demoName}.stl`;
+
+      // Save the file using the API
+      window.api.saveSTL(demoOutputPath, finalBuffer).then(() => {
+        console.log("✅ Demo STL file saved at:", demoOutputPath);
+      });
+
+      window.api.saveSTL(outputPath, finalBuffer).then(() => {
+        console.log("✅ Output STL file saved at:", outputPath);
+      });
+    });
+
 }
 
 

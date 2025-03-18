@@ -36,15 +36,23 @@ function MyThree(props) {
 
     // Lade neues STL-Modell
     const loader = new STLLoader();
+    window.api.getSaveFolder().then((saveFolderPath) => {
+      const filePath = `file://${saveFolderPath}/demo/${props.name}.stl`; // ✅ Correct path
 
-    loader.load(`/output/${props.name}.stl`, (geometry) => {
-      const material = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.3, roughness: 0.6 });
-      const mesh = new THREE.Mesh(geometry, material);
-      meshRef.current = mesh; // Referenz speichern
-      scene.add(mesh);
+      loader.load(filePath, (geometry) => {
+        const material = new THREE.MeshStandardMaterial({
+          color: 0xaaaaaa,
+          metalness: 0.3,
+          roughness: 0.6
+        });
+
+        const mesh = new THREE.Mesh(geometry, material);
+        meshRef.current = mesh; // Save reference
+        scene.add(mesh);
+      });
     });
   }
-
+  
   React.useEffect(() => {
     const container = document.getElementById("boxbox");
     const scene = sceneRef.current;

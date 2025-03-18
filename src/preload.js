@@ -55,5 +55,7 @@ contextBridge.exposeInMainWorld('api', {
         }
     },
     getPath: (name) => ipcRenderer.invoke("get-app-path",name),
+    selectFolder: () => ipcRenderer.invoke("select-folder"),
+    getSaveFolder: () => ipcRenderer.invoke("get-save-folder"),
     
 });
