@@ -1,5 +1,6 @@
 {
   "name": "stlcreator",
+  "productName": "STL Creator",
   "version": "1.0.0",
   "main": "src/main.js",
   "scripts": {
@@ -12,6 +13,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/captimez/stlcreator.git"
+  },
+  "build": {
+    "productName": "STL Creator"  
   },
   "author": "Tim Klingelhoefer",
   "license": "ISC",
