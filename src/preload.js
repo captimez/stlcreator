@@ -57,5 +57,10 @@ contextBridge.exposeInMainWorld('api', {
     getPath: (name) => ipcRenderer.invoke("get-app-path",name),
     selectFolder: () => ipcRenderer.invoke("select-folder"),
     getSaveFolder: () => ipcRenderer.invoke("get-save-folder"),
-    
+    minimizeWindow: () => ipcRenderer.invoke("window_minimize"),
+    closeWindow: () => ipcRenderer.invoke("window_close"),
+    maximizeWindow: () => ipcRenderer.invoke("window_maximize"),
+    isMaximized: () => ipcRenderer.invoke("window_isMaximized"),
+    onMaximized: (callback) => ipcRenderer.on("window_maximized", callback),
+    onUnmaximized: (callback) => ipcRenderer.on("window_unmaximized", callback), 
 });

@@ -14,9 +14,14 @@ import StlView from '../../views/StlView';
 import TrainView from '../../views/TrainView'
 import SettingsView from '../../views/SettingsView';
 import logo from '../../../res/logo.png';
+import FilterNoneSharpIcon from '@mui/icons-material/FilterNoneSharp';
 import './main.css'
-import { Padding } from '@mui/icons-material';
-import { Button, Hidden } from '@mui/material';
+import { Filter, Padding } from '@mui/icons-material';
+import { Button, Hidden, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import MinimizeIcon from '@mui/icons-material/Minimize';
+import CropSquareSharpIcon from '@mui/icons-material/CropSquareSharp';
+import { use } from 'react';
 
 const NAVIGATION = [
   {
@@ -97,6 +102,30 @@ function SidebarFooter({ router, mini }) {
     </Box>
   );
 }
+function ToolbarActions() {
+  const [isMaximized, setIsMaximized] = React.useState(false);
+
+  React.useEffect(() => {
+    window.api.isMaximized().then(setIsMaximized)
+
+    window.api.onMaximized(() => setIsMaximized(true));
+    window.api.onUnmaximized(() => setIsMaximized(false));  
+  }, []);
+
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', height:'50%' }}>
+      <IconButton onClick={() => window.api.minimizeWindow()} size="small" sx={{'-webkit-app-region':"no-drag", padding:"4px" }}>
+        <MinimizeIcon fontSize='small' />
+      </IconButton>
+      <IconButton onClick= {() => window.api.maximizeWindow()} size="small" sx={{ '-webkit-app-region':"no-drag", padding:"4px" }}>
+        { isMaximized ? <FilterNoneSharpIcon fontSize='inherit'></FilterNoneSharpIcon> : <CropSquareSharpIcon fontSize='small'></CropSquareSharpIcon>}
+      </IconButton>
+      <IconButton onClick={() => window.api.closeWindow()} size="small" sx={{ '-webkit-app-region':"no-drag", padding:"4px" }}>
+        <CloseIcon /> 
+      </IconButton>
+    </Box>
+  )
+}
 
 SidebarFooter.propTypes = {
   mini: PropTypes.bool.isRequired,
@@ -136,9 +165,9 @@ export default function DashboardLayoutBasic(props) {
     <DashboardLayout
       slots={{
         sidebarFooter: (layoutProps) => <SidebarFooter router={router} mini={layoutProps.mini} />,
+        toolbarActions: ToolbarActions,
       }}
-      sx={{
-        // Anpassung der Drawer-Farbe
+      sx={{        // Anpassung der Drawer-Farbe
         '& .MuiDrawer-paper': {
           backgroundColor: '#66666', // Farbe für den Drawer
           overflow: 'hidden', // Verhindert Scrollbar im Drawer
@@ -153,6 +182,7 @@ export default function DashboardLayoutBasic(props) {
         },
         // Optional: Anpassung der AppBar, falls vorhanden
         '& .MuiAppBar-root': {
+          '-webkit-app-region': 'drag', // Ziehen der App durch Klicken auf die AppBar
           backgroundColor: '#3f51b5', // Header-Farbe
           color: '#ffffff', // Textfarbe im Header
           '& .MuiSvgIcon-root': {
@@ -161,6 +191,9 @@ export default function DashboardLayoutBasic(props) {
         },
         'nav.MuiBox-root.css-4qjrhm':{
           overflow: 'hidden',
+        },
+        button:{
+          '-webkit-app-region': 'no-drag',
         }
       }}
     >

@@ -20,8 +20,9 @@ app.on('ready', () => {
         width: 1920,
         height: 1080,
         show: true,
-        frame: true,
+        frame: false,
         title: "STL Creator",
+        icon: path.join(__dirname, "../assets/taskbar.png"),
         webPreferences: {
             sandbox: false,
             preload: preloadPath, // Preload-Skript
@@ -38,6 +39,13 @@ app.on('ready', () => {
     mainWindow.webContents.on("did-fail-load",(event, errorCode, errorDescription) =>{
             console.error("Error loading index.html:", errorDescription)
     } )
+
+    mainWindow.on('maximize', () => {
+        mainWindow.webContents.send("window_maximized");
+    });
+    mainWindow.on('unmaximize', () => {
+        mainWindow.webContents.send("window_unmaximized");
+    });
 });
 
 function loadConfig() {
@@ -74,6 +82,29 @@ ipcMain.handle("get-app-path", (event, name) => {
     return app.getPath(name);
 })
 
+ipcMain.handle("window_maximize", () => {
+    if(mainWindow.isMaximized()){
+        mainWindow.unmaximize();
+    }else{
+        mainWindow.maximize();
+    }
+});
+
+ipcMain.handle("window_isMaximized", () => {
+    return mainWindow.isMaximized();
+});
+
+ipcMain.handle("window_close", () => {
+    if(mainWindow){
+        mainWindow.close();
+    }
+});
+
+ipcMain.handle("window_minimize", () => {
+    if(mainWindow){
+        mainWindow.minimize();
+    }
+});
 
 
 
