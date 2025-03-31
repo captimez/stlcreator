@@ -5,6 +5,12 @@ import DashboardLayoutBranding from "./view/components/layout/DashboardLayout";
 import { AppProvider as CustomProvider } from "./model/store";
 
 const App = () => {
+  React.useEffect(() => {
+    document.title = "rbc - STL Creator";
+  }, []);
+
+
+
   return (
     <AppProvider>
         <CustomProvider>
