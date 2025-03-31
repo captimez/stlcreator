@@ -8,8 +8,8 @@ const { subtract, union } = require('@jscad/modeling').booleans;
 const { translate, rotate} = require('@jscad/modeling').transforms;
 const { serialize } = require('@jscad/stl-serializer');
 
-const resolution = 30;
-
+const resolution = await window.api.getResolution();
+console.log(resolution)
 function createAussenring1({
   aussendurchmesser,
   innendurchmesser,

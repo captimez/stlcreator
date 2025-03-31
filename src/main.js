@@ -35,7 +35,6 @@ app.on('ready', () => {
     mainWindow.loadURL(startURL).catch((err) =>{
         console.error("Failed to load index.html: ", err)
     } );
-    mainWindow.webContents.openDevTools();
     mainWindow.webContents.on("did-fail-load",(event, errorCode, errorDescription) =>{
             console.error("Error loading index.html:", errorDescription)
     } )
@@ -50,15 +49,39 @@ app.on('ready', () => {
 
 function loadConfig() {
     if (fs.existsSync(configPath)) {
-        return JSON.parse(fs.readFileSync(configPath, "utf-8"));
+        const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+        if(!config.resolution){
+            config.resolution = 30;
+        }
+        return config;
     }
-    return { stlSavePath: app.getPath("documents") }; // Default path
+
+    return { 
+        stlSavePath: app.getPath("documents"),
+        resolution: 30,
+     }; // Default path
 }
 
-function saveConfig(newPath) {
-    const config = { stlSavePath: newPath };
-    fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+function saveConfig(newPath, newResolution) {
+    const config = loadConfig();
+
+    if(newPath){
+        config.stlSavePath = newPath;
+    }
+    if(newResolution){
+        config.resolution = newResolution;
+    }
+    fs.writeFileSync(configPath, JSON.stringify(config), 'utf-8');
 }
+
+ipcMain.handle("update-resolution", (event, newResolution) => {
+    saveConfig(null, newResolution);
+    return loadConfig();
+});
+
+ipcMain.handle("get-resolution", () => {
+    return loadConfig().resolution;
+});
 
 ipcMain.handle("select-folder", async () => {
     const result = await dialog.showOpenDialog({
