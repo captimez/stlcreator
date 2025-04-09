@@ -61,14 +61,14 @@ const TrainView = () => {
                                 <TextField id="standard-basic"  onChange={(event) => setSolutionName(event.target.value)}  size='small' label="Name" />
                             </FormControl>
                             <FormControl style={{ marginBottom: "10px" }}>
-                                <FormLabel>Select STL File</FormLabel>
+                                <FormLabel>Datei Auswahl</FormLabel>
                                 <Button
                                     component="label"
                                     role={undefined}
                                     variant="contained"
                                     tabIndex={-1}
                                     startIcon={<CloudUploadIcon />}
-                                >Select File
+                                >Datei auswählen
                                 <VisuallyHiddenInput
                                     type="file"
                                     onChange={(event) => setSelectedFile(event.target.files[0])}

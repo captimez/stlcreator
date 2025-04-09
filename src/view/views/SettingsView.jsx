@@ -40,7 +40,7 @@ return (
                 <Typography sx={{mb:2, color: "#757575", fontWeight: 700}} variant='h5'>Settings</Typography>
                 <Box sx={{ ml: 2 }}>
                     <FormControl style={{ marginBottom: "10px", width: "100%" }}>
-                        <FormLabel>STL Files Directory</FormLabel>
+                        <FormLabel>STL Verzeichnis</FormLabel>
                         <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
                             <TextField 
                                 id="directory" 
@@ -50,7 +50,7 @@ return (
                             />
                             <Button sx={{p:1}} variant='contained' size="small" onClick={handleSelectFolder} >Select</Button>
                         </Box>
-                        <FormLabel sx={{ mt: 1}}>STL Render Resolution</FormLabel>
+                        <FormLabel sx={{ mt: 1}}>STL Render Auflösung</FormLabel>
                         <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
                             <Slider
                                 value={resolution}

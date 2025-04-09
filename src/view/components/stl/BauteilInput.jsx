@@ -129,7 +129,7 @@ const BauteilInput = () => {
                 <Grid2>
                     <div class="input-box">
                         <Button sx={{ mt: 1.5 }} variant="contained" onClick={handleCreateSTL}>
-                            Create STL
+                            Erstelle STL
                         </Button>
                     </div>
                 </Grid2>

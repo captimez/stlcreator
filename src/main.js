@@ -11,7 +11,7 @@ let mainWindow;
 const preloadPath = path.join(__dirname, 'preload.js');
 const configPath = path.join(app.getPath("userData"), "config.json");
 console.log(configPath)
-app.disableHardwareAcceleration();
+//app.disableHardwareAcceleration();
 
 app.on('ready', () => {
     
