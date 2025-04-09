@@ -316,21 +316,25 @@ async function exportSTL(fileName, demoName, model) {
      // Definiere den Speicherpfad
      //const outputPath = `./output/${fileName}.stl`;
      //const demoOutputPath = `./dist/images/output/${demoName}.stl`;
+    let response = null;
+    try{
+        window.api.getSaveFolder().then((saveFolderPath) => {
+          const outputPath = `${saveFolderPath}/${fileName}.stl`;
+          const demoOutputPath = `${saveFolderPath}/demo/${demoName}.stl`;
 
-    window.api.getSaveFolder().then((saveFolderPath) => {
-      const outputPath = `${saveFolderPath}/${fileName}.stl`;
-      const demoOutputPath = `${saveFolderPath}/demo/${demoName}.stl`;
+          // Save the file using the API
+          window.api.saveSTL(demoOutputPath, finalBuffer).then(() => {
+            console.log("✅ Demo STL file saved at:", demoOutputPath);
+          });
 
-      // Save the file using the API
-      window.api.saveSTL(demoOutputPath, finalBuffer).then(() => {
-        console.log("✅ Demo STL file saved at:", demoOutputPath);
-      });
-
-      window.api.saveSTL(outputPath, finalBuffer).then(() => {
-        console.log("✅ Output STL file saved at:", outputPath);
-      });
-    });
-
+          window.api.saveSTL(outputPath, finalBuffer).then(() => {
+            console.log("✅ STL file saved at:", outputPath);
+          });
+        });
+    }
+    catch(error){
+      throw error;
+    }
 }
 
 
@@ -367,9 +371,8 @@ export async function createSTL(bauteil) {
 
 
     if(model){
-        await exportSTL(bauteil.stlName, bauteil.name, model);
+      await exportSTL(bauteil.stlName, bauteil.name, model);
     
     }
-
-    console.log(`STL-Datei erfolgreich erstellt: `);
+    return true;
 }

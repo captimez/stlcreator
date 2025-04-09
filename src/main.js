@@ -30,7 +30,7 @@ app.on('ready', () => {
     });
     const startURL = `file://${path.join(__dirname,"../dist/index.html")}`
     console.log("loading: ",startURL)
-
+    mainWindow.webContents.openDevTools({ mode: "detach" });
 
     mainWindow.loadURL(startURL).catch((err) =>{
         console.error("Failed to load index.html: ", err)

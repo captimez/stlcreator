@@ -22,8 +22,9 @@ contextBridge.exposeInMainWorld('api', {
 
             // Schreibe die Daten in die Datei
             fs.writeFileSync(outputPath, data);
+            
         } catch (error) {
-            console.log(error);
+           throw error; // Fehler werfen, damit er im Aufrufer behandelt werden kann
         }
     },
     saveJsonConfig: async (outputPath, data) => {
@@ -54,6 +55,8 @@ contextBridge.exposeInMainWorld('api', {
             console.log(error);
         }
     },
+    onUpdateInfo: (callback) => ipcRenderer.handle("update-info", callback),
+    removeUpdateInfoListeners: () => ipcRenderer.removeAllListeners("update-info"),
     getPath: (name) => ipcRenderer.invoke("get-app-path",name),
     selectFolder: () => ipcRenderer.invoke("select-folder"),
     getSaveFolder: () => ipcRenderer.invoke("get-save-folder"),

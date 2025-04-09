@@ -52,7 +52,7 @@ const demoTheme = createTheme({
             main: "#C7CDE8",
         },
       },
-  colorSchemes: { light: true, dark: true },
+  colorSchemes: { light: true, dark: false},
   breakpoints: {
     values: {
       xs: 0,
