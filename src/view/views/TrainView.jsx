@@ -81,7 +81,7 @@ const TrainView = () => {
                             <FormControlLabel control={<Checkbox name='Winkel' checked={isChecked.Winkel} color="primary" onChange={handleCheckboxChange}/>} label="Winkel" />
                             <FormControlLabel control={<Checkbox name='TStueck' color="primary" checked={isChecked.TStueck} onChange={handleCheckboxChange}/>} label="TStueck" />
                         </FormGroup> 
-                        <Button variant='contained' onClick={handleSubmit} sx={{ mt: 2 }}>Neue Einlernung</Button>
+                        <Button variant='contained' onClick={handleSubmit} sx={{ mt: 2 }}>Einlernen</Button>
                    </Box> 
             </div>
         </div>

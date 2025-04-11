@@ -72,7 +72,7 @@ const BauteilInput = () => {
            }
 
         } catch (error) {
-            showSnackbar("Fehler beim Erstellen der STL-Datei", "error");
+            showSnackbar(`Fehler beim Erstellen der STL-Datei \n ${error} `, "error");
         }
     };
 
