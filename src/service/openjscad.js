@@ -1,6 +1,8 @@
 import { extrudeRotate } from '@jscad/modeling/src/operations/extrusions';
 import { ellipse, roundedCylinder } from '@jscad/modeling/src/primitives';
 import { Buffer } from 'buffer';
+import { or } from 'three/tsl';
+import { UniformNode } from 'three/webgpu';
 
 // Import der JSCAD-Bibliotheken
 const { cylinder, cuboid, cylinderElliptic, torus } = require('@jscad/modeling').primitives;
@@ -136,21 +138,77 @@ function createAussenring2({
   }
 
 // Funktion für Innenring1
-function createInnenring1({ durchmesser_or, durchmesser_so, durchmesser_su, durchmesser_ur, hoehe_or, hoehe, hoehe_ur }) {
+function createInnenring1({ durchmesser_or, durchmesser_so, durchmesser_su, durchmesser_ur,innendurchmesser, hoehe_or, hoehe, hoehe_ur }) {
   durchmesser_or = Number(durchmesser_or) 
   durchmesser_so = Number(durchmesser_so) 
   durchmesser_su = Number(durchmesser_su) 
-  durchmesser_ur = Number(durchmesser_ur) 
+  durchmesser_ur = Number(durchmesser_ur)
+  innendurchmesser = Number(innendurchmesser)
   hoehe_or = Number(hoehe_or)
   hoehe = Number(hoehe) 
   hoehe_ur = Number(hoehe_ur) 
-    const outer = cylinder({  radius: durchmesser_or / 2, height: hoehe, segments: resolution });
-    const stepOuter = cylinder({ radius: durchmesser_so / 2, height: hoehe_or, segments: resolution  });
-    const stepInner = cylinder({ radius: durchmesser_su / 2, height: hoehe_ur, segments: resolution  });
-    const inner = cylinder({ radius: durchmesser_ur / 2, height: hoehe + 1, segments: resolution  });
-    return subtract(union(outer, stepOuter, stepInner), inner);
+  
+  let or_clyinder = cylinder({ radius: durchmesser_or / 2, height: hoehe_or, segments: resolution });
+  let ur_clyinder = cylinder({ radius: durchmesser_ur / 2, height: hoehe_ur, segments: resolution });
+  let middle_cylinder_height = hoehe - (hoehe_or + hoehe_ur);
+  let middle_cylinder = cylinderElliptic({ startRadius: [durchmesser_so / 2, durchmesser_so / 2], endRadius: [durchmesser_su / 2, durchmesser_su / 2], height: middle_cylinder_height , segments: resolution });
+
+  let gesamt = union(translate([0, 0, -((middle_cylinder_height / 2) +( hoehe_or / 2))], or_clyinder), translate([0, 0, ((middle_cylinder_height / 2) +( hoehe_ur / 2))],ur_clyinder), translate([0, 0, 0], middle_cylinder))
+  let inner_cylinder = cylinder({ radius: innendurchmesser / 2, height: hoehe, segments: resolution });
+  gesamt = subtract(gesamt, inner_cylinder);
+  return gesamt;
 }
 
+function createInnenring() {
+  // Parameterzuweisung
+  let Hoehe = 100;
+  let Durchmesser_Innen = 60;
+  let Durchmesser_oberer_Rand = 80;
+  let Hoehe_oberer_Rand = 10;
+  let Durchmesser_Rand_unten = 90;
+  let Hoehe_unterer_Rand = 15;
+  let Durchmesser_Schraege_oben = 75;
+  let Durchmesser_Schraege_unten = 65;
+
+  // Umrechnung der Parameter
+  let R_rand_oben = Durchmesser_oberer_Rand / 2;
+  let R_innen = Durchmesser_Innen / 2;
+  let R_schraege_oben = Durchmesser_Schraege_oben / 2;
+  let R_schraege_unten = Durchmesser_Schraege_unten / 2;
+  let R_rand_unten = Durchmesser_Rand_unten / 2;
+  let a = Hoehe - Hoehe_oberer_Rand - Hoehe_unterer_Rand;
+
+  let resolution = 50;
+
+  // Oberer Rand
+  let obererRand = difference(
+    cylinder({h: Hoehe_oberer_Rand, r: R_rand_oben, fn: resolution}),
+    cylinder({h: Hoehe_oberer_Rand, r: R_innen, fn: resolution})
+  ).translate([0, 0, Hoehe_unterer_Rand + a]);
+
+  // Schräge + Einstiche
+  let schräge = difference(
+    cylinder({h: a, r1: R_schraege_unten, r2: R_schraege_oben, fn: resolution}),
+    union(
+      cylinder({h: a + 1, r: R_innen, fn: resolution}),
+      rotate_extrude({fn: resolution}, circle({r: 1, fn: resolution}).translate([R_schraege_unten, 0])),
+      rotate_extrude({fn: resolution}, circle({r: 1, fn: resolution}).translate([R_schraege_oben, 0])).translate([0, 0, a])
+    )
+  ).translate([0, 0, Hoehe_unterer_Rand]);
+
+  // Unterer Rand
+  let untererRand = difference(
+    cylinder({h: Hoehe_unterer_Rand, r: R_rand_unten, fn: resolution}),
+    cylinder({h: Hoehe_unterer_Rand + 1, r: R_innen, fn: resolution})
+  );
+
+  // Gesamtes Objekt zusammenfügen und um 90° drehen
+  let gesamtesObjekt = union(obererRand, schräge, untererRand)
+    .rotateX(90)
+    .rotateY(90);
+
+  return gesamtesObjekt;
+}
 // Funktion für Innenring2
 function createInnenring2({ innendurchmesser, aussendurchmesser, hoehe, radius_ausstich }) {
   innendurchmesser = Number(innendurchmesser) 
