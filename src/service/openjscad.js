@@ -1,6 +1,7 @@
 import { extrudeRotate } from '@jscad/modeling/src/operations/extrusions';
 import { ellipse, roundedCylinder } from '@jscad/modeling/src/primitives';
 import { Buffer } from 'buffer';
+import { deinterleaveAttribute } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { or } from 'three/tsl';
 import { UniformNode } from 'three/webgpu';
 
@@ -352,7 +353,7 @@ function createRohrbogen({
 
 
 
-async function exportSTL(fileName, demoName, model) {
+async function exportSTL(fileName, demoName, model,dimensions) {
      // Serialisiere das Modell als binäre STL-Daten
      const stlData = serialize({ binary: true }, model); // Gibt ein Array von ArrayBuffer zurück
 
@@ -384,9 +385,14 @@ async function exportSTL(fileName, demoName, model) {
           window.api.saveSTL(demoOutputPath, finalBuffer).then(() => {
             console.log("✅ Demo STL file saved at:", demoOutputPath);
           });
-
+          // Save the file using the API
           window.api.saveSTL(outputPath, finalBuffer).then(() => {
             console.log("✅ STL file saved at:", outputPath);
+            
+            // Save the dimensions using the API
+            window.api.updateDimensions(dimensions).then(() => {
+              console.log("✅ Dimensions saved at:", dimensions);
+            });
           });
         });
     }
@@ -400,21 +406,35 @@ async function exportSTL(fileName, demoName, model) {
 // Funktion, um einen Ring zu erstellen
 export async function createSTL(bauteil) {
     let model;
+    let dimensions = {
+      aussendruchmesser: 0,
+      innendurchmesser: 0,
+      hoehe: 0,
+    }
     switch(bauteil.name){
         case 'Aussenring1':
             model = createAussenring1(bauteil.inputs);
-            
+            dimensions.aussendruchmesser = bauteil.inputs.aussendurchmesser;
+            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
+            dimensions.hoehe = bauteil.inputs.hoehe;
             break;
         case 'Aussenring2':
             model = createAussenring2(bauteil.inputs);
-            
+            dimensions.aussendruchmesser = bauteil.inputs.aussendurchmesser;
+            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser_klein;
+            dimensions.hoehe = bauteil.inputs.hoehe;
             break;
         case 'Innenring1':
             model = createInnenring1(bauteil.inputs);
-            
+            dimensions.aussendruchmesser = bauteil.inputs.durchmesser_or;
+            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
+            dimensions.hoehe = bauteil.inputs.hoehe; 
             break;
         case 'Innenring2':
             model = createInnenring2(bauteil.inputs);
+            dimensions.aussendruchmesser = bauteil.inputs.aussendurchmesser;
+            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
+            dimensions.hoehe = bauteil.inputs.hoehe;
             
             break;
         case 'T-Stueck':
@@ -422,6 +442,7 @@ export async function createSTL(bauteil) {
             break;
         case "Rohrbogen":
             model = createRohrbogen(bauteil.inputs);
+            
             break;
 
     }
@@ -429,7 +450,7 @@ export async function createSTL(bauteil) {
 
 
     if(model){
-      await exportSTL(bauteil.stlName, bauteil.name, model);
+      await exportSTL(bauteil.stlName, bauteil.name, model, dimensions);
     
     }
     return true;

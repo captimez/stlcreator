@@ -62,7 +62,7 @@ function loadConfig() {
      }; // Default path
 }
 
-function saveConfig(newPath, newResolution) {
+function saveConfig(newPath, newResolution, solutionId,dimensions) {
     const config = loadConfig();
 
     if(newPath){
@@ -71,16 +71,54 @@ function saveConfig(newPath, newResolution) {
     if(newResolution){
         config.resolution = newResolution;
     }
+    if(solutionId){
+        config.solutionId = solutionId;
+    }
+    if(dimensions){
+        config.aussendruchmesser = dimensions.aussendruchmesser;
+        config.innendurchmesser = dimensions.innendurchmesser;
+        config.hoehe = dimensions.hoehe;
+    }
     fs.writeFileSync(configPath, JSON.stringify(config), 'utf-8');
 }
+
+ipcMain.handle("save-python-config", (event, outputPath, data) => {
+    const settingsConfig = loadConfig();
+    const pythonConfig = JSON.parse(data);
+    
+    pythonConfig.stlSavePath = settingsConfig.stlSavePath;
+    pythonConfig.solutionId = settingsConfig.solutionId;
+
+    fs.writeFileSync(outputPath, JSON.stringify(pythonConfig), 'utf-8');
+    return true;
+
+})
 
 ipcMain.handle("update-resolution", (event, newResolution) => {
     saveConfig(null, newResolution);
     return loadConfig();
 });
 
+ipcMain.handle("update-solution-id", (event, solutionId) => {
+    saveConfig(null, null, solutionId);
+    return loadConfig();
+});
+
+ipcMain.handle("get-solution-id", () => {
+    return loadConfig().solutionId;
+});
+
 ipcMain.handle("get-resolution", () => {
     return loadConfig().resolution;
+});
+
+ipcMain.handle("update-dimensions", (event, dimensions) => {
+    saveConfig(null,null,null,dimensions);
+    return loadConfig()
+});
+
+ipcMain.handle("get-dimensions", (event) => {
+    return loadConfig().dimensions;
 });
 
 ipcMain.handle("select-folder", async () => {

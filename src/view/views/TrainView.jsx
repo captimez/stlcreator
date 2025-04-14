@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState, useEffect } from "react";
 import Box from '@mui/material/Box';
 import { AppProvider as CustomProvider, useAppContext } from "./../../model/store";
 import { Checkbox, Input, FormControlLabel, FormGroup, FormControl, FormLabel } from '@mui/material';
@@ -9,11 +9,22 @@ import TextField from '@mui/material/TextField';
 
 const TrainView = () => {
     // Initialize state for isSymmetric
-    const [isSymmetric, setIsSymmetric] = React.useState(false);
+    const [isSymmetric, setIsSymmetric] = useState(false);
     const { selectedBauteil } = useAppContext();
-    const [ isChecked, setIsChecked ] = React.useState({Ring: false, Winkel: false, TStueck: false});
-    const [solutionName, setSolutionName] = React.useState('');
-    const [selectedFile, setSelectedFile] = React.useState(null);
+    const [ isChecked, setIsChecked ] = useState({Ring: false, Winkel: false, TStueck: false});
+    const [solutionName, setSolutionName] = useState('');
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [aussendurchmesser, setAussendurchmesser] = useState(0);
+    const [innendurchmesser, setInnendurchmesser] = useState(0);
+    const [hoehe, setHoehe] = useState(0);
+
+    useEffect(() => {
+        window.api.getDimensions().then((dimensions) => {
+            setAussendurchmesser(dimensions.aussendurchmesser);
+            setInnendurchmesser(dimensions.innendurchmesser);
+            setHoehe(dimensions.hoehe);
+        });
+    }, []);
 
     const handleCheckboxChange = (event) => {
         const newCheckedState = { Ring: false, Winkel: false, TStueck: false, [event.target.name]: true };
@@ -40,10 +51,13 @@ const TrainView = () => {
             solutionName: solutionName,
             selectedFile: selectedFile.name,
             type: type,
+            aussendurchmesser: aussendurchmesser,
+            innendurchmesser: innendurchmesser,
+            hoehe: hoehe,
         };
         
         console.log(selectedFile.name)
-        await window.api.saveJsonConfig('config.json', JSON.stringify(config));
+        await window.api.savePythonConfig('pythonConfig.json', JSON.stringify(config));
         await window.api.startPythonScript('script.py');
 
 
@@ -80,6 +94,14 @@ const TrainView = () => {
                             <FormControlLabel control={<Checkbox name='Ring' checked={isChecked.Ring} color="primary" onChange={handleCheckboxChange}/>} label="Ring" />
                             <FormControlLabel control={<Checkbox name='Winkel' checked={isChecked.Winkel} color="primary" onChange={handleCheckboxChange}/>} label="Winkel" />
                             <FormControlLabel control={<Checkbox name='TStueck' color="primary" checked={isChecked.TStueck} onChange={handleCheckboxChange}/>} label="TStueck" />
+                            <FormControl style={{ marginBottom: "10px" }}>
+                                <FormLabel>Aussendruchmesser</FormLabel>
+                                <TextField id="standard-basic" onChange={(event) => setAussendurchmesser(event.target.value)} size='small' label="Durchmesser" />
+                                <FormLabel>Innendurchmesser</FormLabel>
+                                <TextField id="standard-basic" onChange={(event) => setInnendurchmesser(event.target.value)} size='small' label="Durchmesser" />
+                                <FormLabel>Höhe</FormLabel>
+                                <TextField id="standard-basic" onChange={(event) => setHoehe(event.target.value)} size='small' label="Hoehe" />
+                            </FormControl>
                         </FormGroup> 
                         <Button variant='contained' onClick={handleSubmit} sx={{ mt: 2 }}>Einlernen</Button>
                    </Box> 
