@@ -20,9 +20,13 @@ const TrainView = () => {
 
     useEffect(() => {
         window.api.getDimensions().then((dimensions) => {
+            
+            console.log("Dimensions loaded: ", dimensions);
+
             setAussendurchmesser(dimensions.aussendurchmesser);
             setInnendurchmesser(dimensions.innendurchmesser);
             setHoehe(dimensions.hoehe);
+
         });
     }, []);
 
@@ -96,11 +100,11 @@ const TrainView = () => {
                             <FormControlLabel control={<Checkbox name='TStueck' color="primary" checked={isChecked.TStueck} onChange={handleCheckboxChange}/>} label="TStueck" />
                             <FormControl style={{ marginBottom: "10px" }}>
                                 <FormLabel>Aussendruchmesser</FormLabel>
-                                <TextField id="standard-basic" onChange={(event) => setAussendurchmesser(event.target.value)} size='small' label="Durchmesser" />
+                                <TextField id="standard-basic" value={aussendurchmesser} onChange={(event) => setAussendurchmesser(event.target.value)} size='small' label="Aussendurchmesser" />
                                 <FormLabel>Innendurchmesser</FormLabel>
-                                <TextField id="standard-basic" onChange={(event) => setInnendurchmesser(event.target.value)} size='small' label="Durchmesser" />
+                                <TextField id="standard-basic" value={innendurchmesser} onChange={(event) => setInnendurchmesser(event.target.value)} size='small' label="Innendurchmesser" />
                                 <FormLabel>Höhe</FormLabel>
-                                <TextField id="standard-basic" onChange={(event) => setHoehe(event.target.value)} size='small' label="Hoehe" />
+                                <TextField id="standard-basic" value={hoehe} onChange={(event) => setHoehe(event.target.value)} size='small' label="Hoehe" />
                             </FormControl>
                         </FormGroup> 
                         <Button variant='contained' onClick={handleSubmit} sx={{ mt: 2 }}>Einlernen</Button>

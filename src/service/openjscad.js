@@ -154,8 +154,9 @@ function createInnenring1({ durchmesser_or, durchmesser_so, durchmesser_su, durc
   let middle_cylinder_height = hoehe - (hoehe_or + hoehe_ur);
   let middle_cylinder = cylinderElliptic({ startRadius: [durchmesser_so / 2, durchmesser_so / 2], endRadius: [durchmesser_su / 2, durchmesser_su / 2], height: middle_cylinder_height , segments: resolution });
 
-  let gesamt = union(translate([0, 0, -((middle_cylinder_height / 2) +( hoehe_or / 2))], or_clyinder), translate([0, 0, ((middle_cylinder_height / 2) +( hoehe_ur / 2))],ur_clyinder), translate([0, 0, 0], middle_cylinder))
+  let gesamt = union(translate([0, 0, (hoehe_or / 2)], or_clyinder), translate([0, 0, ((middle_cylinder_height) +( hoehe_ur / 2) + (hoehe_or))],ur_clyinder), translate([0, 0, (middle_cylinder_height / 2) + (hoehe_or)], middle_cylinder))
   let inner_cylinder = cylinder({ radius: innendurchmesser / 2, height: hoehe, segments: resolution });
+  inner_cylinder = translate([0,0,(hoehe/ 2)], inner_cylinder);
   gesamt = subtract(gesamt, inner_cylinder);
   return gesamt;
 }
@@ -407,32 +408,32 @@ async function exportSTL(fileName, demoName, model,dimensions) {
 export async function createSTL(bauteil) {
     let model;
     let dimensions = {
-      aussendruchmesser: 0,
+      aussendurchmesser: 0,
       innendurchmesser: 0,
       hoehe: 0,
     }
     switch(bauteil.name){
         case 'Aussenring1':
             model = createAussenring1(bauteil.inputs);
-            dimensions.aussendruchmesser = bauteil.inputs.aussendurchmesser;
+            dimensions.aussendurchmesser = bauteil.inputs.aussendurchmesser;
             dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
             dimensions.hoehe = bauteil.inputs.hoehe;
             break;
         case 'Aussenring2':
             model = createAussenring2(bauteil.inputs);
-            dimensions.aussendruchmesser = bauteil.inputs.aussendurchmesser;
+            dimensions.aussendurchmesser = bauteil.inputs.aussendurchmesser;
             dimensions.innendurchmesser = bauteil.inputs.innendurchmesser_klein;
             dimensions.hoehe = bauteil.inputs.hoehe;
             break;
         case 'Innenring1':
             model = createInnenring1(bauteil.inputs);
-            dimensions.aussendruchmesser = bauteil.inputs.durchmesser_or;
+            dimensions.aussendurchmesser = bauteil.inputs.durchmesser_or;
             dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
             dimensions.hoehe = bauteil.inputs.hoehe; 
             break;
         case 'Innenring2':
             model = createInnenring2(bauteil.inputs);
-            dimensions.aussendruchmesser = bauteil.inputs.aussendurchmesser;
+            dimensions.aussendurchmesser = bauteil.inputs.aussendurchmesser;
             dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
             dimensions.hoehe = bauteil.inputs.hoehe;
             

@@ -75,9 +75,7 @@ function saveConfig(newPath, newResolution, solutionId,dimensions) {
         config.solutionId = solutionId;
     }
     if(dimensions){
-        config.aussendruchmesser = dimensions.aussendruchmesser;
-        config.innendurchmesser = dimensions.innendurchmesser;
-        config.hoehe = dimensions.hoehe;
+        config.dimensions = dimensions;
     }
     fs.writeFileSync(configPath, JSON.stringify(config), 'utf-8');
 }
