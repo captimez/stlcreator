@@ -5,15 +5,16 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select
 
 
 
 #Load Config File, created by STL-Creator 
 with open("pythonConfig.json") as f:
     config = json.load(f)
-    stl_file_path = f'output/{config["selectedFile"]}'
+    stl_file_path = f'{config["stlSavePath"]}/{config["selectedFile"]}'
     filename = config["selectedFile"].split(".")[0]
-    objectType = config["type"]
+    objectType = config["type"][0]
     solution_name = config["solutionName"]
     workpiece_aussendurchmesser = config['aussendurchmesser']
     workpiece_innendurchmesser = config['innendurchmesser']
@@ -22,7 +23,7 @@ with open("pythonConfig.json") as f:
 workpiece_innenradius = workpiece_innendurchmesser / 2
 workpiece_aussenradius = workpiece_aussendurchmesser / 2
 
-gripping_point = {
+gp = {
     "x": workpiece_innenradius + ((workpiece_aussenradius - workpiece_innenradius) / 2),
     "y": 0, 
     "z": 0, 
@@ -36,7 +37,7 @@ print(objectType)
 print(solution_name)
 
 #Photoneo BPS IP
-photoneo_ip = "http://192.168.1.1" 
+photoneo_ip = "http://192.168.2.1" 
 
 def get_default_chrome_options():
     options = webdriver.ChromeOptions()
@@ -107,81 +108,161 @@ link.click()
 
 time.sleep(2)
 
-#Delete old Workpiece if existing
+#Change CAD FILE of existing workpiece
 driver.get(f"{photoneo_ip}/solution/{solution_id}/object/")
 try:
-    delete_object_button = driver.find_element(By.NAME, "delete")
-    delete_object_button.click()
+    object_links = driver.find_elements(By.CSS_SELECTOR, 'a[href*="/solution/"][href*="/object/"][href$="/edit/"]')
 
-    modal_proceed = driver.find_element(By.ID, "confirm-modal-proceed")
-    modal_proceed.click()
-    time.sleep(2)
+    href = object_links[0].get_attribute("href")
+    print(href)
+    driver.get(f'{href}')
+    
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "id_name")))
+
+    name_input = driver.find_element(By.ID, "id_name")
+    name_input.send_keys("" + filename)
+
+    file_input = driver.find_element(By.ID, "id-mesh")
+
+    # Falls das Input-Feld versteckt ist, per JS sichtbar machen
+    driver.execute_script("arguments[0].style.display = 'block';", file_input)
+    file_input.send_keys(stl_file_path)
+
+    #Save Workpiece 
+    save_button = driver.find_element(By.XPATH, "//button[@type='submit']")
+    save_button.click()
 except:
     print("Kein Objekt zum Löschen gefunden.")
 
-#Add new Workpiece
-driver.get(f"{photoneo_ip}/solution/{solution_id}/object/add")
-WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "id_name")))
-
-name_input = driver.find_element(By.ID, "id_name")
-name_input.send_keys("" + filename)
-
-file_input = driver.find_element(By.ID, "id-mesh")
-
-# Falls das Input-Feld versteckt ist, per JS sichtbar machen
-driver.execute_script("arguments[0].style.display = 'block';", file_input)
-file_input.send_keys(stl_file_path)
-
-#Save Workpiece 
-save_button = driver.find_element(By.XPATH, "//button[@type='submit']")
-save_button.click()
-time.sleep(3)
-
+time.sleep(2)
 #Navigate to Gripping Points
-driver.get(f"{photoneo_ip}/solutions/{solution_id}/gripping_points/")
-workpiece_select = driver.find_element(By.NAME,"picking_object")
-workpiece_select.send_keys(filename)
-workpiece_select.click()
+driver.get(f"{photoneo_ip}/solution/{solution_id}/gripping_points/")
+#workpiece_select = driver.find_element(By.NAME,"picking_object")
 
-add_gripping_point_button = driver.find_element(By.ID, "btn-gp-action-new")
+gripping_point_links = driver.find_elements(By.CSS_SELECTOR, 'a[href*="solution/"][href*="/gripping_points/"]')
+gripping_point_hrefs = [link.get_attribute("href") for link in gripping_point_links]
+print(f'{len(gripping_point_links)} Gripping Points found.')
+gp_count = 0
+for href in gripping_point_hrefs:
+    print(href)
+    driver.get(f'{href}')
 
-#Adjust Gripping Point
-input_gripping_point_x = driver.find_element(By.NAME,"position_x")
-input_gripping_point_x.clear()
-input_gripping_point_x.send_keys(gripping_point["x"])
+    #Adjust Gripping Point
+    input_gripping_point_x = driver.find_element(By.NAME,"position_x")
+    input_gripping_point_x.clear()
 
-#Set Rotation Invariant if object is ring type
-if(objectType == "ring"):
-    rot_invariatn_checkbox = driver.find_element(By.NAME, "is_rot_inv_enabled")
-    rot_invariatn_checkbox.click()
+    if(gp_count == 0):
+        input_gripping_point_x.send_keys(gp["x"])
+    
+    if(gp_count == 1):
+        input_gripping_point_x.send_keys(-gp["x"])
 
-#Save Gripping Point
-save_gripping_point_button = driver.find_element(By.ID, "save-grasping-steps")
-save_gripping_point_button.click()
-time.sleep(1)
+    time.sleep(2)
 
-driver.get(f"{photoneo_ip}/solutions/{solution_id}/gripping_points/")
+    #Set Rotation Invariant if object is ring type
+    if(objectType == "Ring"):
+        checkbox = driver.find_element(By.NAME, "is_rot_inv_enabled")
 
-#Create 2. Gripping Point
-workpiece_select = driver.find_element(By.NAME,"picking_object")
-workpiece_select.send_keys(filename)
-workpiece_select.click()
+        if not checkbox.is_selected():
+            driver.execute_script("arguments[0].click();", checkbox)
 
-add_gripping_point_button = driver.find_element(By.ID, "btn-gp-action-new")
+    #Save Gripping Point
+    save_gripping_point_button = driver.find_element(By.ID, "save-grasping-steps")
+    save_gripping_point_button.click()
 
-#Adjust Gripping Point in negative direction
-input_gripping_point_x = driver.find_element(By.NAME,"position_x")
-input_gripping_point_x.clear()
-input_gripping_point_x.send_keys(-gripping_point["x"])
+    gp_count += 1
+    time.sleep(1)
 
-#Set Rotation Invariant if object is ring type
-if(objectType == "ring"):
-    rot_invariatn_checkbox = driver.find_element(By.NAME, "is_rot_inv_enabled")
-    rot_invariatn_checkbox.click()
-
-save_gripping_point_button = driver.find_element(By.ID, "save-grasping-steps")
-save_gripping_point_button.click()
-time.sleep(1)
-
-# Browser schließen
+#QUIT FOR NOW
 driver.quit()
+
+# STEP 5: Go to Vision System
+driver.get(f"{photoneo_ip}/solution/{solution_id}/vision/")
+
+# STEP 6: Get all Box Localization links
+box_links = driver.find_elements(By.CSS_SELECTOR, 'a[href*="/vision/"][href$="/edit/"]')
+box_hrefs = [link.get_attribute("href") for link in box_links]
+
+for href in box_hrefs:
+    localization_path = href.replace("/edit", "/localization/")
+    driver.get(localization_path)
+
+    # STEP 7.1: Edit Current
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "id-loca-start-edit"))).click()
+
+    # STEP 7.2: Wait for UI to settle (optional)
+    time.sleep(1)  # Or wait for some canvas or element if available
+
+    # STEP 7.3: Scan & Locate
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "id-scan-and-locate"))).click()
+
+    # STEP 7.4: Wait for scan to complete (optional but recommended)
+    time.sleep(2)
+
+    # STEP 7.5: Save configuration
+    save_button = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.ID, "id-save-localization_profile"))
+    )
+    driver.execute_script("arguments[0].removeAttribute('disabled')", save_button)
+    save_button.click()
+
+    # STEP 7.6: Quit localization
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "id-exit-localization"))).click()
+
+    # STEP 7.7: Read notification
+    try:
+        msg = WebDriverWait(driver, 5).until(
+            EC.visibility_of_element_located((By.CSS_SELECTOR, 'span[data-notify="message"]'))
+        ).text
+        print("Message:", msg)
+    except:
+        print("No message found.")
+
+# STEP 8: Deployment    
+driver.find_element(By.ID, "deploy-btn").click()
+
+
+# STEP 9: Ensure "Production Mode" is checked
+checkbox = driver.find_element(By.NAME, "mode")
+is_production = checkbox.get_attribute("checked")  # will be 'true' or None
+
+if not is_production:
+    driver.execute_script("arguments[0].click();", checkbox)
+
+# STEP 10: Click Proceed
+#WebDriverWait(driver, 10).until(
+    #EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[name="deployment-action"][value="start-solution-list"]'))
+#).click()
+#TODO
+#PRE SELECTED BAUTEIL IN SOLUTION
+#1. CHANGE CAD MODEL OF BAUTEIL
+#2. CHANGE THUMBNAIL
+#3. ADJUST EXISTING GRIPPING POINT COORDINATES
+#4. AJUDST ROTATION INVARIANCE
+
+#5.GO TO VISION SYSTEM
+#6. GET ALL IDS OF BOXes
+#7. ITERATE BOX
+    #1.LOCALIZATION <a href="/solution/37/vision/103/localization/">Localization</a>
+    #2. EDIT CURRETN <button type="submit" class="btn btn-default loca-button" name="localization-action" id="id-loca-start-edit" value="start-edit"> <i class="fa fa-edit"></i> Edit current
+    #</button>
+    #3. WAIT FOR LOAD ANYHOW
+    #4. SCAN AND LOCATE <button type="button" id="id-scan-and-locate" class="btn btn-primary disable-on-stop" name="env">
+                        #   <i class="fa fa-camera"></i> Scan &amp; Locate
+                        #</button>
+    #5. SAVE CONFIGURATION BUTTON : <button type="button" id="id-save-localization_profile" class="btn btn-primary disable-on-stop push-to-right hint-trigger hint-short" name="env" disabled="">
+                                    #   <i class="fa fa-save"></i> Save configuration
+                                    #</button>
+    #6. QUIT LOCALIZATION <button type="button" id="id-exit-localization" class="btn btn-danger" name="env" style="top: -10px">
+                        #   <i class="fa fa-times"></i> Quit localization
+                        #</button>
+    #7. Read <span data-notify="message">hier ist die message</span>
+
+#8.  DEPLOY Button id="deploy-btn"
+#9. Popup input <input type="checkbox" checked="" name="mode" data-toggle="toggle" data-width="180" class="binpicking-mode" data-onstyle="danger" data-on="Production mode" data-off="Simulation mode" disabled="">
+# CHECKED = Produciton mode
+# UNCHECKED = Simulation mode, always needs to be Productin MODE
+#10. PROCEED BUTTON <button type="submit" class="btn btn-primary btn-class-deployment-action-confirm-start prevent-multiple-clicks" name="deployment-action" value="start-solution-list">
+                 #   Proceed
+                #</button>
+# FINISHED

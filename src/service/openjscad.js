@@ -345,7 +345,7 @@ function createRohrbogen({
   console.log(verschiebung);
 
   // **Zusammenfügen**
-  const rohrbogen = union(schenkel1, bogenPositioniert, schenkel2);
+  const rohrbogen = rotate([0, 0, 0],union(schenkel1, bogenPositioniert, schenkel2));
 
   return rohrbogen;
 }

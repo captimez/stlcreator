@@ -98,14 +98,18 @@ const TrainView = () => {
                             <FormControlLabel control={<Checkbox name='Ring' checked={isChecked.Ring} color="primary" onChange={handleCheckboxChange}/>} label="Ring" />
                             <FormControlLabel control={<Checkbox name='Winkel' checked={isChecked.Winkel} color="primary" onChange={handleCheckboxChange}/>} label="Winkel" />
                             <FormControlLabel control={<Checkbox name='TStueck' color="primary" checked={isChecked.TStueck} onChange={handleCheckboxChange}/>} label="TStueck" />
-                            <FormControl style={{ marginBottom: "10px" }}>
-                                <FormLabel>Aussendruchmesser</FormLabel>
-                                <TextField id="standard-basic" value={aussendurchmesser} onChange={(event) => setAussendurchmesser(event.target.value)} size='small' label="Aussendurchmesser" />
-                                <FormLabel>Innendurchmesser</FormLabel>
-                                <TextField id="standard-basic" value={innendurchmesser} onChange={(event) => setInnendurchmesser(event.target.value)} size='small' label="Innendurchmesser" />
-                                <FormLabel>Höhe</FormLabel>
-                                <TextField id="standard-basic" value={hoehe} onChange={(event) => setHoehe(event.target.value)} size='small' label="Hoehe" />
-                            </FormControl>
+                            {
+                                isChecked.Ring && (
+                                    <FormControl  style={{ marginBottom: "10px" }}>
+                                        <FormLabel>Aussendurchmesser</FormLabel>
+                                        <TextField id="standard-basic" value={aussendurchmesser} onChange={(event) => setAussendurchmesser(event.target.value)} size='small' label="Aussendurchmesser" />
+                                        <FormLabel>Innendurchmesser</FormLabel>
+                                        <TextField id="standard-basic" value={innendurchmesser} onChange={(event) => setInnendurchmesser(event.target.value)} size='small' label="Innendurchmesser" />
+                                        <FormLabel>Höhe</FormLabel>
+                                        <TextField id="standard-basic" value={hoehe} onChange={(event) => setHoehe(event.target.value)} size='small' label="Hoehe" />
+                                    </FormControl>
+                                )
+                            }
                         </FormGroup> 
                         <Button variant='contained' onClick={handleSubmit} sx={{ mt: 2 }}>Einlernen</Button>
                    </Box> 
