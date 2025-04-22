@@ -9,10 +9,12 @@ import { styled } from '@mui/material/styles';
 const SettingsView = () => {
 const [saveFolder, setSaveFolder] = useState("");
 const [resolution, setResolution] = useState(null);
+const [solution_id, setSolutionId] = useState(1);
 // Load initial save folder on mount
 useEffect(() => {
     window.api.getSaveFolder().then(setSaveFolder);
     window.api.getResolution().then(setResolution); 
+    window.api.getSolutionId().then(setSolutionId); // Load initial solution ID
 }, []);
 
 const Input = styled(MuiInput)`
@@ -37,11 +39,11 @@ return (
     <div style={{ height:"100%", width: "100%", display: "flex" }}>
         <div style={{ width: "40%", marginLeft:"30px" }}>
             <Box sx={{ mt: 2, ml: 2 }}>
-                <Typography sx={{mb:2, color: "#757575", fontWeight: 700}} variant='h5'>Settings</Typography>
+                <Typography sx={{mb:2, color: "#757575", fontWeight: 700}} variant='h5'>Einstellungen</Typography>
                 <Box sx={{ ml: 2 }}>
                     <FormControl style={{ marginBottom: "10px", width: "100%" }}>
-                        <FormLabel>STL Files Directory</FormLabel>
-                        <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
+                        <FormLabel>STL Verzeichnis</FormLabel>
+                        <Box sx={{ display: "flex", alignItems: "center", mt: 1, mb: 1 }}>
                             <TextField 
                                 id="directory" 
                                 value={saveFolder} 
@@ -50,8 +52,8 @@ return (
                             />
                             <Button sx={{p:1}} variant='contained' size="small" onClick={handleSelectFolder} >Select</Button>
                         </Box>
-                        <FormLabel sx={{ mt: 1}}>STL Render Resolution</FormLabel>
-                        <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
+                        <FormLabel sx={{ mt: 1}}>STL Render Auflösung</FormLabel>
+                        <Box sx={{ display: "flex", alignItems: "center", mt: 2, mb: 1 }}>
                             <Slider
                                 value={resolution}
                                 sx={{ml:1, mr: 2 }}
@@ -74,6 +76,19 @@ return (
                                 label="Resolution"
                             />
 
+                        </Box>
+                        <FormLabel sx={{ mt: 1}}>BPS COPY Solution ID</FormLabel>
+                        <Box sx={{ display: "flex", alignItems: "center", mt: 2, mb: 1 }}>
+                            <Input type="number"
+                                min={1} max={100} id="solution-id" 
+                                value={solution_id} 
+                                onChange={(e) => { 
+                                    setSolutionId(e.target.value)
+                                    window.api.updateSolutionId(e.target.value)
+                                    }} 
+                                size='small' 
+                                label="BPS COPY Solution ID" 
+                            />
                         </Box>
                     </FormControl>
                 </Box>

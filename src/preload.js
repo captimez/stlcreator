@@ -22,43 +22,26 @@ contextBridge.exposeInMainWorld('api', {
 
             // Schreibe die Daten in die Datei
             fs.writeFileSync(outputPath, data);
+            
         } catch (error) {
-            console.log(error);
+           throw error; // Fehler werfen, damit er im Aufrufer behandelt werden kann
         }
     },
-    saveJsonConfig: async (outputPath, data) => {
-        try {
-            // Erstelle das Verzeichnis, falls es nicht existiert
-            fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-
-            // Schreibe die Daten in die Datei
-            fs.writeFileSync(outputPath, data);
-        } catch (error) {
-            console.log(error);
-        }
-    },
-    startPythonScript: async (scriptName, args) => {
-        try {
-            const scriptPath = path.join(__dirname, `../${scriptName}`);
-            const python = spawner('python', [scriptPath, []]);
-            python.stdout.on('data', (data) => {
-                console.log(`stdout: ${data}`);
-            });
-            python.stderr.on('data', (data) => {
-                console.error(`stderr: ${data}`);
-            });
-            python.on('close', (code) => {
-                console.log(`child process exited with code ${code}`);
-            });
-        } catch (error) {
-            console.log(error);
-        }
-    },
+    savePythonConfig: async (outputPath, data) => ipcRenderer.invoke("save-python-config", outputPath, data),
+    startPythonScript: (scriptName) => ipcRenderer.invoke("start-python-script", scriptName, []),
+    onUpdateInfo: (callback) => ipcRenderer.handle("update-info", callback),
+    onPythonOutput: (callback) => ipcRenderer.on("python-output", (_,data) => callback(data)),
+    onPythonError: (callback) => ipcRenderer.on("python-error", (_,data) => callback(data)),
+    removeUpdateInfoListeners: () => ipcRenderer.removeAllListeners("update-info"),
+    updateDimensions: (dimensions) => ipcRenderer.invoke("update-dimensions", dimensions),
+    getDimensions: () => ipcRenderer.invoke("get-dimensions"),
     getPath: (name) => ipcRenderer.invoke("get-app-path",name),
     selectFolder: () => ipcRenderer.invoke("select-folder"),
     getSaveFolder: () => ipcRenderer.invoke("get-save-folder"),
     updateResolution: (resolution) => ipcRenderer.invoke("update-resolution", resolution),
     getResolution: () => ipcRenderer.invoke("get-resolution"),
+    getSolutionId: () => ipcRenderer.invoke("get-solution-id"),
+    updateSolutionId: (solutionId) => ipcRenderer.invoke("update-solution-id", solutionId),
     minimizeWindow: () => ipcRenderer.invoke("window_minimize"),
     closeWindow: () => ipcRenderer.invoke("window_close"),
     maximizeWindow: () => ipcRenderer.invoke("window_maximize"),

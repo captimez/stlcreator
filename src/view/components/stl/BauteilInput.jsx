@@ -10,6 +10,7 @@ import { createSTL } from '../../../service/openjscad';
 import MyThree from '../threejs/viewer';
 import { IconButton, Modal, Typography } from '@mui/material';
 
+
 /**
  * BauteilInput Komponente
  * 
@@ -19,6 +20,7 @@ import { IconButton, Modal, Typography } from '@mui/material';
 const BauteilInput = () => {
     // Zugriff auf das aktuell ausgewählte Bauteil aus dem globalen Zustand
     const { selectedBauteil, setSelectedBauteil } = useAppContext();
+    const { showSnackbar } = useAppContext(); // Zugriff auf die Snackbar-Funktion
     const [open, setOpen] = React.useState(false); // Zustand für das Modal
     const [imageSrc, setImageSrc] = React.useState(null); // Zustand für das Bild im Modal
 
@@ -64,9 +66,13 @@ const BauteilInput = () => {
     const handleCreateSTL = async () => {
         try {
             console.log(selectedBauteil);
-            await createSTL(selectedBauteil);
+           const response = await createSTL(selectedBauteil);
+           if(response){
+             showSnackbar("STL-Datei erfolgreich erstellt", "success");
+           }
+
         } catch (error) {
-            console.log(error);
+            showSnackbar(`Fehler beim Erstellen der STL-Datei \n ${error} `, "error");
         }
     };
 
@@ -87,7 +93,6 @@ const BauteilInput = () => {
                         <InfoIcon />
                     </IconButton>
                 </Box>
-                
                 {/* Dynamische Eingabefelder für die Bauteilparameter */}
                 <Grid2 container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                     {Object.entries(selectedBauteil?.inputs).map(([key, value], index) => {
@@ -129,7 +134,7 @@ const BauteilInput = () => {
                 <Grid2>
                     <div class="input-box">
                         <Button sx={{ mt: 1.5 }} variant="contained" onClick={handleCreateSTL}>
-                            Create STL
+                            Erstelle STL
                         </Button>
                     </div>
                 </Grid2>

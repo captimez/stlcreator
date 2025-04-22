@@ -26,7 +26,7 @@ import { use } from 'react';
 const NAVIGATION = [
   {
     kind: 'header',
-    title: 'Programms',
+    title: 'Programme',
   },
   {
     segment: 'dashboard',
@@ -35,7 +35,7 @@ const NAVIGATION = [
   },
   {
     segment: 'training',
-    title: 'Training Tool',
+    title: 'Einlern Tool',
     icon: <BuildIcon />,
   },
 ];
@@ -52,7 +52,7 @@ const demoTheme = createTheme({
             main: "#C7CDE8",
         },
       },
-  colorSchemes: { light: true, dark: true },
+  colorSchemes: { light: true, dark: false},
   breakpoints: {
     values: {
       xs: 0,
@@ -91,7 +91,7 @@ function SidebarFooter({ router, mini }) {
             },
           }}
         >
-          {mini ? "" : "Settings"}
+          {mini ? "" : "Einstellungen"}
         </Button>
       </Box>
       <Box sx={{ p: 2, textAlign: 'center' }}>

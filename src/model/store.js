@@ -1,32 +1,50 @@
 import React, { createContext, useContext, useState } from 'react';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
 
-// Erstelle den AppContext
 const AppContext = createContext();
 
-/**
- * AppProvider - Kontext-Provider für globale Zustandsverwaltung
- *
- * Diese Komponente stellt den AppContext bereit und verwaltet den Zustand
- * des aktuell ausgewählten Bauteils.
- * 
- * @param {Object} props - Enthält die Kinderkomponenten, die den Kontext nutzen.
- */
 export const AppProvider = ({ children }) => {
-  // Zustand für das aktuell ausgewählte Bauteil
   const [selectedBauteil, setSelectedBauteil] = useState(null);
-  
+
+  // 🔔 Snackbar-Zustand
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('info'); // "success", "error", "warning", "info"
+
+  // 🔧 Funktion zum Anzeigen der Snackbar
+  const showSnackbar = (message, severity = 'info') => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') return;
+    setSnackbarOpen(false);
+  };
+
   return (
-    <AppContext.Provider value={{ selectedBauteil, setSelectedBauteil }}>
-      {children} {/* Stellt den Kontext für untergeordnete Komponenten bereit */}
+    <AppContext.Provider value={{
+      selectedBauteil,
+      setSelectedBauteil,
+      showSnackbar, // <- jetzt global verfügbar!
+    }}>
+      {children}
+
+      {/* Snackbar wird global gerendert */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={10000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <MuiAlert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </MuiAlert>
+      </Snackbar>
     </AppContext.Provider>
   );
 };
 
-/**
- * Custom Hook zum Zugriff auf den AppContext
- * 
- * @returns {Object} Enthält `selectedBauteil` und `setSelectedBauteil`
- */
-export const useAppContext = () => {
-  return useContext(AppContext);
-};
+export const useAppContext = () => useContext(AppContext);
