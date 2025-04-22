@@ -6,6 +6,7 @@ import { styled } from '@mui/material/styles';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { Button, Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
+import LinearProgress from '@mui/material/LinearProgress';
 
 const TrainView = () => {
     // Initialize state for isSymmetric
@@ -17,6 +18,9 @@ const TrainView = () => {
     const [aussendurchmesser, setAussendurchmesser] = useState(0);
     const [innendurchmesser, setInnendurchmesser] = useState(0);
     const [hoehe, setHoehe] = useState(0);
+    const [progress, setProgress] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
+    const [message, setMessage] = useState('test');
 
     useEffect(() => {
         window.api.getDimensions().then((dimensions) => {
@@ -27,6 +31,16 @@ const TrainView = () => {
             setInnendurchmesser(dimensions.innendurchmesser);
             setHoehe(dimensions.hoehe);
 
+        });
+        window.api.onPythonOutput((output) => {
+            setProgress(output.percentage);
+            setMessage(output.message);
+            console.log("Python Output: ", output);
+        });
+        window.api.onPythonError((error) => {
+            setProgress(0);
+            setMessage("Python Error: " + error);
+            console.error("Python Error: ", error);
         });
     }, []);
 
@@ -64,7 +78,8 @@ const TrainView = () => {
         await window.api.savePythonConfig('pythonConfig.json', JSON.stringify(config));
         await window.api.startPythonScript('script.py');
 
-
+        setIsLoading(true);
+        setProgress(0);
     }
 
     return (
@@ -112,6 +127,22 @@ const TrainView = () => {
                             }
                         </FormGroup> 
                         <Button variant='contained' onClick={handleSubmit} sx={{ mt: 2 }}>Einlernen</Button>
+                        {isLoading && (
+                            <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column', mt: 2 }}>
+                                <Box sx={{ width: '100%', mr: 1 }}>
+                                    <LinearProgress variant="determinate" value={progress || 0} />
+                                </Box>
+                                <Box sx={{ minWidth: 35, mt: 1 }}>
+                                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                        {`${progress || 0}%`}
+                                    </Typography>
+                                </Box>
+                                
+                                    <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>
+                                        {message}
+                                    </Typography>
+                            </Box>
+                        )}
                    </Box> 
             </div>
         </div>

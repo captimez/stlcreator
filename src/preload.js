@@ -28,24 +28,10 @@ contextBridge.exposeInMainWorld('api', {
         }
     },
     savePythonConfig: async (outputPath, data) => ipcRenderer.invoke("save-python-config", outputPath, data),
-    startPythonScript: async (scriptName, args) => {
-        try {
-            const scriptPath = path.join(__dirname, `../${scriptName}`);
-            const python = spawner('python', [scriptPath, []]);
-            python.stdout.on('data', (data) => {
-                console.log(`stdout: ${data}`);
-            });
-            python.stderr.on('data', (data) => {
-                console.error(`stderr: ${data}`);
-            });
-            python.on('close', (code) => {
-                console.log(`child process exited with code ${code}`);
-            });
-        } catch (error) {
-            console.log(error);
-        }
-    },
+    startPythonScript: (scriptName) => ipcRenderer.invoke("start-python-script", scriptName, []),
     onUpdateInfo: (callback) => ipcRenderer.handle("update-info", callback),
+    onPythonOutput: (callback) => ipcRenderer.on("python-output", (_,data) => callback(data)),
+    onPythonError: (callback) => ipcRenderer.on("python-error", (_,data) => callback(data)),
     removeUpdateInfoListeners: () => ipcRenderer.removeAllListeners("update-info"),
     updateDimensions: (dimensions) => ipcRenderer.invoke("update-dimensions", dimensions),
     getDimensions: () => ipcRenderer.invoke("get-dimensions"),

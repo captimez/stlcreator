@@ -165,5 +165,28 @@ ipcMain.handle("window_minimize", () => {
     }
 });
 
+ipcMain.handle("start-python-script", (event, scriptName, args) => {
+    const { spawn } = require('child_process');
+    const pythonPath = path.join(__dirname,"../",scriptName);
+    console.log("python path: ", pythonPath)
+    const pythonProcess = spawn('python', ["-u", pythonPath, ...args]);
+
+    pythonProcess.stdout.on('data', (data) => {
+        console.log(`stdout: ${data}`);
+        const parsedJSon = JSON.parse(data.toString());
+        mainWindow.webContents.send("python-output", parsedJSon);
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+        console.error(`stderr: ${data}`);
+        const parsedJson = JSON.parse(data.toString());
+        mainWindow.webContents.send("python-error",data.toString());
+    });
+
+    pythonProcess.on('close', (code) => {
+        console.log(`child process exited with code ${code}`);
+    });
+});
+
 
 
