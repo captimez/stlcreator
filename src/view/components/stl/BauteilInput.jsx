@@ -69,6 +69,7 @@ const BauteilInput = () => {
            const response = await createSTL(selectedBauteil);
            if(response){
              showSnackbar("STL-Datei erfolgreich erstellt", "success");
+             window.api.updatedStl(); // Aktualisiert die STL-Datei im Hauptprozess
            }
 
         } catch (error) {
@@ -141,7 +142,7 @@ const BauteilInput = () => {
             </Grid2>
 
             {/* 3D-Vorschau Komponente */}
-            <MyThree style={{ width: "100%" }} name={selectedBauteil.name} />
+            <MyThree key={selectedBauteil.demoName} style={{ width: "100%" }} name={selectedBauteil.demoName} />
 
             {/* Modal für das Bauteil-Info-Bild */}
             <Modal

@@ -62,7 +62,7 @@ function loadConfig() {
      }; // Default path
 }
 
-function saveConfig(newPath, newResolution, solutionId,dimensions) {
+function saveConfig(newPath, newResolution, solutionId,dimensions,verschiebung) {
     const config = loadConfig();
 
     if(newPath){
@@ -76,6 +76,9 @@ function saveConfig(newPath, newResolution, solutionId,dimensions) {
     }
     if(dimensions){
         config.dimensions = dimensions;
+    }
+    if(verschiebung){
+        config.verschiebung = verschiebung;
     }
     fs.writeFileSync(configPath, JSON.stringify(config), 'utf-8');
 }
@@ -108,6 +111,10 @@ ipcMain.handle("get-solution-id", () => {
 
 ipcMain.handle("get-resolution", () => {
     return loadConfig().resolution;
+});
+ipcMain.handle("update-verschiebung", (event, verschiebung) => {
+    saveConfig(null, null, null, null, verschiebung);
+    return loadConfig()
 });
 
 ipcMain.handle("update-dimensions", (event, dimensions) => {
@@ -162,6 +169,12 @@ ipcMain.handle("window_close", () => {
 ipcMain.handle("window_minimize", () => {
     if(mainWindow){
         mainWindow.minimize();
+    }
+});
+
+ipcMain.handle("updated-stl", () => {
+    if(mainWindow){
+        mainWindow.webContents.send("stl-update");
     }
 });
 

@@ -18,6 +18,8 @@ const TrainView = () => {
     const [aussendurchmesser, setAussendurchmesser] = useState(0);
     const [innendurchmesser, setInnendurchmesser] = useState(0);
     const [hoehe, setHoehe] = useState(0);
+    const [laenge, setLaenge] = useState(0);
+    const [thoehe, setThoehe] = useState(0);
     const [progress, setProgress] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('test');
@@ -30,6 +32,8 @@ const TrainView = () => {
             setAussendurchmesser(dimensions.aussendurchmesser);
             setInnendurchmesser(dimensions.innendurchmesser);
             setHoehe(dimensions.hoehe);
+            setLaenge(dimensions.laenge);
+            setThoehe(dimensions.thoehe);
 
         });
         window.api.onPythonOutput((output) => {
@@ -72,6 +76,8 @@ const TrainView = () => {
             aussendurchmesser: aussendurchmesser,
             innendurchmesser: innendurchmesser,
             hoehe: hoehe,
+            laenge: laenge,
+            thoehe: thoehe,
         };
         
         console.log(selectedFile.name)
@@ -122,6 +128,18 @@ const TrainView = () => {
                                         <TextField id="standard-basic" value={innendurchmesser} onChange={(event) => setInnendurchmesser(event.target.value)} size='small' label="Innendurchmesser" />
                                         <FormLabel>Höhe</FormLabel>
                                         <TextField id="standard-basic" value={hoehe} onChange={(event) => setHoehe(event.target.value)} size='small' label="Hoehe" />
+                                    </FormControl>
+                                ) ||
+                                isChecked.Winkel && (
+                                    <FormControl  style={{ marginBottom: "10px" }}>
+                                        <FormLabel>Schenkel Länge</FormLabel>
+                                        <TextField id="standard-basic" value={laenge} onChange={(event) => setLaenge(event.target.value)} size='small' label="Winkel" />
+                                    </FormControl>
+                                ) ||
+                                isChecked.TStueck && (
+                                    <FormControl  style={{ marginBottom: "10px" }}>
+                                        <FormLabel>T-Stück Höhe</FormLabel>
+                                        <TextField id="standard-basic" value={thoehe} onChange={(event) => setThoehe(event.target.value)} size='small' label="tHoehe" />
                                     </FormControl>
                                 )
                             }

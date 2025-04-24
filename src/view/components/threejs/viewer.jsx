@@ -20,19 +20,37 @@ function MyThree(props) {
   const sceneRef = React.useRef(new THREE.Scene());
   const meshRef = React.useRef(null); // Referenz für das STL-Mesh
 
+  
   /**
    * Lädt und rendert eine STL-Datei neu, indem das alte Modell entfernt und ersetzt wird.
    */
   const reRenderSTL = () => {
     const scene = sceneRef.current;
 
-    // Entferne vorheriges STL-Mesh, falls vorhanden
-    if (meshRef.current) {
-      scene.remove(meshRef.current);
-      meshRef.current.geometry.dispose();
-      meshRef.current.material.dispose();
-      meshRef.current = null;
-    }
+    console.error("Re-rendering STL:", props.name);
+    // Debugging: Anzahl der vorhandenen Kinder in der Szene
+    console.log("Meshes before cleanup:", scene.children.length);
+
+    // 🔁 ALLE vorhandenen Meshes entfernen (z. B. durch versehentliche Mehrfach-Loads)
+    scene.children
+      .filter(obj => obj.type === 'Mesh')
+      .forEach(mesh => {
+        if (mesh.geometry) mesh.geometry.dispose();
+        if (mesh.material) {
+          if (Array.isArray(mesh.material)) {
+            mesh.material.forEach(mat => mat.dispose());
+          } else {
+            mesh.material.dispose();
+          }
+        }
+        scene.remove(mesh);
+      });
+
+    // 🔁 meshRef resetten (für späteren Zugriff)
+    meshRef.current = null;
+
+    // Debugging: Anzahl der Kinder nach der Bereinigung
+    console.log("Meshes after cleanup:", scene.children.length);
 
     // Lade neues STL-Modell
     const loader = new STLLoader();
@@ -47,11 +65,16 @@ function MyThree(props) {
         });
 
         const mesh = new THREE.Mesh(geometry, material);
+        mesh.rotation.x = -Math.PI / 2; // Rotation anpassen
         meshRef.current = mesh; // Save reference
+        
         scene.add(mesh);
+
+        // Debugging: Anzahl der Kinder nach dem Hinzufügen des neuen Meshes
+        console.log("Meshes after adding new STL:", scene.children.length);
       });
     });
-  }
+  };
   
   React.useEffect(() => {
     const container = document.getElementById("boxbox");
@@ -87,7 +110,7 @@ function MyThree(props) {
     scene.add(dirLight);
 
     // Hilfsgitter für die Szene
-    const gridSize = 100;
+    const gridSize = 1000;
     const gridDivisions = 50;
     const gridHelper = new THREE.GridHelper(gridSize, gridDivisions, 0x888888, 0x444444);
     scene.add(gridHelper);
@@ -115,10 +138,26 @@ function MyThree(props) {
     };
   }, []);
 
-  // Lädt das STL-Modell neu, wenn sich der Dateiname (props.name) ändert
   React.useEffect(() => {
+    // Registriere den Event-Listener nur einmal
+    const handleStlUpdate = () => {
+      console.log("STL update triggered");
+      reRenderSTL();
+    };
+
+    window.api.onStlUpdate(handleStlUpdate);
+
+    // Cleanup-Funktion, um den Event-Listener zu entfernen
+    return () => {
+      window.api.removeUpdateInfoListeners();
+    };
+  }, []); // Nur einmal beim Mount ausführen
+
+  React.useEffect(() => {
+    // Reagiere auf Änderungen des ausgewählten Bauteils
+    console.log("Selected Bauteil changed:", props.name);
     reRenderSTL();
-  }, [props.name]);
+  }, [props.name]); // Wird ausgeführt, wenn sich props.name ändert
 
   return (
     <div ref={refContainer} className="canvas">

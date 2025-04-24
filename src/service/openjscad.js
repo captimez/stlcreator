@@ -273,7 +273,7 @@ function createTstueck({
   /* const tStueck = subtract(tStueckAussen, innerTopZylinder, innerBottomZylinder); */
   const tStueck = tStueckAussen;
 
-  return rotate([2 * Math.PI, 0, 0],tStueck);
+  return rotate([0, Math.PI/2, 0],tStueck);
 }
 
 
@@ -327,6 +327,9 @@ function createRohrbogen({
     z: zielPosition.z - untereEckeNachRotation.z,
   };
 
+  //Speichere die Verschiebung in der Konfigurationsdatei
+  //saveVerschiebungToConfig(verschiebung)
+
    // Bogen erstellen: Verbinden der beiden Zylinder
    let kreis = ellipse({ radius: [radius, radius], center:[radius + radius, 0], segments: resolution}); // Querschnitt des Rohres
    const bogen = extrudeRotate(
@@ -345,7 +348,7 @@ function createRohrbogen({
   console.log(verschiebung);
 
   // **Zusammenfügen**
-  const rohrbogen = rotate([0, 0, 0],union(schenkel1, bogenPositioniert, schenkel2));
+  const rohrbogen = rotate([0, Math.PI / 2, 0],union(schenkel1, bogenPositioniert, schenkel2));
 
   return rohrbogen;
 }
@@ -388,8 +391,7 @@ async function exportSTL(fileName, demoName, model,dimensions) {
           });
           // Save the file using the API
           window.api.saveSTL(outputPath, finalBuffer).then(() => {
-            console.log("✅ STL file saved at:", outputPath);
-            
+            console.log("✅ STL file saved at:", outputPath); 
             // Save the dimensions using the API
             window.api.updateDimensions(dimensions).then(() => {
               console.log("✅ Dimensions saved at:", dimensions);
@@ -403,6 +405,15 @@ async function exportSTL(fileName, demoName, model,dimensions) {
 }
 
 
+async function saveVerschiebungToConfig(verschiebung) {
+  try {
+    // Speichern der Verschiebung in der Konfigurationsdatei
+    await window.api.updateVerschiebung(verschiebung);
+    console.log("✅ Verschiebung gespeichert:", verschiebung);
+  } catch (error) {
+    console.error("Fehler beim Speichern der Verschiebung:", error);
+  }
+}
 
 // Funktion, um einen Ring zu erstellen
 export async function createSTL(bauteil) {
@@ -411,6 +422,8 @@ export async function createSTL(bauteil) {
       aussendurchmesser: 0,
       innendurchmesser: 0,
       hoehe: 0,
+      thoehe: 0,
+      laenge: 0,
     }
     switch(bauteil.name){
         case 'Aussenring1':
@@ -440,9 +453,11 @@ export async function createSTL(bauteil) {
             break;
         case 'T-Stueck':
             model = createTstueck(bauteil.inputs);
+            dimensions.thoehe = bauteil.inputs.thoehe;
             break;
         case "Rohrbogen":
             model = createRohrbogen(bauteil.inputs);
+            dimensions.laenge = bauteil.inputs.schenkel_laenge_1;
             
             break;
 

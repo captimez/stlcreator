@@ -16,6 +16,7 @@ const bauteile = [
             teile: [
             {
                 name: "Aussenring1",
+                demoName: "Aussenring1",
                 shortcut: ["D1","D2","A","B","C",""],
                 inputs: {
                     aussendurchmesser: 0,
@@ -28,6 +29,7 @@ const bauteile = [
             },
             {
                 name: "Aussenring2",
+                demoName: "Aussenring2",
                 shortcut: ["D1","D2","D3","A"],
                 inputs: {
                     innendurchmesser_klein: 0,
@@ -38,6 +40,7 @@ const bauteile = [
             },
             {
                 name: "Innenring1",
+                demoName: "Innenring1",
                 shortcut: ["D1","D2","D3","D4","D5","A","B","C"],
                 inputs: {
                     durchmesser_or: 0,
@@ -52,6 +55,7 @@ const bauteile = [
             },
             {
                 name: "Innenring2",
+                demoName: "Innenring2",
                 shortcut: ["D1","D2","A","B"],
                 inputs: {
                     innendurchmesser: 0,
@@ -66,6 +70,7 @@ const bauteile = [
         teile: [
             {
                 name: "T-Stueck",
+                demoName: "T-Stueck",
                 shortcut: ["AD1","AD2","",""],
                 inputs:{
                     zylinder_duchmesser_aussen: 0,
@@ -79,6 +84,7 @@ const bauteile = [
         teile: [
             {
                 name: "Rohrbogen",
+                demoName: "Rohrbogen",
                 shortcut: ["DM","W","SL1","SL2"],
                 inputs:{
                     durchmesser: 20,

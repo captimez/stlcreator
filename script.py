@@ -26,6 +26,9 @@ try:
         workpiece_aussendurchmesser = config['aussendurchmesser']
         workpiece_innendurchmesser = config['innendurchmesser']
         workpiece_hoehe = config['hoehe']
+        workpiece_thoehe = config['thoehe']
+        workpiece_laenge = config['laenge']
+    
     send_progress(5, "Loaded configuration file successfully.")
 except Exception as e:
     print(f"Error loading config file: {e}")
@@ -33,23 +36,41 @@ except Exception as e:
 
 workpiece_innenradius = workpiece_innendurchmesser / 2
 workpiece_aussenradius = workpiece_aussendurchmesser / 2
-
-gp = {
-    "x": workpiece_innenradius + ((workpiece_aussenradius - workpiece_innenradius) / 2),
-    "y": 0, 
-    "z": 0, 
-    "rx": 0, 
-    "ry": 0, 
-    "rz": 0,
-}
+if(objectType == "Ring"):
+    gp = {
+        "x": workpiece_innenradius + ((workpiece_aussenradius - workpiece_innenradius) / 2),
+        "y": 0, 
+        "z": (workpiece_hoehe / 2) / 2, 
+        "rx": 0, 
+        "ry": 0, 
+        "rz": 0,
+    }
+elif(objectType == "T-Stueck"):
+    gp = {
+        "x": 0,
+        "y": workpiece_thoehe / 2, 
+        "z": 0,
+        "rx": 0, 
+        "ry": 0, 
+        "rz": 0,
+    }
+elif(objectType == "Winkel"):
+    gp = {
+        "x": 0, 
+        "y": workpiece_laenge / 2, 
+        "z": 0, 
+        "rx": 0, 
+        "ry": 0, 
+        "rz": 0,
+    }
 
 
 #Photoneo BPS IP
-#photoneo_ip = "http://192.168.2.1" 
-photoneo_ip = "http://127.0.0.1"  # Localhost for testing
+photoneo_ip = "http://192.168.2.1" 
+#photoneo_ip = "http://127.0.0.1"  # Localhost for testing
 def get_default_chrome_options():
     options = webdriver.ChromeOptions()
-    options.add_argument("--headless=new")  # Verwende den neuen Headless-Modus
+    #options.add_argument("--headless=new")  # Verwende den neuen Headless-Modus
     options.add_argument("--window-size=1920,1080")
     options.add_argument("--no-sandbox")
     return options
@@ -58,7 +79,7 @@ try:
     # Initialize WebDriver
     options = get_default_chrome_options()
     options.page_load_strategy = 'eager'
-    driver = webdriver.Chrome(options=options)
+    driver = webdriver.Edge()
     driver.implicitly_wait(5)
     send_progress(10, "Initialized WebDriver successfully.")
 except Exception as e:
@@ -180,18 +201,35 @@ try:
     for href in gripping_point_hrefs:
         driver.get(f'{href}')
 
-        # Adjust Gripping Point
-        input_gripping_point_x = driver.find_element(By.NAME,"position_x")
-        input_gripping_point_x.clear()
+        if(objectType == "Ring"):
+            # Adjust Gripping Point
+            input_gripping_point_x = driver.find_element(By.NAME,"position_x")
+            input_gripping_point_x.clear()
 
-        if(gp_count == 0):
-            input_gripping_point_x.send_keys(gp["x"])
-        elif(gp_count == 1):
-            input_gripping_point_x.send_keys(-gp["x"])
-        elif(gp_count == 2):
-            input_gripping_point_x.send_keys(gp["x"])
-        elif(gp_count == 3):
-            input_gripping_point_x.send_keys(-gp["x"])
+            input_gripping_point_z = driver.find_element(By.NAME,"position_z")
+            input_gripping_point_z.clear()
+
+            if((gp_count % 2) == 0):
+                input_gripping_point_x.send_keys(gp["x"])
+            else:
+                input_gripping_point_x.send_keys(-gp["x"])
+        
+            if((workpiece_hoehe/2) > 17.5):
+                input_gripping_point_z.send_keys(-gp["z"])
+
+        elif(objectType == "T-Stueck"):
+            input_gripping_point_y = driver.find_element(By.NAME,"position_y")
+            input_gripping_point_y.clear()
+
+            input_gripping_point_y.send_keys(gp["y"])
+        
+        elif(objectType == "Winkel"):
+            input_gripping_point_y = driver.find_element(By.NAME,"position_y")
+            input_gripping_point_y.clear()
+            input_gripping_point_y.send_keys(gp["y"])
+
+
+
 
 
         time.sleep(2)
