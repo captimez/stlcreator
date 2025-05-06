@@ -194,7 +194,7 @@ ipcMain.handle("start-python-script", (event, scriptName, args) => {
     pythonProcess.stderr.on('data', (data) => {
         console.error(`stderr: ${data}`);
         const parsedJson = JSON.parse(data.toString());
-        mainWindow.webContents.send("python-error",data.toString());
+        mainWindow.webContents.send("python-error", parsedJson);
     });
 
     pythonProcess.on('close', (code) => {

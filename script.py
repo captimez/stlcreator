@@ -6,6 +6,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
+from selenium.common.exceptions import NoSuchElementException
 
 # Function to send progress updates
 def send_progress(percentage, message):
@@ -43,7 +44,7 @@ try:
 
     send_progress(5, "Loaded configuration file successfully.")
 except Exception as e:
-    print(f"Error loading config file: {e}")
+    send_progress(0, f"Error loading config file: {e}")
     exit(1)
 
 workpiece_innenradius = workpiece_innendurchmesser / 2
@@ -82,7 +83,7 @@ photoneo_ip = "http://192.168.2.1"
 #photoneo_ip = "http://127.0.0.1"  # Localhost for testing
 def get_default_chrome_options():
     options = webdriver.ChromeOptions()
-    #options.add_argument("--headless=new")  # Verwende den neuen Headless-Modus
+    options.add_argument("--headless=new")  # Verwende den neuen Headless-Modus
     options.add_argument("--window-size=1920,1080")
     options.add_argument("--no-sandbox")
     return options
@@ -96,7 +97,7 @@ try:
     driver.implicitly_wait(10)
     send_progress(10, "Initialized WebDriver successfully.")
 except Exception as e:
-    print(f"Error initializing WebDriver: {e}")
+    send_progress(0, f"Error initializing WebDriver: {e}")
     exit(1)
 
 try:
@@ -108,9 +109,18 @@ try:
     time.sleep(2)
     send_progress(20, "Logged into Photoneo BPS successfully.")
 except Exception as e:
-    print(f"Error logging into Photoneo BPS: {e}")
+    send_progress(0, f"Error logging into Photoneo BPS: {e}")
     driver.quit()
     exit(1)
+
+try:
+    driver.get(f"{photoneo_ip}/deployment")
+    stop_button = driver.find_element(By.ID, "btn-deployment-action-stop")
+    driver.execute_script("arguments[0].scrollIntoView();", stop_button)
+    stop_button.click()
+    send_progress(25, "Stopped deployment successfully.")
+except NoSuchElementException:
+    send_progress(25, "No Deployment, continuing...")
 
 try:
     # Get all existing Solution IDs
@@ -123,10 +133,18 @@ try:
             solution_ids.append(int(match.group(1)))
     if not solution_ids:
         raise ValueError("No solutions found.")
-    template_id = 25
+    
+    if objectType == "Ring":
+        template_id = solution_ids[0]
+    elif objectType == "TStueck":
+        template_id = solution_ids[1]
+    elif objectType == "Winkel":
+        template_id = solution_ids[2]
+    
+
     send_progress(30, "Retrieved all existing solution IDs.")
 except Exception as e:
-    print(f"Error retrieving solution IDs: {e}")
+    send_progress(0, f"Error retrieving solution IDs: {e}")
     driver.quit()
     exit(1)
 
@@ -141,7 +159,7 @@ try:
     duplicate_button.click()
     send_progress(40, "Duplicated template solution successfully.")
 except Exception as e:
-    print(f"Error duplicating template solution: {e}")
+    send_progress(0, f"Error duplicating template solution: {e}")
     driver.quit()
     exit(1)
 
@@ -155,7 +173,7 @@ try:
     time.sleep(2)
     send_progress(50, "Retrieved new solution ID successfully.")
 except Exception as e:
-    print(f"Error retrieving new solution ID: {e}")
+    send_progress(0, f"Error retrieving new solution ID: {e}")
     driver.quit()
     exit(1)
 
@@ -181,7 +199,7 @@ try:
     file_input.send_keys(stl_file_path)
     send_progress(60, "Changed CAD file of existing workpiece successfully.")
 except Exception as e:
-    print(f"Error changing CAD file: {e}")
+    send_progress(0, f"Error changing CAD file: {e}")
     driver.quit()
     exit(1)
 
@@ -193,7 +211,7 @@ try:
     time.sleep(2)
     send_progress(70, "Saved workpiece successfully.")
 except Exception as e:
-    print(f"Error saving workpiece: {e}")
+    send_progress(0, f"Error saving workpiece: {e}")
     driver.quit()
     exit(1)
 
@@ -301,7 +319,7 @@ try:
         time.sleep(1)
     send_progress(80, "Adjusted gripping points successfully.")
 except Exception as e:
-    print(f"Error navigating to or adjusting gripping points: {e}")
+    send_progress(0, f"Error navigating to or adjusting gripping points: {e}")
     driver.quit()
     exit(1)
 
@@ -310,7 +328,7 @@ try:
     driver.get(f"{photoneo_ip}/solution/{solution_id}/vision/")
     send_progress(85, "Navigated to Vision System successfully.")
 except Exception as e:
-    print(f"Error navigating to Vision System: {e}")
+    send_progress(0, f"Error navigating to Vision System: {e}")
     driver.quit()
     exit(1)
 
@@ -369,12 +387,11 @@ try:
             ).text
             send_progress(85, msg)
         except:
-            print("No message found.")
-
+            send_progress(85, "No notification found.")
         driver.get(f"{photoneo_ip}/solution/{solution_id}/vision/")
     send_progress(90, "Box localization and configuration completed successfully.")
 except Exception as e:
-    print(f"Error during box localization or configuration: {e}")
+    send_progress(0, f"Error during box localization or configuration: {e}")
     driver.quit()
     exit(1)
 
@@ -383,7 +400,7 @@ try:
     driver.find_element(By.ID, "deploy-btn").click()
     send_progress(95, "Deployment initiated successfully.")
 except Exception as e:
-    print(f"Error initiating deployment: {e}")
+    send_progress(0, f"Error initiating deployment: {e}")
     driver.quit()
     exit(1)
 
@@ -401,7 +418,7 @@ try:
     ).click()
     send_progress(100, "Solution deployed successfully. Process completed.")
 except Exception as e:
-    print(f"Error during deployment or finalization: {e}")
+    send_progress(0, f"Error during deployment or finalization: {e}")
     driver.quit()
     exit(1)
 
