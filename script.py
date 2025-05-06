@@ -15,6 +15,16 @@ def send_progress(percentage, message):
     }
     print(json.dumps(progress_data))  # Send JSON data to the console or UI
 
+def update_thumbnail(driver):
+    for toggle in all_toggles:
+        if "Thumbnail" in toggle.text:
+            toggle.click()
+            break
+
+    WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.ID, "take-thumbnail"))
+    ).click()   
+
 # Load Config File, created by STL-Creator 
 try:
     with open("pythonConfig.json") as f:
@@ -28,7 +38,9 @@ try:
         workpiece_hoehe = config['hoehe']
         workpiece_thoehe = config['thoehe']
         workpiece_laenge = config['laenge']
-    
+        workpiece_verschiebung = config['verschiebung']
+
+
     send_progress(5, "Loaded configuration file successfully.")
 except Exception as e:
     print(f"Error loading config file: {e}")
@@ -45,12 +57,12 @@ if(objectType == "Ring"):
         "ry": 0, 
         "rz": 0,
     }
-elif(objectType == "T-Stueck"):
+elif(objectType == "TStueck"):
     gp = {
         "x": 0,
         "y": workpiece_thoehe / 2, 
         "z": 0,
-        "rx": 0, 
+        "rx": 180, 
         "ry": 0, 
         "rz": 0,
     }
@@ -79,8 +91,9 @@ try:
     # Initialize WebDriver
     options = get_default_chrome_options()
     options.page_load_strategy = 'eager'
+    #driver = webdriver.Chrome(options=options)
     driver = webdriver.Edge()
-    driver.implicitly_wait(5)
+    driver.implicitly_wait(10)
     send_progress(10, "Initialized WebDriver successfully.")
 except Exception as e:
     print(f"Error initializing WebDriver: {e}")
@@ -110,7 +123,7 @@ try:
             solution_ids.append(int(match.group(1)))
     if not solution_ids:
         raise ValueError("No solutions found.")
-    template_id = max(solution_ids)
+    template_id = 25
     send_progress(30, "Retrieved all existing solution IDs.")
 except Exception as e:
     print(f"Error retrieving solution IDs: {e}")
@@ -160,15 +173,7 @@ try:
     all_toggles = driver.find_elements(By.CSS_SELECTOR, "span.widget-title")
 
     # Durchgehen und das mit "Thumbnail" im Textinhalt finden
-    for toggle in all_toggles:
-        if "Thumbnail" in toggle.text:
-            toggle.click()
-            break
-
-    WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable((By.ID, "take-thumbnail"))
-    ).click()   
-
+    update_thumbnail(driver)
     send_progress(55, "Updated Thumbnail successfully.")
     name_input.send_keys("" + filename)
     file_input = driver.find_element(By.ID, "id-mesh")
@@ -199,15 +204,15 @@ try:
     gripping_point_hrefs = [link.get_attribute("href") for link in gripping_point_links]
     gp_count = 0
     for href in gripping_point_hrefs:
-        driver.get(f'{href}')
 
         if(objectType == "Ring"):
+            driver.get(f'{href}')
+            
             # Adjust Gripping Point
             input_gripping_point_x = driver.find_element(By.NAME,"position_x")
             input_gripping_point_x.clear()
 
             input_gripping_point_z = driver.find_element(By.NAME,"position_z")
-            input_gripping_point_z.clear()
 
             if((gp_count % 2) == 0):
                 input_gripping_point_x.send_keys(gp["x"])
@@ -215,34 +220,81 @@ try:
                 input_gripping_point_x.send_keys(-gp["x"])
         
             if((workpiece_hoehe/2) > 17.5):
+                input_gripping_point_z.clear()
                 input_gripping_point_z.send_keys(-gp["z"])
 
-        elif(objectType == "T-Stueck"):
-            input_gripping_point_y = driver.find_element(By.NAME,"position_y")
-            input_gripping_point_y.clear()
-
-            input_gripping_point_y.send_keys(gp["y"])
-        
-        elif(objectType == "Winkel"):
-            input_gripping_point_y = driver.find_element(By.NAME,"position_y")
-            input_gripping_point_y.clear()
-            input_gripping_point_y.send_keys(gp["y"])
-
-
-
-
-
-        time.sleep(2)
-
-        # Set Rotation Invariant if object is ring type
-        if(objectType == "Ring"):
             checkbox = driver.find_element(By.NAME, "is_rot_inv_enabled")
 
             if not checkbox.is_selected():
                 driver.execute_script("arguments[0].click();", checkbox)
 
+        elif(objectType == "TStueck"):
+            if(gp_count == 0):
+                driver.get(f'{href}')
+            else:
+                href.replace("edit", "delete")
+                driver.get(f'{href}')
+                delete_button = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.ID, "delete-grasping-point"))
+                )
+                driver.execute_script("arguments[0].scrollIntoView();", delete_button)
+            
+            input_rotation_x = driver.find_element(By.NAME,"rotation_x")
+            input_rotation_x.clear()
+            input_rotation_x.send_keys(gp["rx"])
+
+            input_gripping_point_y = driver.find_element(By.NAME,"position_y")
+            input_gripping_point_y.clear()
+            input_gripping_point_y.send_keys(gp["y"])
+        
+            checkbox = driver.find_element(By.NAME, "is_rot_inv_enabled")
+
+            if checkbox.is_selected():
+                driver.execute_script("arguments[0].click();", checkbox)
+
+        elif(objectType == "Winkel"):
+            if(gp_count == 0):
+                driver.get(f'{href}')
+
+                input_gripping_point_x = driver.find_element(By.NAME,"position_x")
+                input_gripping_point_x.clear()
+                input_gripping_point_x.send_keys(0)
+                input_gripping_point_y = driver.find_element(By.NAME,"position_y")
+                input_gripping_point_y.clear()
+                input_gripping_point_y.send_keys(gp["y"])
+
+                checkbox = driver.find_element(By.NAME, "is_rot_inv_enabled")
+
+                if not checkbox.is_selected():
+                    driver.execute_script("arguments[0].click();", checkbox)
+                rot_y_checkbox = driver.find_element(By.ID, "id_rot_inv_axis_choice_2")
+
+            elif(gp_count == 1):
+                driver.get(f'{href}')
+                input_gripping_point_y.clear()
+                input_gripping_point_y.send_keys(workpiece_verschiebung["y"])
+
+                input_gripping_point_x = driver.find_element(By.NAME,"position_x")
+                input_gripping_point_x.clear()
+                input_gripping_point_x.send_keys(workpiece_verschiebung["z"])
+
+                input_rotation_z = driver.find_element(By.NAME,"rotation_z")
+                input_rotation_z.clear()
+                input_rotation_z.send_keys(-workpiece_verschiebung["w"])
+            elif(gp_count > 1):
+                driver.get(f"{photoneo_ip}/solution/{solution_id}/gripping_points/")  
+
+        time.sleep(2)
+
+        # Set Rotation Invariant if object is ring type
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
         # Save Gripping Point
-        save_gripping_point_button = driver.find_element(By.ID, "save-grasping-steps")
+        save_gripping_point_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.ID, "save-grasping-steps"))
+        )
+
+        driver.execute_script("arguments[0].scrollIntoView();", save_gripping_point_button)
         save_gripping_point_button.click()
 
         gp_count += 1

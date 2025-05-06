@@ -30,7 +30,7 @@ app.on('ready', () => {
     });
     const startURL = `file://${path.join(__dirname,"../dist/index.html")}`
     console.log("loading: ",startURL)
-    mainWindow.webContents.openDevTools({ mode: "detach" });
+   //mainWindow.webContents.openDevTools({ mode: "detach" });
 
     mainWindow.loadURL(startURL).catch((err) =>{
         console.error("Failed to load index.html: ", err)
@@ -89,6 +89,7 @@ ipcMain.handle("save-python-config", (event, outputPath, data) => {
     
     pythonConfig.stlSavePath = settingsConfig.stlSavePath;
     pythonConfig.solutionId = settingsConfig.solutionId;
+    pythonConfig.verschiebung = settingsConfig.verschiebung;
 
     fs.writeFileSync(outputPath, JSON.stringify(pythonConfig), 'utf-8');
     return true;

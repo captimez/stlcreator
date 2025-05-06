@@ -115,6 +115,11 @@ function MyThree(props) {
     const gridHelper = new THREE.GridHelper(gridSize, gridDivisions, 0x888888, 0x444444);
     scene.add(gridHelper);
 
+    //Koordinatenachsen
+    const axesHelper = new THREE.AxesHelper(100);
+    axesHelper.scale.set(3, 3, 3); // Setze die Skalierung der Achsen
+    scene.add(axesHelper);
+
     // Fenstergrößen-EventListener
     const handleResize = () => {
       const { width } = container.getBoundingClientRect();

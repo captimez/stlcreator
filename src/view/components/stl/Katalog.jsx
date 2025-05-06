@@ -73,10 +73,11 @@ const bauteile = [
                 demoName: "T-Stueck",
                 shortcut: ["AD1","AD2","",""],
                 inputs:{
-                    zylinder_duchmesser_aussen: 0,
+                    zylinder_durchmesser_aussen: 0,
                     zylinder2_durchmesser_aussen: 0,
                     laenge: 0,
                     hoehe: 0,
+                    half: false,
                 }
             },]},
     {

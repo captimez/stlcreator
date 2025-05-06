@@ -15,11 +15,14 @@ const TrainView = () => {
     const [ isChecked, setIsChecked ] = useState({Ring: false, Winkel: false, TStueck: false});
     const [solutionName, setSolutionName] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
+
     const [aussendurchmesser, setAussendurchmesser] = useState(0);
     const [innendurchmesser, setInnendurchmesser] = useState(0);
     const [hoehe, setHoehe] = useState(0);
     const [laenge, setLaenge] = useState(0);
     const [thoehe, setThoehe] = useState(0);
+    const [gp_count, setGpCount] = useState(0);
+
     const [progress, setProgress] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('test');
@@ -78,6 +81,7 @@ const TrainView = () => {
             hoehe: hoehe,
             laenge: laenge,
             thoehe: thoehe,
+            gp_count: gp_count
         };
         
         console.log(selectedFile.name)
@@ -110,11 +114,18 @@ const TrainView = () => {
                                 >Datei auswählen
                                 <VisuallyHiddenInput
                                     type="file"
-                                    onChange={(event) => setSelectedFile(event.target.files[0])}
+                                    onChange={(event) => {
+                                        setSelectedFile(event.target.files[0]);
+                                    }}
                                     accept=".stl"
                                     multiple
                                 />
                                 </Button>
+                                {selectedFile && (
+                                    <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
+                                        Ausgewählte Datei: {selectedFile.name}
+                                    </Typography>
+                                )}
                             </FormControl>
                             <FormControlLabel control={<Checkbox name='Ring' checked={isChecked.Ring} color="primary" onChange={handleCheckboxChange}/>} label="Ring" />
                             <FormControlLabel control={<Checkbox name='Winkel' checked={isChecked.Winkel} color="primary" onChange={handleCheckboxChange}/>} label="Winkel" />

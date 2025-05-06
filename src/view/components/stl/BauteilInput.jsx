@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Grid2 from '@mui/material/Grid2';
 import Box from '@mui/material/Box';
-import { Info as InfoIcon } from '@mui/icons-material';
+import { CheckBox, Info as InfoIcon } from '@mui/icons-material';
 import TextField from '@mui/material/TextField';
 import { useAppContext } from '../../../model/store';
 import './bauteilInput.css';
@@ -9,7 +9,7 @@ import Button from '@mui/material/Button';
 import { createSTL } from '../../../service/openjscad';
 import MyThree from '../threejs/viewer';
 import { IconButton, Modal, Typography } from '@mui/material';
-
+import Checkbox from '@mui/material/Checkbox';
 
 /**
  * BauteilInput Komponente
@@ -98,7 +98,7 @@ const BauteilInput = () => {
                 <Grid2 container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                     {Object.entries(selectedBauteil?.inputs).map(([key, value], index) => {
                         const shortcut = selectedBauteil?.shortcut?.[index] || '';
-                        return (
+                        return key !== "half" ? (
                             <Grid2 key={key}>
                                 <div className="input-box">
                                     <TextField
@@ -113,6 +113,16 @@ const BauteilInput = () => {
                                         size='small'
                                         onChange={(e) => handleInputChange(key, e.target.value)}
                                     />
+                                </div>
+                            </Grid2>
+                        ) : (
+                            <Grid2 key={key}>
+                                <div className="input-box" style={{ display: 'flex', alignItems: 'center' }}>
+                                    <Checkbox
+                                        checked={!!selectedBauteil.inputs[key]}
+                                        onChange={(e) => handleInputChange(key, e.target.checked ? 1 : 0)}
+                                    />
+                                    <Typography sx={{ ml: 1 }}>Halbieren</Typography>
                                 </div>
                             </Grid2>
                         );
