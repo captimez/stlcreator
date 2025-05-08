@@ -79,8 +79,8 @@ elif(objectType == "Winkel"):
 
 
 #Photoneo BPS IP
-photoneo_ip = "http://192.168.2.1" 
-#photoneo_ip = "http://127.0.0.1"  # Localhost for testing
+#photoneo_ip = "http://192.168.2.1" 
+photoneo_ip = "http://127.0.0.1"  # Localhost for testing
 def get_default_chrome_options():
     options = webdriver.ChromeOptions()
     options.add_argument("--headless=new")  # Verwende den neuen Headless-Modus
@@ -92,8 +92,8 @@ try:
     # Initialize WebDriver
     options = get_default_chrome_options()
     options.page_load_strategy = 'eager'
-    #driver = webdriver.Chrome(options=options)
-    driver = webdriver.Edge()
+    driver = webdriver.Chrome(options=options)
+    #driver = webdriver.Edge()
     driver.implicitly_wait(10)
     send_progress(10, "Initialized WebDriver successfully.")
 except Exception as e:

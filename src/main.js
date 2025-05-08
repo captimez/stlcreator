@@ -10,7 +10,6 @@ if (require('electron-squirrel-startup')) app.quit();
 let mainWindow;
 const preloadPath = path.join(__dirname, 'preload.js');
 const configPath = path.join(app.getPath("userData"), "config.json");
-console.log(configPath)
 //app.disableHardwareAcceleration();
 
 app.on('ready', () => {
@@ -181,7 +180,7 @@ ipcMain.handle("updated-stl", () => {
 
 ipcMain.handle("start-python-script", (event, scriptName, args) => {
     const { spawn } = require('child_process');
-    const pythonPath = path.join(__dirname,"../",scriptName);
+    const pythonPath = path.join(__dirname,"../python",scriptName);
     console.log("python path: ", pythonPath)
     const pythonProcess = spawn('python', ["-u", pythonPath, ...args]);
 

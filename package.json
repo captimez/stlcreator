@@ -1,7 +1,7 @@
 {
   "name": "stlcreator",
   "productName": "STL Creator",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "src/main.js",
   "scripts": {
     "start": "electron-forge start",
@@ -14,15 +14,8 @@
     "type": "git",
     "url": "https://github.com/captimez/stlcreator.git"
   },
-  "config": {
-    "forge": {
-      "packagerConfig": {
-        "executableName": "stlcreator" 
-      }
-    }
-  },
   "build": {
-    "productName": "STL Creator"  
+    "productName": "stlcreator"  
   },
   "author": "Tim Klingelhoefer",
   "license": "ISC",
