@@ -6,7 +6,7 @@ module.exports = {
   packagerConfig: {
     executableName: "stlcreator",
     icon: "./assets/taskbar",
-    asar: false
+    asar: true,
   },
   rebuildConfig: {},
   makers: [
@@ -15,12 +15,24 @@ module.exports = {
         config: {
           asar: true,
           executableName: 'stlcreator',
-          version: '1.2',
+          version: '1.1',
           icon: './assets/taskbar',
         },
     }, 
   ],
   plugins: [
-    
+    {
+      name: '@electron-forge/plugin-auto-unpack-natives',
+      config: {},
+    },
+    new FusesPlugin({
+      version: FuseVersion.V1,
+      [FuseV1Options.RunAsNode]: false,
+      [FuseV1Options.EnableCookieEncryption]: true,
+      [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
+      [FuseV1Options.EnableNodeCliInspectArguments]: false,
+      [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
+      [FuseV1Options.OnlyLoadAppFromAsar]: true,
+    }),
   ],
 };
