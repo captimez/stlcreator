@@ -10,7 +10,6 @@ if (require('electron-squirrel-startup')) app.quit();
 let mainWindow;
 const preloadPath = path.join(__dirname, 'preload.js');
 const configPath = path.join(app.getPath("userData"), "config.json");
-console.log(configPath)
 //app.disableHardwareAcceleration();
 
 app.on('ready', () => {
@@ -62,7 +61,7 @@ function loadConfig() {
      }; // Default path
 }
 
-function saveConfig(newPath, newResolution, solutionId,dimensions) {
+function saveConfig(newPath, newResolution, solutionId,dimensions,verschiebung) {
     const config = loadConfig();
 
     if(newPath){
@@ -77,6 +76,9 @@ function saveConfig(newPath, newResolution, solutionId,dimensions) {
     if(dimensions){
         config.dimensions = dimensions;
     }
+    if(verschiebung){
+        config.verschiebung = verschiebung;
+    }
     fs.writeFileSync(configPath, JSON.stringify(config), 'utf-8');
 }
 
@@ -86,6 +88,7 @@ ipcMain.handle("save-python-config", (event, outputPath, data) => {
     
     pythonConfig.stlSavePath = settingsConfig.stlSavePath;
     pythonConfig.solutionId = settingsConfig.solutionId;
+    pythonConfig.verschiebung = settingsConfig.verschiebung;
 
     fs.writeFileSync(outputPath, JSON.stringify(pythonConfig), 'utf-8');
     return true;
@@ -108,6 +111,10 @@ ipcMain.handle("get-solution-id", () => {
 
 ipcMain.handle("get-resolution", () => {
     return loadConfig().resolution;
+});
+ipcMain.handle("update-verschiebung", (event, verschiebung) => {
+    saveConfig(null, null, null, null, verschiebung);
+    return loadConfig()
 });
 
 ipcMain.handle("update-dimensions", (event, dimensions) => {
@@ -165,14 +172,27 @@ ipcMain.handle("window_minimize", () => {
     }
 });
 
+ipcMain.handle("updated-stl", () => {
+    if(mainWindow){
+        mainWindow.webContents.send("stl-update");
+    }
+});
+
 ipcMain.handle("start-python-script", (event, scriptName, args) => {
     const { spawn } = require('child_process');
-    const pythonPath = path.join(__dirname,"../",scriptName);
+    const pythonPath = path.join(__dirname,"../python",scriptName);
     console.log("python path: ", pythonPath)
     const pythonProcess = spawn('python', ["-u", pythonPath, ...args]);
 
     pythonProcess.stdout.on('data', (data) => {
         console.log(`stdout: ${data}`);
+        try {
+            const parsedJSon = JSON.parse(data.toString());
+            mainWindow.webContents.send("python-output", parsedJSon);
+        } catch (error) {
+            console.error("Error parsing JSON from Python script:", error);
+            console.error("Received data:", data.toString());
+        }
         const parsedJSon = JSON.parse(data.toString());
         mainWindow.webContents.send("python-output", parsedJSon);
     });
@@ -180,7 +200,7 @@ ipcMain.handle("start-python-script", (event, scriptName, args) => {
     pythonProcess.stderr.on('data', (data) => {
         console.error(`stderr: ${data}`);
         const parsedJson = JSON.parse(data.toString());
-        mainWindow.webContents.send("python-error",data.toString());
+        mainWindow.webContents.send("python-error", parsedJson);
     });
 
     pythonProcess.on('close', (code) => {

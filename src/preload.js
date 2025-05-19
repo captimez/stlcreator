@@ -22,17 +22,22 @@ contextBridge.exposeInMainWorld('api', {
 
             // Schreibe die Daten in die Datei
             fs.writeFileSync(outputPath, data);
-            
+
         } catch (error) {
            throw error; // Fehler werfen, damit er im Aufrufer behandelt werden kann
         }
     },
+    updatedStl: async () => ipcRenderer.invoke("updated-stl"),
+    onStlUpdate: (callback) => ipcRenderer.on("stl-update", (_,data) => callback(data)),
+    removeStlUpdateListeners: () => ipcRenderer.removeAllListeners("stl-update"),
     savePythonConfig: async (outputPath, data) => ipcRenderer.invoke("save-python-config", outputPath, data),
     startPythonScript: (scriptName) => ipcRenderer.invoke("start-python-script", scriptName, []),
+    onStlUpdate:(callback) => ipcRenderer.on("stl-update", (_,data) => callback(data)),
     onUpdateInfo: (callback) => ipcRenderer.handle("update-info", callback),
     onPythonOutput: (callback) => ipcRenderer.on("python-output", (_,data) => callback(data)),
     onPythonError: (callback) => ipcRenderer.on("python-error", (_,data) => callback(data)),
     removeUpdateInfoListeners: () => ipcRenderer.removeAllListeners("update-info"),
+    updateVerschiebung: (verschiebung) => ipcRenderer.invoke("update-verschiebung", verschiebung),
     updateDimensions: (dimensions) => ipcRenderer.invoke("update-dimensions", dimensions),
     getDimensions: () => ipcRenderer.invoke("get-dimensions"),
     getPath: (name) => ipcRenderer.invoke("get-app-path",name),

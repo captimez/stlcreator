@@ -1,12 +1,13 @@
 import { extrudeRotate } from '@jscad/modeling/src/operations/extrusions';
-import { ellipse, roundedCylinder } from '@jscad/modeling/src/primitives';
+import { ellipse} from '@jscad/modeling/src/primitives';
 import { Buffer } from 'buffer';
+import { update } from 'three/examples/jsm/libs/tween.module.js';
 import { deinterleaveAttribute } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { or } from 'three/tsl';
 import { UniformNode } from 'three/webgpu';
 
 // Import der JSCAD-Bibliotheken
-const { cylinder, cuboid, cylinderElliptic, torus } = require('@jscad/modeling').primitives;
+const { cylinder, cuboid, cylinderElliptic, torus, roundedCylinder } = require('@jscad/modeling').primitives;
 const { subtract, union } = require('@jscad/modeling').booleans;
 const { translate, rotate} = require('@jscad/modeling').transforms;
 const { serialize } = require('@jscad/stl-serializer');
@@ -34,14 +35,6 @@ function createAussenring1({
     throw new Error('Alle Eingabeparameter müssen positive Werte haben.');
   }
 
-  console.log('Eingabeparameter:');
-  console.log('aussendurchmesser:', aussendurchmesser);
-  console.log('innendurchmesser:', innendurchmesser);
-  console.log('hoehe:', hoehe);
-  console.log('breite_aussen:', breite_aussen);
-  console.log('breite_innen:', breite_innen);
-  console.log('tiefe_innen:', tiefe_innen);
-  console.log('resolution:', resolution);
 
   // Umrechnen der Maße
   const Durchmesser_aussen = Number(aussendurchmesser) 
@@ -106,11 +99,6 @@ function createAussenring2({
     const D_gr_innen = Number(innendurchmesser_gross) 
     const D_kl_innen = Number(innendurchmesser_klein) 
 
-    console.log(hoehe);
-    console.log(D_aussen);
-    console.log(D_gr_innen);
-    console.log(D_kl_innen);
-  
     const aussenradius = D_aussen / 2;
     const rklein = D_kl_innen / 2;
     const rgross = D_gr_innen / 2;
@@ -135,8 +123,94 @@ function createAussenring2({
     const result = subtract(outerCylinder, innerCylinder, slopedCylinder);
   
     // Rotation für die richtige Ausrichtung (90 Grad um Y-Achse)
-    return rotate([0, Math.PI / 2, 0], result);
+    return rotate([0, 0, 0], result);
   }
+
+function createORN({aussendurchmesser, laufbahndurchmesser, breite}){
+  aussendurchmesser = Number(aussendurchmesser)
+  laufbahndurchmesser = Number(laufbahndurchmesser)
+  breite = Number(breite)
+
+  let outerCylinder = cylinder({ radius: aussendurchmesser / 2, height: breite, segments: resolution });
+
+  let innerCylinder = cylinder({ radius: laufbahndurchmesser / 2, height: breite, segments: resolution });
+
+  let result = subtract(outerCylinder, innerCylinder);
+
+  return translate([0,0,0],result);
+}
+
+function createORNU({ aussendurchmesser, schulterdurchmesser, laufbahndurchmesser, lichteweite, breite}){
+  aussendurchmesser = Number(aussendurchmesser)
+  schulterdurchmesser = Number(schulterdurchmesser)
+  laufbahndurchmesser = Number(laufbahndurchmesser)
+  lichteweite = Number(lichteweite)
+  breite = Number(breite)
+
+  let innerCylinder = cylinder({ radius: schulterdurchmesser / 2, height: breite, segments: resolution });
+  let innerCylinder2 = cylinder({ radius: laufbahndurchmesser / 2, height: lichteweite, segments: resolution });
+  let outerCylinder = cylinder({ radius: aussendurchmesser / 2, height: breite, segments: resolution });
+
+  let result = subtract(outerCylinder, innerCylinder);
+  result = subtract(result, innerCylinder2);
+
+  return translate([0,0,0],result);
+
+}
+
+function createIRN({ innendurchmesser, laufbahndurchmesser, schulterdurchmesser, breite}){
+  innendurchmesser = Number(innendurchmesser)
+  laufbahndurchmesser = Number(laufbahndurchmesser)
+  schulterdurchmesser = Number(schulterdurchmesser)
+  breite = Number(breite)
+
+  let schulterbreite = (schulterdurchmesser - laufbahndurchmesser) / 2;
+  let innerCylinder = cylinder({ radius: innendurchmesser / 2, height: breite, segments: resolution });
+
+  let outerCylinder = cylinder({ radius: laufbahndurchmesser / 2, height: breite - ( 2 * schulterbreite), segments: resolution });
+  let schulterCylinder = cylinder({ radius: schulterdurchmesser / 2, height: schulterbreite, segments: resolution });
+  
+  let schulterCylinder2 = cylinder({ radius: schulterdurchmesser / 2, height: schulterbreite, segments: resolution });
+  schulterCylinder2 = translate([0, 0, ((breite / 2) - (schulterbreite / 2))], schulterCylinder2);
+  schulterCylinder = translate([0, 0, -((breite / 2) - (schulterbreite / 2))], schulterCylinder);
+  
+  let result = union(outerCylinder, schulterCylinder, schulterCylinder2);
+  result = subtract(result, innerCylinder);
+  
+  return translate([0,0,0],result);
+}
+
+function createIRNJ({innendurchmesser, laufbahndurchmesser, schulterdurchmesser, breite}){
+  innendurchmesser = Number(innendurchmesser)
+  laufbahndurchmesser = Number(laufbahndurchmesser)
+  schulterdurchmesser = Number(schulterdurchmesser)
+  breite = Number(breite)
+
+  let schulterbreite = (schulterdurchmesser - laufbahndurchmesser) / 2;
+
+  let innerCylinder = cylinder({ radius: innendurchmesser / 2, height: breite, segments: resolution });
+  let outerCylinder = cylinder({ radius: laufbahndurchmesser / 2, height: breite - schulterbreite, segments: resolution });
+  let schulterCylinder = cylinder({ radius: schulterdurchmesser / 2, height: schulterbreite, segments: resolution });
+
+  schulterCylinder = translate([0, 0, -((breite / 2) - (schulterbreite / 2))], schulterCylinder);
+  let result = union(outerCylinder, schulterCylinder);
+  result = subtract(result, innerCylinder);
+
+  return translate([0,0,0],result);
+}
+
+function createIRNU({innendurchmesser, laufbahndurchmesser, breite}){
+  innendurchmesser = Number(innendurchmesser)
+  laufbahndurchmesser = Number(laufbahndurchmesser)
+  breite = Number(breite)
+
+  let innerCylinder = cylinder({ radius: innendurchmesser / 2, height: breite, segments: resolution });
+  let outerCylinder = cylinder({ radius: laufbahndurchmesser / 2, height: breite, segments: resolution });
+
+  let result = subtract(outerCylinder, innerCylinder);
+
+  return translate([0,0,0],result);
+}
 
 // Funktion für Innenring1
 function createInnenring1({ durchmesser_or, durchmesser_so, durchmesser_su, durchmesser_ur,innendurchmesser, hoehe_or, hoehe, hoehe_ur }) {
@@ -158,6 +232,7 @@ function createInnenring1({ durchmesser_or, durchmesser_so, durchmesser_su, durc
   let inner_cylinder = cylinder({ radius: innendurchmesser / 2, height: hoehe, segments: resolution });
   inner_cylinder = translate([0,0,(hoehe/ 2)], inner_cylinder);
   gesamt = subtract(gesamt, inner_cylinder);
+  gesamt = translate([0,0,-(hoehe/2)],gesamt);
   return gesamt;
 }
 
@@ -229,30 +304,31 @@ function createInnenring2({ innendurchmesser, aussendurchmesser, hoehe, radius_a
 }
 
 function createTstueck({
-  zylinder_duchmesser_aussen,
-  zylinder_duchmesser_innen,
+  zylinder_durchmesser_aussen,
+  zylinder_durchmesser_innen,
   zylinder2_durchmesser_aussen,
-  zylinder2_duchemsser_innen,
+  zylinder2_durchmesser_innen,
   laenge,
   hoehe,
+  half,
 }) {
 
-  zylinder_duchmesser_aussen = Number(zylinder_duchmesser_aussen);
-  zylinder_duchmesser_innen = Number(zylinder_duchmesser_innen);
+  zylinder_durchmesser_aussen = Number(zylinder_durchmesser_aussen);
+  zylinder_durchmesser_innen = Number(zylinder_durchmesser_innen);
   zylinder2_durchmesser_aussen = Number(zylinder2_durchmesser_aussen);
-  zylinder2_duchemsser_innen = Number(zylinder2_duchemsser_innen);
+  zylinder2_durchmesser_innen = Number(zylinder2_durchmesser_innen);
   laenge = Number(laenge);
   hoehe = Number(hoehe);
-  console.log(zylinder_duchmesser_aussen);
+ 
 
   
-  let zylinderBottomHeight = (hoehe + (zylinder_duchmesser_aussen / 2));
+  let zylinderBottomHeight = (hoehe + (zylinder_durchmesser_aussen / 2));
   const topZylinderAussen = cylinder({ 
-    radius: zylinder_duchmesser_aussen / 2, 
+    radius: zylinder_durchmesser_aussen / 2, 
     height: laenge, 
     segments: resolution
   });
-  console.log
+
   const topZylinder = translate(
   // Rotation um 90 Grad und Positionierung
     [0, 0, zylinderBottomHeight / 2], // Verschiebe den Zylinder zur Mitte des vertikalen Zylinders
@@ -271,9 +347,20 @@ function createTstueck({
 
   // Innerer Hohlraum: Subtrahiere die inneren Zylinder
   /* const tStueck = subtract(tStueckAussen, innerTopZylinder, innerBottomZylinder); */
-  const tStueck = tStueckAussen;
+  let tStueck = tStueckAussen;
+  tStueck = rotate([0, Math.PI / 2, Math.PI / 2],tStueck)
+  
+  if(half){
+      let rectangle = cuboid({size:[laenge + laenge,laenge + laenge,zylinder_durchmesser_aussen / 2], segments:resolution})
+      rectangle = rotate([0, 0, 0],rectangle)
+      rectangle = translate([0, 0, - (zylinder_durchmesser_aussen / 4)],rectangle)
 
-  return rotate([2 * Math.PI, 0, 0],tStueck);
+      let tstueck_half = subtract(tStueck, rectangle)
+      return translate([0,zylinderBottomHeight / 2,0],tstueck_half);
+  }
+  else {
+      return tStueck;
+  }
 }
 
 
@@ -325,7 +412,11 @@ function createRohrbogen({
     x: zielPosition.x - untereEckeNachRotation.x,
     y: zielPosition.y - untereEckeNachRotation.y,
     z: zielPosition.z - untereEckeNachRotation.z,
+    winkel: winkel,
   };
+
+  //Speichere die Verschiebung in der Konfigurationsdatei
+  //saveVerschiebungToConfig(verschiebung)
 
    // Bogen erstellen: Verbinden der beiden Zylinder
    let kreis = ellipse({ radius: [radius, radius], center:[radius + radius, 0], segments: resolution}); // Querschnitt des Rohres
@@ -343,9 +434,10 @@ function createRohrbogen({
   schenkel2 = rotate([Math.PI / 2, 0, 0], schenkel2);
   schenkel2 = translate([verschiebung.x, verschiebung.y, verschiebung.z], schenkel2);
   console.log(verschiebung);
+  saveVerschiebungToConfig(verschiebung);
 
   // **Zusammenfügen**
-  const rohrbogen = rotate([0, 0, 0],union(schenkel1, bogenPositioniert, schenkel2));
+  const rohrbogen = rotate([0,0,0],rotate([0, Math.PI /2, 0],union(schenkel1, bogenPositioniert, schenkel2)));
 
   return rohrbogen;
 }
@@ -388,8 +480,7 @@ async function exportSTL(fileName, demoName, model,dimensions) {
           });
           // Save the file using the API
           window.api.saveSTL(outputPath, finalBuffer).then(() => {
-            console.log("✅ STL file saved at:", outputPath);
-            
+            console.log("✅ STL file saved at:", outputPath); 
             // Save the dimensions using the API
             window.api.updateDimensions(dimensions).then(() => {
               console.log("✅ Dimensions saved at:", dimensions);
@@ -403,6 +494,15 @@ async function exportSTL(fileName, demoName, model,dimensions) {
 }
 
 
+async function saveVerschiebungToConfig(verschiebung) {
+  try {
+    // Speichern der Verschiebung in der Konfigurationsdatei
+    await window.api.updateVerschiebung(verschiebung);
+    console.log("✅ Verschiebung gespeichert:", verschiebung);
+  } catch (error) {
+    console.error("Fehler beim Speichern der Verschiebung:", error);
+  }
+}
 
 // Funktion, um einen Ring zu erstellen
 export async function createSTL(bauteil) {
@@ -411,6 +511,8 @@ export async function createSTL(bauteil) {
       aussendurchmesser: 0,
       innendurchmesser: 0,
       hoehe: 0,
+      thoehe: 0,
+      laenge: 0,
     }
     switch(bauteil.name){
         case 'Aussenring1':
@@ -438,11 +540,55 @@ export async function createSTL(bauteil) {
             dimensions.hoehe = bauteil.inputs.hoehe;
             
             break;
+        case 'OR-N':
+            model = createORN(bauteil.inputs);
+            dimensions.aussendurchmesser = bauteil.inputs.aussendurchmesser;
+            dimensions.innendurchmesser = bauteil.inputs.laufbahndurchmesser;
+            dimensions.hoehe = bauteil.inputs.breite;
+            break;
+        case 'OR-NU':
+            model = createORNU(bauteil.inputs);
+            dimensions.aussendurchmesser = bauteil.inputs.aussendurchmesser;
+            dimensions.innendurchmesser = bauteil.inputs.laufbahndurchmesser;
+            dimensions.hoehe = bauteil.inputs.breite;
+            break;
+        case 'IR-N':
+            model = createIRN(bauteil.inputs);
+            dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
+            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
+            dimensions.hoehe = bauteil.inputs.breite;
+            break;
+        case 'IR-NJ':
+            model = createIRNJ(bauteil.inputs);
+            dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
+            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
+            dimensions.hoehe = bauteil.inputs.breite;
+            break;
+        case 'IR-NJP':
+            model = createIRNU(bauteil.inputs);
+            dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
+            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
+            dimensions.hoehe = bauteil.inputs.breite;
+            break;
+        case 'IR-NU':
+            model = createIRNU(bauteil.inputs);
+            dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
+            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
+            dimensions.hoehe = bauteil.inputs.breite;
+            break;
+        case 'IR-NUP':
+            model = createIRNJ(bauteil.inputs);
+            dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
+            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
+            dimensions.hoehe = bauteil.inputs.breite;
+            break;
         case 'T-Stueck':
             model = createTstueck(bauteil.inputs);
+            dimensions.thoehe = bauteil.inputs.hoehe;
             break;
         case "Rohrbogen":
             model = createRohrbogen(bauteil.inputs);
+            dimensions.laenge = bauteil.inputs.schenkel_laenge_1;
             
             break;
 
