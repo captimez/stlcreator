@@ -26,13 +26,12 @@ def send_progress(percentage, message):
 
 def send_to_sps(value):
     try:
-    	client.connect()
-	
-    	node = client.get_node('ns=3, s="Typdaten_DB".Innendurchmesser')
-        print(node.get_value())
-    	node.set_value(ua.Variant(value,ua.VariantType.UInt))
+        client.connect()
+
+        node = client.get_node('ns=3, s="Typdaten_DB".innendurchmesser')
+        node.set_value(ua.Variant(value,ua.VariantType.UInt))
     finally:
-    	client.disconnect()
+        client.disconnect()
 
 def update_thumbnail(driver):
     for toggle in all_toggles:
@@ -119,11 +118,7 @@ try:
     
     options = get_default_chrome_options()
     options.page_load_strategy = 'eager'
-<<<<<<< Updated upstream:python/script.py
-    driver = webdriver.Chrome(options=options)
-=======
     driver = webdriver.Chrome(service=service, options=options)
->>>>>>> Stashed changes:script.py
     #driver = webdriver.Edge()
     driver.implicitly_wait(10)
     send_to_sps(workpiece_innendurchmesser)
@@ -267,85 +262,83 @@ try:
             input_gripping_rot_x = driver.find_element(By.NAME,"rotation_x")
             input_gripping_rot_y = driver.find_element(By.NAME,"rotation_y")
             rotation_x_value = input_gripping_rot_x.get_attribute("value")
-	    
-	    #Gripping Point Position X
+        
+            #Gripping Point Position X
             if(gp_count < 6):
                 input_gripping_point_x.send_keys(gp["x"])
-                
             else:
-            	input_gripping_point_x.send_keys(-gp["x"])
-            	
-            
-            #Gripping Point x,y rotation Adjustments
-            if(gp_count == 0):
-            	input_gripping_rot_x.clear()
-            	input_gripping_rot_x.send_keys(0)
-            	input_gripping_rot_y.clear()
-            	input_gripping_rot_y.send_keys(0)
-            elif(gp_count == 1):
-            	input_gripping_rot_x.clear()
-            	input_gripping_rot_x.send_keys(180)
-            	input_gripping_rot_y.clear()
-            	input_gripping_rot_y.send_keys(0)
-            elif(gp_count == 2):
-            	input_gripping_rot_x.clear()
-            	input_gripping_rot_x.send_keys(0)
-            	input_gripping_rot_y.clear()
-            	input_gripping_rot_y.send_keys(15)
-            elif(gp_count == 3):
-            	input_gripping_rot_x.clear()
-            	input_gripping_rot_x.send_keys(180)
-            	input_gripping_rot_y.clear()
-            	input_gripping_rot_y.send_keys(15)
-            elif(gp_count == 4):
-            	input_gripping_rot_x.clear()
-            	input_gripping_rot_x.send_keys(0)
-            	input_gripping_rot_y.clear()
-            	input_gripping_rot_y.send_keys(-15)
-            elif(gp_count == 5):
-            	input_gripping_rot_y.clear()
-            	input_gripping_rot_y.send_keys(-15)
-            	input_gripping_rot_x.clear()
-            	input_gripping_rot_x.send_keys(180)
-            elif(gp_count == 6):
-            	input_gripping_rot_y.clear()
-            	input_gripping_rot_y.send_keys(0)
-            	input_gripping_rot_x.clear()
-            	input_gripping_rot_x.send_keys(0)
-            elif(gp_count == 7):
-            	input_gripping_rot_x.clear()
-            	input_gripping_rot_x.send_keys(180)
-            elif(gp_count == 8):
-            	input_gripping_rot_x.clear()
-            	input_gripping_rot_x.send_keys(0)
-            	input_gripping_rot_y.clear()
-            	input_gripping_rot_y.send_keys(15)
-            elif(gp_count == 9):
-            	input_gripping_rot_x.clear()
-            	input_gripping_rot_y.clear()
-            	input_gripping_rot_x.send_keys(180)
-            	input_gripping_rot_y.send_keys(15)
-            elif(gp_count == 10):
-            	input_gripping_rot_x.clear()
-            	input_gripping_rot_x.send_keys(0)
-            	input_gripping_rot_y.clear()
-            	input_gripping_rot_y.send_keys(-5)
-            elif(gp_count == 11):
-            	input_gripping_rot_x.clear()
-            	input_gripping_rot_x.send_keys(0)
-            	input_gripping_rot_y.clear()
-            	input_gripping_rot_y.send_keys(15)
-            	
-            #Gripping Point Position Z
+                input_gripping_point_x.send_keys(-gp["x"])	
+
+            if gp_count == 0:
+                input_gripping_rot_x.clear()
+                input_gripping_rot_x.send_keys(0)
+                input_gripping_rot_y.clear()
+                input_gripping_rot_y.send_keys(0)
+            elif gp_count == 1:
+                input_gripping_rot_x.clear()
+                input_gripping_rot_x.send_keys(180)
+                input_gripping_rot_y.clear()
+                input_gripping_rot_y.send_keys(0)
+            elif gp_count == 2:
+                input_gripping_rot_x.clear()
+                input_gripping_rot_x.send_keys(0)
+                input_gripping_rot_y.clear()
+                input_gripping_rot_y.send_keys(15)
+            elif gp_count == 3:
+                input_gripping_rot_x.clear()
+                input_gripping_rot_x.send_keys(180)
+                input_gripping_rot_y.clear()
+                input_gripping_rot_y.send_keys(15)
+            elif gp_count == 4:
+                input_gripping_rot_x.clear()
+                input_gripping_rot_x.send_keys(0)
+                input_gripping_rot_y.clear()
+                input_gripping_rot_y.send_keys(-15)
+            elif gp_count == 5:
+                input_gripping_rot_y.clear()
+                input_gripping_rot_y.send_keys(-15)
+                input_gripping_rot_x.clear()
+                input_gripping_rot_x.send_keys(180)
+            elif gp_count == 6:
+                input_gripping_rot_y.clear()
+                input_gripping_rot_y.send_keys(0)
+                input_gripping_rot_x.clear()
+                input_gripping_rot_x.send_keys(0)
+            elif gp_count == 7:
+                input_gripping_rot_x.clear()
+                input_gripping_rot_x.send_keys(180)
+            elif gp_count == 8:
+                input_gripping_rot_x.clear()
+                input_gripping_rot_x.send_keys(0)
+                input_gripping_rot_y.clear()
+                input_gripping_rot_y.send_keys(15)
+            elif gp_count == 9:
+                input_gripping_rot_x.clear()
+                input_gripping_rot_y.clear()
+                input_gripping_rot_x.send_keys(180)
+                input_gripping_rot_y.send_keys(15)
+            elif gp_count == 10:
+                input_gripping_rot_x.clear()
+                input_gripping_rot_x.send_keys(0)
+                input_gripping_rot_y.clear()
+                input_gripping_rot_y.send_keys(-5)
+            elif gp_count == 11:
+                input_gripping_rot_x.clear()
+                input_gripping_rot_x.send_keys(0)
+                input_gripping_rot_y.clear()
+                input_gripping_rot_y.send_keys(15)
+            # Gripping Point Position Z
             input_gripping_point_z.clear()
+
+            #Gripping Point x,y rotation Adjustment
             if((workpiece_hoehe/2) > max_grip_depth):
                 if(float(rotation_x_value) == 180):
-                	input_gripping_point_z.send_keys(gp["z"])
+                    input_gripping_point_z.send_keys(gp["z"])
                 else:
-                	input_gripping_point_z.send_keys(-gp["z"])
+                    input_gripping_point_z.send_keys(-gp["z"])
             else:
-            	input_gripping_point_z.send_keys(0)
-            	
+                input_gripping_point_z.send_keys(0)
+            
 
             checkbox = driver.find_element(By.NAME, "is_rot_inv_enabled")
 
