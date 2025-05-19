@@ -1,12 +1,20 @@
 import json
 import time
 import re
+import os
+from opcua import Client
+from opcua import ua
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
+
+PLC_IP = "192.168.1.5"
+client = Client(f"opc.tcp://{PLC_IP}:4840")
+
 
 # Function to send progress updates
 def send_progress(percentage, message):
@@ -15,6 +23,16 @@ def send_progress(percentage, message):
         "message": message
     }
     print(json.dumps(progress_data))  # Send JSON data to the console or UI
+
+def send_to_sps(value):
+    try:
+    	client.connect()
+	
+    	node = client.get_node('ns=3, s="Typdaten_DB".Innendurchmesser')
+        print(node.get_value())
+    	node.set_value(ua.Variant(value,ua.VariantType.UInt))
+    finally:
+    	client.disconnect()
 
 def update_thumbnail(driver):
     for toggle in all_toggles:
@@ -41,7 +59,7 @@ try:
         workpiece_laenge = config['laenge']
         workpiece_verschiebung = config['verschiebung']
 
-
+    send_to_sps(workpiece_innendurchmesser)
     send_progress(5, "Loaded configuration file successfully.")
 except Exception as e:
     send_progress(0, f"Error loading config file: {e}")
@@ -49,11 +67,16 @@ except Exception as e:
 
 workpiece_innenradius = workpiece_innendurchmesser / 2
 workpiece_aussenradius = workpiece_aussendurchmesser / 2
+
+grip_depth = 17.5
+grip_tolerance = 4
+max_grip_depth = grip_depth - grip_tolerance 
+
 if(objectType == "Ring"):
     gp = {
         "x": workpiece_innenradius + ((workpiece_aussenradius - workpiece_innenradius) / 2),
         "y": 0, 
-        "z": (workpiece_hoehe / 2) / 2, 
+        "z": ((workpiece_hoehe / 2) - max_grip_depth), 
         "rx": 0, 
         "ry": 0, 
         "rz": 0,
@@ -83,18 +106,27 @@ elif(objectType == "Winkel"):
 photoneo_ip = "http://127.0.0.1"  # Localhost for testing
 def get_default_chrome_options():
     options = webdriver.ChromeOptions()
-    options.add_argument("--headless=new")  # Verwende den neuen Headless-Modus
+    #options.add_argument("--headless=new")  # Verwende den neuen Headless-Modus
     options.add_argument("--window-size=1920,1080")
     options.add_argument("--no-sandbox")
     return options
 
 try:
     # Initialize WebDriver
+    base = os.path.dirname(os.path.abspath(__file__))
+    chromedriver_path = os.path.join(base, 'chromedriver')
+    service = Service(exectuable_path= chromedriver_path)
+    
     options = get_default_chrome_options()
     options.page_load_strategy = 'eager'
+<<<<<<< Updated upstream:python/script.py
     driver = webdriver.Chrome(options=options)
+=======
+    driver = webdriver.Chrome(service=service, options=options)
+>>>>>>> Stashed changes:script.py
     #driver = webdriver.Edge()
     driver.implicitly_wait(10)
+    send_to_sps(workpiece_innendurchmesser)
     send_progress(10, "Initialized WebDriver successfully.")
 except Exception as e:
     send_progress(0, f"Error initializing WebDriver: {e}")
@@ -119,6 +151,7 @@ try:
     driver.execute_script("arguments[0].scrollIntoView();", stop_button)
     stop_button.click()
     send_progress(25, "Stopped deployment successfully.")
+    driver.get(f"{photoneo_ip}/solutions/")
 except NoSuchElementException:
     send_progress(25, "No Deployment, continuing...")
 
@@ -231,21 +264,94 @@ try:
             input_gripping_point_x.clear()
 
             input_gripping_point_z = driver.find_element(By.NAME,"position_z")
-
-            if((gp_count % 2) == 0):
+            input_gripping_rot_x = driver.find_element(By.NAME,"rotation_x")
+            input_gripping_rot_y = driver.find_element(By.NAME,"rotation_y")
+            rotation_x_value = input_gripping_rot_x.get_attribute("value")
+	    
+	    #Gripping Point Position X
+            if(gp_count < 6):
                 input_gripping_point_x.send_keys(gp["x"])
+                
             else:
-                input_gripping_point_x.send_keys(-gp["x"])
-        
-            if((workpiece_hoehe/2) > 17.5):
-                input_gripping_point_z.clear()
-                input_gripping_point_z.send_keys(-gp["z"])
+            	input_gripping_point_x.send_keys(-gp["x"])
+            	
+            
+            #Gripping Point x,y rotation Adjustments
+            if(gp_count == 0):
+            	input_gripping_rot_x.clear()
+            	input_gripping_rot_x.send_keys(0)
+            	input_gripping_rot_y.clear()
+            	input_gripping_rot_y.send_keys(0)
+            elif(gp_count == 1):
+            	input_gripping_rot_x.clear()
+            	input_gripping_rot_x.send_keys(180)
+            	input_gripping_rot_y.clear()
+            	input_gripping_rot_y.send_keys(0)
+            elif(gp_count == 2):
+            	input_gripping_rot_x.clear()
+            	input_gripping_rot_x.send_keys(0)
+            	input_gripping_rot_y.clear()
+            	input_gripping_rot_y.send_keys(15)
+            elif(gp_count == 3):
+            	input_gripping_rot_x.clear()
+            	input_gripping_rot_x.send_keys(180)
+            	input_gripping_rot_y.clear()
+            	input_gripping_rot_y.send_keys(15)
+            elif(gp_count == 4):
+            	input_gripping_rot_x.clear()
+            	input_gripping_rot_x.send_keys(0)
+            	input_gripping_rot_y.clear()
+            	input_gripping_rot_y.send_keys(-15)
+            elif(gp_count == 5):
+            	input_gripping_rot_y.clear()
+            	input_gripping_rot_y.send_keys(-15)
+            	input_gripping_rot_x.clear()
+            	input_gripping_rot_x.send_keys(180)
+            elif(gp_count == 6):
+            	input_gripping_rot_y.clear()
+            	input_gripping_rot_y.send_keys(0)
+            	input_gripping_rot_x.clear()
+            	input_gripping_rot_x.send_keys(0)
+            elif(gp_count == 7):
+            	input_gripping_rot_x.clear()
+            	input_gripping_rot_x.send_keys(180)
+            elif(gp_count == 8):
+            	input_gripping_rot_x.clear()
+            	input_gripping_rot_x.send_keys(0)
+            	input_gripping_rot_y.clear()
+            	input_gripping_rot_y.send_keys(15)
+            elif(gp_count == 9):
+            	input_gripping_rot_x.clear()
+            	input_gripping_rot_y.clear()
+            	input_gripping_rot_x.send_keys(180)
+            	input_gripping_rot_y.send_keys(15)
+            elif(gp_count == 10):
+            	input_gripping_rot_x.clear()
+            	input_gripping_rot_x.send_keys(0)
+            	input_gripping_rot_y.clear()
+            	input_gripping_rot_y.send_keys(-5)
+            elif(gp_count == 11):
+            	input_gripping_rot_x.clear()
+            	input_gripping_rot_x.send_keys(0)
+            	input_gripping_rot_y.clear()
+            	input_gripping_rot_y.send_keys(15)
+            	
+            #Gripping Point Position Z
+            input_gripping_point_z.clear()
+            if((workpiece_hoehe/2) > max_grip_depth):
+                if(float(rotation_x_value) == 180):
+                	input_gripping_point_z.send_keys(gp["z"])
+                else:
+                	input_gripping_point_z.send_keys(-gp["z"])
+            else:
+            	input_gripping_point_z.send_keys(0)
+            	
 
             checkbox = driver.find_element(By.NAME, "is_rot_inv_enabled")
 
             if not checkbox.is_selected():
                 driver.execute_script("arguments[0].click();", checkbox)
-
+	
         elif(objectType == "TStueck"):
             if(gp_count == 0):
                 driver.get(f'{href}')
@@ -314,7 +420,7 @@ try:
 
         driver.execute_script("arguments[0].scrollIntoView();", save_gripping_point_button)
         save_gripping_point_button.click()
-
+        send_progress(70 + gp_count, "Adjusting Gripping Points")
         gp_count += 1
         time.sleep(1)
     send_progress(80, "Adjusted gripping points successfully.")
@@ -363,6 +469,11 @@ try:
 
         # STEP 7.2: Wait for UI to settle (optional)
         time.sleep(1)
+        select_element = driver.find_element(By.CSS_SELECTOR, "select.select.form-control")
+        select = Select(select_element)
+        
+        select.select_by_visible_text(f"Picked object ({filename})")
+        time.sleep(2)
 
         # STEP 7.3: Scan & Locate
         WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "id-scan-and-locate"))).click()

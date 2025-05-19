@@ -29,7 +29,7 @@ app.on('ready', () => {
     });
     const startURL = `file://${path.join(__dirname,"../dist/index.html")}`
     console.log("loading: ",startURL)
-   //mainWindow.webContents.openDevTools({ mode: "detach" });
+    mainWindow.webContents.openDevTools({ mode: "detach" });
 
     mainWindow.loadURL(startURL).catch((err) =>{
         console.error("Failed to load index.html: ", err)
@@ -186,6 +186,13 @@ ipcMain.handle("start-python-script", (event, scriptName, args) => {
 
     pythonProcess.stdout.on('data', (data) => {
         console.log(`stdout: ${data}`);
+        try {
+            const parsedJSon = JSON.parse(data.toString());
+            mainWindow.webContents.send("python-output", parsedJSon);
+        } catch (error) {
+            console.error("Error parsing JSON from Python script:", error);
+            console.error("Received data:", data.toString());
+        }
         const parsedJSon = JSON.parse(data.toString());
         mainWindow.webContents.send("python-output", parsedJSon);
     });

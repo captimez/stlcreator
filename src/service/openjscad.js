@@ -1,5 +1,5 @@
 import { extrudeRotate } from '@jscad/modeling/src/operations/extrusions';
-import { ellipse, roundedCylinder } from '@jscad/modeling/src/primitives';
+import { ellipse} from '@jscad/modeling/src/primitives';
 import { Buffer } from 'buffer';
 import { update } from 'three/examples/jsm/libs/tween.module.js';
 import { deinterleaveAttribute } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
@@ -7,7 +7,7 @@ import { or } from 'three/tsl';
 import { UniformNode } from 'three/webgpu';
 
 // Import der JSCAD-Bibliotheken
-const { cylinder, cuboid, cylinderElliptic, torus } = require('@jscad/modeling').primitives;
+const { cylinder, cuboid, cylinderElliptic, torus, roundedCylinder } = require('@jscad/modeling').primitives;
 const { subtract, union } = require('@jscad/modeling').booleans;
 const { translate, rotate} = require('@jscad/modeling').transforms;
 const { serialize } = require('@jscad/stl-serializer');
@@ -125,6 +125,92 @@ function createAussenring2({
     // Rotation für die richtige Ausrichtung (90 Grad um Y-Achse)
     return rotate([0, 0, 0], result);
   }
+
+function createORN({aussendurchmesser, laufbahndurchmesser, breite}){
+  aussendurchmesser = Number(aussendurchmesser)
+  laufbahndurchmesser = Number(laufbahndurchmesser)
+  breite = Number(breite)
+
+  let outerCylinder = cylinder({ radius: aussendurchmesser / 2, height: breite, segments: resolution });
+
+  let innerCylinder = cylinder({ radius: laufbahndurchmesser / 2, height: breite, segments: resolution });
+
+  let result = subtract(outerCylinder, innerCylinder);
+
+  return translate([0,0,0],result);
+}
+
+function createORNU({ aussendurchmesser, schulterdurchmesser, laufbahndurchmesser, lichteweite, breite}){
+  aussendurchmesser = Number(aussendurchmesser)
+  schulterdurchmesser = Number(schulterdurchmesser)
+  laufbahndurchmesser = Number(laufbahndurchmesser)
+  lichteweite = Number(lichteweite)
+  breite = Number(breite)
+
+  let innerCylinder = cylinder({ radius: schulterdurchmesser / 2, height: breite, segments: resolution });
+  let innerCylinder2 = cylinder({ radius: laufbahndurchmesser / 2, height: lichteweite, segments: resolution });
+  let outerCylinder = cylinder({ radius: aussendurchmesser / 2, height: breite, segments: resolution });
+
+  let result = subtract(outerCylinder, innerCylinder);
+  result = subtract(result, innerCylinder2);
+
+  return translate([0,0,0],result);
+
+}
+
+function createIRN({ innendurchmesser, laufbahndurchmesser, schulterdurchmesser, breite}){
+  innendurchmesser = Number(innendurchmesser)
+  laufbahndurchmesser = Number(laufbahndurchmesser)
+  schulterdurchmesser = Number(schulterdurchmesser)
+  breite = Number(breite)
+
+  let schulterbreite = (schulterdurchmesser - laufbahndurchmesser) / 2;
+  let innerCylinder = cylinder({ radius: innendurchmesser / 2, height: breite, segments: resolution });
+
+  let outerCylinder = cylinder({ radius: laufbahndurchmesser / 2, height: breite - ( 2 * schulterbreite), segments: resolution });
+  let schulterCylinder = cylinder({ radius: schulterdurchmesser / 2, height: schulterbreite, segments: resolution });
+  
+  let schulterCylinder2 = cylinder({ radius: schulterdurchmesser / 2, height: schulterbreite, segments: resolution });
+  schulterCylinder2 = translate([0, 0, ((breite / 2) - (schulterbreite / 2))], schulterCylinder2);
+  schulterCylinder = translate([0, 0, -((breite / 2) - (schulterbreite / 2))], schulterCylinder);
+  
+  let result = union(outerCylinder, schulterCylinder, schulterCylinder2);
+  result = subtract(result, innerCylinder);
+  
+  return translate([0,0,0],result);
+}
+
+function createIRNJ({innendurchmesser, laufbahndurchmesser, schulterdurchmesser, breite}){
+  innendurchmesser = Number(innendurchmesser)
+  laufbahndurchmesser = Number(laufbahndurchmesser)
+  schulterdurchmesser = Number(schulterdurchmesser)
+  breite = Number(breite)
+
+  let schulterbreite = (schulterdurchmesser - laufbahndurchmesser) / 2;
+
+  let innerCylinder = cylinder({ radius: innendurchmesser / 2, height: breite, segments: resolution });
+  let outerCylinder = cylinder({ radius: laufbahndurchmesser / 2, height: breite - schulterbreite, segments: resolution });
+  let schulterCylinder = cylinder({ radius: schulterdurchmesser / 2, height: schulterbreite, segments: resolution });
+
+  schulterCylinder = translate([0, 0, -((breite / 2) - (schulterbreite / 2))], schulterCylinder);
+  let result = union(outerCylinder, schulterCylinder);
+  result = subtract(result, innerCylinder);
+
+  return translate([0,0,0],result);
+}
+
+function createIRNU({innendurchmesser, laufbahndurchmesser, breite}){
+  innendurchmesser = Number(innendurchmesser)
+  laufbahndurchmesser = Number(laufbahndurchmesser)
+  breite = Number(breite)
+
+  let innerCylinder = cylinder({ radius: innendurchmesser / 2, height: breite, segments: resolution });
+  let outerCylinder = cylinder({ radius: laufbahndurchmesser / 2, height: breite, segments: resolution });
+
+  let result = subtract(outerCylinder, innerCylinder);
+
+  return translate([0,0,0],result);
+}
 
 // Funktion für Innenring1
 function createInnenring1({ durchmesser_or, durchmesser_so, durchmesser_su, durchmesser_ur,innendurchmesser, hoehe_or, hoehe, hoehe_ur }) {
@@ -453,6 +539,48 @@ export async function createSTL(bauteil) {
             dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
             dimensions.hoehe = bauteil.inputs.hoehe;
             
+            break;
+        case 'OR-N':
+            model = createORN(bauteil.inputs);
+            dimensions.aussendurchmesser = bauteil.inputs.aussendurchmesser;
+            dimensions.innendurchmesser = bauteil.inputs.laufbahndurchmesser;
+            dimensions.hoehe = bauteil.inputs.breite;
+            break;
+        case 'OR-NU':
+            model = createORNU(bauteil.inputs);
+            dimensions.aussendurchmesser = bauteil.inputs.aussendurchmesser;
+            dimensions.innendurchmesser = bauteil.inputs.laufbahndurchmesser;
+            dimensions.hoehe = bauteil.inputs.breite;
+            break;
+        case 'IR-N':
+            model = createIRN(bauteil.inputs);
+            dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
+            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
+            dimensions.hoehe = bauteil.inputs.breite;
+            break;
+        case 'IR-NJ':
+            model = createIRNJ(bauteil.inputs);
+            dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
+            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
+            dimensions.hoehe = bauteil.inputs.breite;
+            break;
+        case 'IR-NJP':
+            model = createIRNU(bauteil.inputs);
+            dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
+            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
+            dimensions.hoehe = bauteil.inputs.breite;
+            break;
+        case 'IR-NU':
+            model = createIRNU(bauteil.inputs);
+            dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
+            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
+            dimensions.hoehe = bauteil.inputs.breite;
+            break;
+        case 'IR-NUP':
+            model = createIRNJ(bauteil.inputs);
+            dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
+            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
+            dimensions.hoehe = bauteil.inputs.breite;
             break;
         case 'T-Stueck':
             model = createTstueck(bauteil.inputs);

@@ -15,55 +15,81 @@ const bauteile = [
             name: "Ringe",
             teile: [
             {
-                name: "Aussenring1",
-                demoName: "Aussenring1",
+                name: "OR-N",
+                demoName: "OR-N",
                 shortcut: ["D1","D2","A","B","C",""],
                 inputs: {
                     aussendurchmesser: 0,
-                    innendurchmesser: 0,
-                    hoehe: 0,
-                    breite_aussen: 0,
-                    breite_innen: 0,
-                    tiefe_innen: 0,
-            }
+                    laufbahndurchmesser: 0,
+                    breite: 0,
+                },
             },
             {
-                name: "Aussenring2",
-                demoName: "Aussenring2",
-                shortcut: ["D1","D2","D3","A"],
+                name: "OR-NU",
+                demoName: "OR-NU",
+                shortcut: ["D1","D2","A","B","C",""],
                 inputs: {
-                    innendurchmesser_klein: 0,
-                    innendurchmesser_gross: 0,
                     aussendurchmesser: 0,
-                    hoehe: 0,
-                }
+                    schulterdurchmesser: 0,
+                    laufbahndurchmesser: 0,
+                    lichteweite: 0,
+                    breite: 0,
+                },
             },
             {
-                name: "Innenring1",
-                demoName: "Innenring1",
-                shortcut: ["D1","D2","D3","D4","D5","A","B","C"],
-                inputs: {
-                    durchmesser_or: 0,
-                    durchmesser_so: 0,
-                    durchmesser_su: 0,
-                    durchmesser_ur: 0,
-                    innendurchmesser: 0,
-                    hoehe_or: 0,
-                    hoehe: 0,
-                    hoehe_ur: 0,
-                }
-            },
-            {
-                name: "Innenring2",
-                demoName: "Innenring2",
+                name: "IR-N",
+                demoName: "IR-N",
                 shortcut: ["D1","D2","A","B"],
                 inputs: {
                     innendurchmesser: 0,
-                    aussendurchmesser: 0,
-                    hoehe: 0,
-                    radius_ausstich: 0,
+                    laufbahndurchmesser: 0,
+                    schulterdurchmesser: 0,
+                    breite: 0,
                 }
-            },]
+            },
+            {
+                name: "IR-NJ",
+                demoName: "IR-NJ",
+                shortcut: ["SD","D2","A","B"],
+                inputs: {
+                    innendurchmesser: 0,
+                    laufbahndurchmesser: 0,
+                    schulterdurchmesser: 0,
+                    breite: 0,
+                }
+            },
+            {
+                name: "IR-NJP",
+                demoName: "IR-NJP",
+                shortcut: ["D1","D2","A","B"],
+                inputs: {
+                    innendurchmesser: 0,
+                    laufbahndurchmesser: 0,
+                    breite: 0,
+                }
+            },
+            {
+                name: "IR-NU",
+                demoName: "IR-NU",
+                shortcut: ["D1","D2","A","B"],
+                inputs: {
+                    innendurchmesser: 0,
+                    laufbahndurchmesser: 0,
+                    breite: 0,
+                }
+            },
+            {
+                name: "IR-NUP",
+                demoName: "IR-NUP",
+                shortcut: ["D1","D2","A","B"],
+                inputs: {
+                    innendurchmesser: 0,
+                    laufbahndurchmesser: 0,
+                    schulterdurchmesser: 0,
+                    breite: 0,
+                }
+            },
+        ]
      },
     {
         name:"T-Stuecke",
