@@ -2,6 +2,7 @@ const { app, Menu, BrowserWindow, ipcMain } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
 const { dialog } = require('electron');
+const opcua = require('./service/opcua');
 
 const { preload } = require('react-dom');
 
@@ -12,9 +13,9 @@ const preloadPath = path.join(__dirname, 'preload.js');
 const configPath = path.join(app.getPath("userData"), "config.json");
 //app.disableHardwareAcceleration();
 
-app.on('ready', () => {
-    
+app.on('ready', async () => {
     Menu.setApplicationMenu(null);
+
     mainWindow = new BrowserWindow({
         width: 1920,
         height: 1080,
@@ -27,16 +28,18 @@ app.on('ready', () => {
             preload: preloadPath, // Preload-Skript
         },
     });
-    const startURL = `file://${path.join(__dirname,"../dist/index.html")}`
-    console.log("loading: ",startURL)
+
+    const startURL = `file://${path.join(__dirname, "../dist/index.html")}`;
+    console.log("loading: ", startURL);
     mainWindow.webContents.openDevTools({ mode: "detach" });
 
-    mainWindow.loadURL(startURL).catch((err) =>{
-        console.error("Failed to load index.html: ", err)
-    } );
-    mainWindow.webContents.on("did-fail-load",(event, errorCode, errorDescription) =>{
-            console.error("Error loading index.html:", errorDescription)
-    } )
+    mainWindow.loadURL(startURL).catch((err) => {
+        console.error("Failed to load index.html: ", err);
+    });
+
+    mainWindow.webContents.on("did-fail-load", (event, errorCode, errorDescription) => {
+        console.error("Error loading index.html:", errorDescription);
+    });
 
     mainWindow.on('maximize', () => {
         mainWindow.webContents.send("window_maximized");
@@ -44,6 +47,18 @@ app.on('ready', () => {
     mainWindow.on('unmaximize', () => {
         mainWindow.webContents.send("window_unmaximized");
     });
+
+    // Verbindungsaufbau im Hintergrund
+    setTimeout(async () => {
+        try {
+            await opcua.connectionStrategy();
+            console.log("Connected to OPC UA server");
+            mainWindow.webContents.send("opcua-status", { success: true, message: "Connected to OPC UA server successfully." });
+        } catch (error) {
+            console.error("Error connecting to OPC UA server:", error);
+            mainWindow.webContents.send("opcua-status", { success: false, message: `Failed to connect to OPC UA server: ${error.message}` });
+        }
+    }, 100); // Verbindung 100ms nach dem Start der App beginnen
 });
 
 function loadConfig() {
@@ -206,6 +221,28 @@ ipcMain.handle("start-python-script", (event, scriptName, args) => {
     pythonProcess.on('close', (code) => {
         console.log(`child process exited with code ${code}`);
     });
+});
+
+ipcMain.handle("check-opcua-connection", async () => {
+    try {
+        await opcua.connectionStrategy();
+        return { success: true, message: "Connected to OPC UA server successfully." };
+    } catch (error) {
+        return { success: false, message: `Failed to connect to OPC UA server: ${error.message}` };
+    }
+});
+
+ipcMain.handle("send-dimensions-to-sps", async (event, aussendurchmesser, innendurchmesser, hoehe) => {
+    try {
+        console.log("Sending dimensions to SPS:", { aussendurchmesser, innendurchmesser, hoehe });
+        await opcua.writeNodeValue("ns=3;s=Typdaten_DB.Aussendurchmesser", aussendurchmesser);
+        await opcua.writeNodeValue("ns=3;s=Typedaten_DB.Innendurchmesser", innendurchmesser);
+        await opcua.writeNodeValue("ns=3;s=Typdaten_DB.Breite", hoehe);
+
+        return { success: true, message: "Dimensions sent to SPS successfully." };
+    } catch (error) {
+        return { success: false, message: `Failed to send dimensions to SPS: ${error.message}` };
+    }
 });
 
 

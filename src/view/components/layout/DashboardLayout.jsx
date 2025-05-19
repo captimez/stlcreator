@@ -17,11 +17,12 @@ import logo from '../../../res/logo.png';
 import FilterNoneSharpIcon from '@mui/icons-material/FilterNoneSharp';
 import './main.css'
 import { Filter, Padding } from '@mui/icons-material';
-import { Button, Hidden, IconButton } from '@mui/material';
+import { Button, Hidden, IconButton, Tooltip } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import MinimizeIcon from '@mui/icons-material/Minimize';
 import CropSquareSharpIcon from '@mui/icons-material/CropSquareSharp';
-import { use } from 'react';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
+import { use, useState, useEffect } from 'react';
 
 const NAVIGATION = [
   {
@@ -103,28 +104,48 @@ function SidebarFooter({ router, mini }) {
   );
 }
 function ToolbarActions() {
-  const [isMaximized, setIsMaximized] = React.useState(false);
+  const [isMaximized, setIsMaximized] = useState(false);
+  const [opcuaConnected, setOpcuaConnected] = useState(false);
 
-  React.useEffect(() => {
-    window.api.isMaximized().then(setIsMaximized)
+  useEffect(() => {
+      // Check OPC UA connection on component mount
+      window.api.receive("opcua-status", (status) => {
+          setOpcuaConnected(status.success);
+      })
+    }, []);
 
-    window.api.onMaximized(() => setIsMaximized(true));
-    window.api.onUnmaximized(() => setIsMaximized(false));  
+  useEffect(() => {
+      window.api.isMaximized().then(setIsMaximized);
+
+      window.api.onMaximized(() => setIsMaximized(true));
+      window.api.onUnmaximized(() => setIsMaximized(false));
   }, []);
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', height:'50%' }}>
-      <IconButton onClick={() => window.api.minimizeWindow()} size="small" sx={{'-webkit-app-region':"no-drag", padding:"4px" }}>
-        <MinimizeIcon fontSize='small' />
-      </IconButton>
-      <IconButton onClick= {() => window.api.maximizeWindow()} size="small" sx={{ '-webkit-app-region':"no-drag", padding:"4px" }}>
-        { isMaximized ? <FilterNoneSharpIcon fontSize='inherit'></FilterNoneSharpIcon> : <CropSquareSharpIcon fontSize='small'></CropSquareSharpIcon>}
-      </IconButton>
-      <IconButton onClick={() => window.api.closeWindow()} size="small" sx={{ '-webkit-app-region':"no-drag", padding:"4px" }}>
-        <CloseIcon /> 
-      </IconButton>
-    </Box>
-  )
+      <Box sx={{ display: 'flex', alignItems: 'center', height: '50%' }}>
+          {/* OPC UA Connection Status */}
+          <Tooltip title={opcuaConnected ? "Connected to OPC UA" : "Disconnected from OPC UA"}>
+              <FiberManualRecordIcon
+                  fontSize="small"
+                  sx={{
+                      color: opcuaConnected ? "green" : "red",
+                      marginRight: 1,
+                  }}
+              />
+          </Tooltip>
+
+          {/* Minimize, Maximize, Close Buttons */}
+          <IconButton onClick={() => window.api.minimizeWindow()} size="small" sx={{ '-webkit-app-region': "no-drag", padding: "4px" }}>
+              <MinimizeIcon fontSize='small' />
+          </IconButton>
+          <IconButton onClick={() => window.api.maximizeWindow()} size="small" sx={{ '-webkit-app-region': "no-drag", padding: "4px" }}>
+              {isMaximized ? <FilterNoneSharpIcon fontSize='inherit' /> : <CropSquareSharpIcon fontSize='small' />}
+          </IconButton>
+          <IconButton onClick={() => window.api.closeWindow()} size="small" sx={{ '-webkit-app-region': "no-drag", padding: "4px" }}>
+              <CloseIcon />
+          </IconButton>
+      </Box>
+  );
 }
 
 SidebarFooter.propTypes = {

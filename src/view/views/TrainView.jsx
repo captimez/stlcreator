@@ -85,6 +85,7 @@ const TrainView = () => {
         };
         
         console.log(selectedFile.name)
+        await window.api.sendDimensionsToSps(config.aussendurchmesser, config.innendurchmesser, config.hoehe)
         await window.api.savePythonConfig('pythonConfig.json', JSON.stringify(config));
         await window.api.startPythonScript('script.py');
 

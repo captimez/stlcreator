@@ -10,6 +10,8 @@ const SettingsView = () => {
 const [saveFolder, setSaveFolder] = useState("");
 const [resolution, setResolution] = useState(null);
 const [solution_id, setSolutionId] = useState(1);
+const [opcuaStatus, setOpcuaStatus] = useState("");
+
 // Load initial save folder on mount
 useEffect(() => {
     window.api.getSaveFolder().then(setSaveFolder);
@@ -34,6 +36,12 @@ const handleUpdateResolution = () => {
         setResolution(resolution); // Update UI with new resolution
     });
 }
+
+const handleCheckOpcuaConnection = async () => {
+    const result = await window.api.checkOpcuaConnection();
+    console.log(result)
+    setOpcuaStatus(result.message);
+};
 
 return (
     <div style={{ height:"100%", width: "100%", display: "flex" }}>
@@ -89,6 +97,21 @@ return (
                                 size='small' 
                                 label="BPS COPY Solution ID" 
                             />
+                        </Box>
+                        <Box sx = {{ display: "flex", alignItems: "center", mt: 2, mb: 1 }}>
+                            <Button 
+                                variant="contained" 
+                                color="primary" 
+                                onClick={handleCheckOpcuaConnection}
+                                style={{ marginTop: "20px" }}
+                            >
+                                Check OPC UA Connection
+                            </Button>
+                            {opcuaStatus && (
+                                <Typography sx={{ mt: 2, color: opcuaStatus.includes("successfully") ? "green" : "red" }}>
+                                    {opcuaStatus}
+                                </Typography>
+                            )}
                         </Box>
                     </FormControl>
                 </Box>
