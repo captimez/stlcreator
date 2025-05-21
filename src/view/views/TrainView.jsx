@@ -12,12 +12,13 @@ const TrainView = () => {
     // Initialize state for isSymmetric
     const [isSymmetric, setIsSymmetric] = useState(false);
     const { selectedBauteil } = useAppContext();
-    const [ isChecked, setIsChecked ] = useState({Ring: false, Winkel: false, TStueck: false});
+    const [ isChecked, setIsChecked ] = useState({Aussenring: false, Innenring: false});
     const [solutionName, setSolutionName] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
 
     const [aussendurchmesser, setAussendurchmesser] = useState(0);
     const [innendurchmesser, setInnendurchmesser] = useState(0);
+    const [schulterdurchmesser, setSchulterdurchmesser] = useState(0);
     const [hoehe, setHoehe] = useState(0);
     const [laenge, setLaenge] = useState(0);
     const [thoehe, setThoehe] = useState(0);
@@ -34,6 +35,7 @@ const TrainView = () => {
 
             setAussendurchmesser(dimensions.aussendurchmesser);
             setInnendurchmesser(dimensions.innendurchmesser);
+            setSchulterdurchmesser(dimensions.schulterdurchmesser);
             setHoehe(dimensions.hoehe);
             setLaenge(dimensions.laenge);
             setThoehe(dimensions.thoehe);
@@ -52,7 +54,7 @@ const TrainView = () => {
     }, []);
 
     const handleCheckboxChange = (event) => {
-        const newCheckedState = { Ring: false, Winkel: false, TStueck: false, [event.target.name]: true };
+        const newCheckedState = { Aussenring: false, Innenring: false, [event.target.name]: true };
         setIsChecked(newCheckedState);
         console.log(newCheckedState);
     };
@@ -79,6 +81,7 @@ const TrainView = () => {
             aussendurchmesser: aussendurchmesser,
             innendurchmesser: innendurchmesser,
             hoehe: hoehe,
+            schulterdurchmesser: schulterdurchmesser,
             laenge: laenge,
             thoehe: thoehe,
             gp_count: gp_count
@@ -128,32 +131,31 @@ const TrainView = () => {
                                     </Typography>
                                 )}
                             </FormControl>
-                            <FormControlLabel control={<Checkbox name='Ring' checked={isChecked.Ring} color="primary" onChange={handleCheckboxChange}/>} label="Ring" />
-                            <FormControlLabel control={<Checkbox name='Winkel' checked={isChecked.Winkel} color="primary" onChange={handleCheckboxChange}/>} label="Winkel" />
-                            <FormControlLabel control={<Checkbox name='TStueck' color="primary" checked={isChecked.TStueck} onChange={handleCheckboxChange}/>} label="TStueck" />
+                            <FormControlLabel control={<Checkbox name='Aussenring' checked={isChecked.Aussenring} color="primary" onChange={handleCheckboxChange}/>} label="Aussenring" />
+                            <FormControlLabel control={<Checkbox name='Innenring' checked={isChecked.Innenring} color="primary" onChange={handleCheckboxChange}/>} label="Innenring" />
                             {
-                                isChecked.Ring && (
+                                isChecked.Aussenring && (
                                     <FormControl  style={{ marginBottom: "10px" }}>
                                         <FormLabel>Aussendurchmesser</FormLabel>
-                                        <TextField id="standard-basic" value={aussendurchmesser} onChange={(event) => setAussendurchmesser(event.target.value)} size='small' label="Aussendurchmesser" />
+                                        <TextField id="standard-basic" value={aussendurchmesser} onChange={(event) => setAussendurchmesser(event.target.value)} size='small'/>
+                                        <FormLabel>Laufbahndurchmesser / Innendurchmesser</FormLabel>
+                                        <TextField id="standard-basic" value={innendurchmesser} onChange={(event) => setInnendurchmesser(event.target.value)} size='small' />
+                                        <FormLabel>Breite</FormLabel>
+                                        <TextField id="standard-basic" value={hoehe} onChange={(event) => setHoehe(event.target.value)} size='small'/>
+                                    </FormControl>
+                                ) ||
+                                isChecked.Innenring&& (
+                                    <FormControl  style={{ marginBottom: "10px" }}>
+                                        <FormLabel>Laufbahndurchmesser</FormLabel>
+                                        <TextField id="standard-basic" value={aussendurchmesser} onChange={(event) => setAussendurchmesser(event.target.value)} size='small'/>
                                         <FormLabel>Innendurchmesser</FormLabel>
-                                        <TextField id="standard-basic" value={innendurchmesser} onChange={(event) => setInnendurchmesser(event.target.value)} size='small' label="Innendurchmesser" />
-                                        <FormLabel>Höhe</FormLabel>
-                                        <TextField id="standard-basic" value={hoehe} onChange={(event) => setHoehe(event.target.value)} size='small' label="Hoehe" />
+                                        <TextField id="standard-basic" value={innendurchmesser} onChange={(event) => setInnendurchmesser(event.target.value)} size='small' />
+                                        <FormLabel>Schulterdurchmesser</FormLabel>
+                                        <TextField id="standard-basic" value={innendurchmesser} onChange={(event) => setSchulterdurchmesser(event.target.value)} size='small' />
+                                        <FormLabel>Breite</FormLabel>
+                                        <TextField id="standard-basic" value={hoehe} onChange={(event) => setHoehe(event.target.value)} size='small'/>
                                     </FormControl>
-                                ) ||
-                                isChecked.Winkel && (
-                                    <FormControl  style={{ marginBottom: "10px" }}>
-                                        <FormLabel>Schenkel Länge</FormLabel>
-                                        <TextField id="standard-basic" value={laenge} onChange={(event) => setLaenge(event.target.value)} size='small' label="Winkel" />
-                                    </FormControl>
-                                ) ||
-                                isChecked.TStueck && (
-                                    <FormControl  style={{ marginBottom: "10px" }}>
-                                        <FormLabel>T-Stück Höhe</FormLabel>
-                                        <TextField id="standard-basic" value={thoehe} onChange={(event) => setThoehe(event.target.value)} size='small' label="tHoehe" />
-                                    </FormControl>
-                                )
+                                ) 
                             }
                         </FormGroup> 
                         <Button variant='contained' onClick={handleSubmit} sx={{ mt: 2 }}>Einlernen</Button>

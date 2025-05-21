@@ -538,7 +538,6 @@ export async function createSTL(bauteil) {
             dimensions.aussendurchmesser = bauteil.inputs.aussendurchmesser;
             dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
             dimensions.hoehe = bauteil.inputs.hoehe;
-            
             break;
         case 'OR-N':
             model = createORN(bauteil.inputs);
@@ -557,12 +556,14 @@ export async function createSTL(bauteil) {
             dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
             dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
             dimensions.hoehe = bauteil.inputs.breite;
+            dimensions.schulterdurchmesser = bauteil.inputs.schulterdurchmesser;
             break;
         case 'IR-NJ':
             model = createIRNJ(bauteil.inputs);
             dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
             dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
             dimensions.hoehe = bauteil.inputs.breite;
+            dimensions.schulterdurchmesser = bauteil.inputs.schulterdurchmesser;
             break;
         case 'IR-NJP':
             model = createIRNU(bauteil.inputs);
@@ -581,6 +582,7 @@ export async function createSTL(bauteil) {
             dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
             dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
             dimensions.hoehe = bauteil.inputs.breite;
+            dimensions.schulterdurchmesser = bauteil.inputs.schulterdurchmesser;
             break;
         case 'T-Stueck':
             model = createTstueck(bauteil.inputs);

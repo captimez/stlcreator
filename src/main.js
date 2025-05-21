@@ -2,7 +2,6 @@ const { app, Menu, BrowserWindow, ipcMain } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
 const { dialog } = require('electron');
-const opcua = require('./service/opcua');
 
 const { preload } = require('react-dom');
 
@@ -49,16 +48,7 @@ app.on('ready', async () => {
     });
 
     // Verbindungsaufbau im Hintergrund
-    setTimeout(async () => {
-        try {
-            await opcua.connectionStrategy();
-            console.log("Connected to OPC UA server");
-            mainWindow.webContents.send("opcua-status", { success: true, message: "Connected to OPC UA server successfully." });
-        } catch (error) {
-            console.error("Error connecting to OPC UA server:", error);
-            mainWindow.webContents.send("opcua-status", { success: false, message: `Failed to connect to OPC UA server: ${error.message}` });
-        }
-    }, 100); // Verbindung 100ms nach dem Start der App beginnen
+    
 });
 
 function loadConfig() {

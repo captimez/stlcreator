@@ -91,37 +91,6 @@ const bauteile = [
             },
         ]
      },
-    {
-        name:"T-Stuecke",
-        teile: [
-            {
-                name: "T-Stueck",
-                demoName: "T-Stueck",
-                shortcut: ["AD1","AD2","",""],
-                inputs:{
-                    zylinder_durchmesser_aussen: 0,
-                    zylinder2_durchmesser_aussen: 0,
-                    laenge: 0,
-                    hoehe: 0,
-                    half: false,
-                }
-            },]},
-    {
-        name:"Winkel",
-        teile: [
-            {
-                name: "Rohrbogen",
-                demoName: "Rohrbogen",
-                shortcut: ["DM","W","SL1","SL2"],
-                inputs:{
-                    durchmesser: 20,
-                    winkel: 90,
-                    schenkel_laenge_1: 60,
-                    schenkel_laenge_2: 60,
-                }
-            },
-    ]}
-    
 ];
 
 /**

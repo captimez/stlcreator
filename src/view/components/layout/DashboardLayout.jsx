@@ -105,14 +105,7 @@ function SidebarFooter({ router, mini }) {
 }
 function ToolbarActions() {
   const [isMaximized, setIsMaximized] = useState(false);
-  const [opcuaConnected, setOpcuaConnected] = useState(false);
 
-  useEffect(() => {
-      // Check OPC UA connection on component mount
-      window.api.receive("opcua-status", (status) => {
-          setOpcuaConnected(status.success);
-      })
-    }, []);
 
   useEffect(() => {
       window.api.isMaximized().then(setIsMaximized);
@@ -123,17 +116,6 @@ function ToolbarActions() {
 
   return (
       <Box sx={{ display: 'flex', alignItems: 'center', height: '50%' }}>
-          {/* OPC UA Connection Status */}
-          <Tooltip title={opcuaConnected ? "Connected to OPC UA" : "Disconnected from OPC UA"}>
-              <FiberManualRecordIcon
-                  fontSize="small"
-                  sx={{
-                      color: opcuaConnected ? "green" : "red",
-                      marginRight: 1,
-                  }}
-              />
-          </Tooltip>
-
           {/* Minimize, Maximize, Close Buttons */}
           <IconButton onClick={() => window.api.minimizeWindow()} size="small" sx={{ '-webkit-app-region': "no-drag", padding: "4px" }}>
               <MinimizeIcon fontSize='small' />
