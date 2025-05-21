@@ -19,7 +19,7 @@ const bauteile = [
                 demoName: "OR-N",
                 shortcut: ["D1","D2","A","B","C",""],
                 inputs: {
-                    aussendurchmesser: 0,
+                    manteldurchmesser: 0,
                     laufbahndurchmesser: 0,
                     breite: 0,
                 },
@@ -29,7 +29,7 @@ const bauteile = [
                 demoName: "OR-NU",
                 shortcut: ["D1","D2","A","B","C",""],
                 inputs: {
-                    aussendurchmesser: 0,
+                    manteldurchmesser: 0,
                     schulterdurchmesser: 0,
                     laufbahndurchmesser: 0,
                     lichteweite: 0,
@@ -41,7 +41,7 @@ const bauteile = [
                 demoName: "IR-N",
                 shortcut: ["D1","D2","A","B"],
                 inputs: {
-                    innendurchmesser: 0,
+                    bohrungsdurchmesser: 0,
                     laufbahndurchmesser: 0,
                     schulterdurchmesser: 0,
                     breite: 0,
@@ -52,43 +52,43 @@ const bauteile = [
                 demoName: "IR-NJ",
                 shortcut: ["SD","D2","A","B"],
                 inputs: {
-                    innendurchmesser: 0,
+                    bohrungsdurchmesser: 0,
                     laufbahndurchmesser: 0,
                     schulterdurchmesser: 0,
                     breite: 0,
                 }
             },
-            {
-                name: "IR-NJP",
-                demoName: "IR-NJP",
-                shortcut: ["D1","D2","A","B"],
-                inputs: {
-                    innendurchmesser: 0,
-                    laufbahndurchmesser: 0,
-                    breite: 0,
-                }
-            },
+            //{
+                //name: "IR-NJP",
+                //demoName: "IR-NJP",
+                //shortcut: ["D1","D2","A","B"],
+                //inputs: {
+                    //innendurchmesser: 0,
+                    //laufbahndurchmesser: 0,
+                    //breite: 0,
+                //}
+            //},
             {
                 name: "IR-NU",
                 demoName: "IR-NU",
                 shortcut: ["D1","D2","A","B"],
                 inputs: {
-                    innendurchmesser: 0,
+                    bohrungsdurchmesser: 0,
                     laufbahndurchmesser: 0,
                     breite: 0,
                 }
             },
-            {
-                name: "IR-NUP",
-                demoName: "IR-NUP",
-                shortcut: ["D1","D2","A","B"],
-                inputs: {
-                    innendurchmesser: 0,
-                    laufbahndurchmesser: 0,
-                    schulterdurchmesser: 0,
-                    breite: 0,
-                }
-            },
+            //{
+                //name: "IR-NUP",
+                //demoName: "IR-NUP",
+                //shortcut: ["D1","D2","A","B"],
+                //inputs: {
+                    //innendurchmesser: 0,
+                    //laufbahndurchmesser: 0,
+                    //schulterdurchmesser: 0,
+                    //breite: 0,
+                //}
+            //},
         ]
      },
 ];
@@ -101,7 +101,11 @@ const bauteile = [
  */
 const Katalog = () => {
     const { selectedBauteil, setSelectedBauteil } = useAppContext();
-    const [katalogOpen, setKatalogOpen] = React.useState(new Map());
+    const [katalogOpen, setKatalogOpen] = React.useState(() => {
+        const map = new Map();
+        if (bauteile.length > 0) map.set(bauteile[0], true); // Ersten Reiter öffnen
+        return map;
+    });
 
     /**
      * Öffnet oder schließt eine Bauteilkategorie.

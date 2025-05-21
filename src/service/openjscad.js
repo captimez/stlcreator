@@ -126,8 +126,8 @@ function createAussenring2({
     return rotate([0, 0, 0], result);
   }
 
-function createORN({aussendurchmesser, laufbahndurchmesser, breite}){
-  aussendurchmesser = Number(aussendurchmesser)
+function createORN({manteldurchmesser, laufbahndurchmesser, breite}){
+  let aussendurchmesser = Number(manteldurchmesser)
   laufbahndurchmesser = Number(laufbahndurchmesser)
   breite = Number(breite)
 
@@ -140,8 +140,8 @@ function createORN({aussendurchmesser, laufbahndurchmesser, breite}){
   return translate([0,0,0],result);
 }
 
-function createORNU({ aussendurchmesser, schulterdurchmesser, laufbahndurchmesser, lichteweite, breite}){
-  aussendurchmesser = Number(aussendurchmesser)
+function createORNU({ manteldurchmesser, schulterdurchmesser, laufbahndurchmesser, lichteweite, breite}){
+  let aussendurchmesser = Number(manteldurchmesser)
   schulterdurchmesser = Number(schulterdurchmesser)
   laufbahndurchmesser = Number(laufbahndurchmesser)
   lichteweite = Number(lichteweite)
@@ -158,8 +158,8 @@ function createORNU({ aussendurchmesser, schulterdurchmesser, laufbahndurchmesse
 
 }
 
-function createIRN({ innendurchmesser, laufbahndurchmesser, schulterdurchmesser, breite}){
-  innendurchmesser = Number(innendurchmesser)
+function createIRN({ bohrungsdurchmesser, laufbahndurchmesser, schulterdurchmesser, breite}){
+  let innendurchmesser = Number(bohrungsdurchmesser)
   laufbahndurchmesser = Number(laufbahndurchmesser)
   schulterdurchmesser = Number(schulterdurchmesser)
   breite = Number(breite)
@@ -180,8 +180,8 @@ function createIRN({ innendurchmesser, laufbahndurchmesser, schulterdurchmesser,
   return translate([0,0,0],result);
 }
 
-function createIRNJ({innendurchmesser, laufbahndurchmesser, schulterdurchmesser, breite}){
-  innendurchmesser = Number(innendurchmesser)
+function createIRNJ({bohrungsdurchmesser, laufbahndurchmesser, schulterdurchmesser, breite}){
+  let innendurchmesser = Number(bohrungsdurchmesser)
   laufbahndurchmesser = Number(laufbahndurchmesser)
   schulterdurchmesser = Number(schulterdurchmesser)
   breite = Number(breite)
@@ -199,8 +199,8 @@ function createIRNJ({innendurchmesser, laufbahndurchmesser, schulterdurchmesser,
   return translate([0,0,0],result);
 }
 
-function createIRNU({innendurchmesser, laufbahndurchmesser, breite}){
-  innendurchmesser = Number(innendurchmesser)
+function createIRNU({bohrungsdurchmesser, laufbahndurchmesser, breite}){
+  let innendurchmesser = Number(bohrungsdurchmesser)
   laufbahndurchmesser = Number(laufbahndurchmesser)
   breite = Number(breite)
 
@@ -541,27 +541,27 @@ export async function createSTL(bauteil) {
             break;
         case 'OR-N':
             model = createORN(bauteil.inputs);
-            dimensions.aussendurchmesser = bauteil.inputs.aussendurchmesser;
+            dimensions.aussendurchmesser = bauteil.inputs.manteldurchmesser;
             dimensions.innendurchmesser = bauteil.inputs.laufbahndurchmesser;
             dimensions.hoehe = bauteil.inputs.breite;
             break;
         case 'OR-NU':
             model = createORNU(bauteil.inputs);
-            dimensions.aussendurchmesser = bauteil.inputs.aussendurchmesser;
+            dimensions.aussendurchmesser = bauteil.inputs.manteldurchmesser;
             dimensions.innendurchmesser = bauteil.inputs.laufbahndurchmesser;
             dimensions.hoehe = bauteil.inputs.breite;
             break;
         case 'IR-N':
             model = createIRN(bauteil.inputs);
             dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
-            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
+            dimensions.innendurchmesser = bauteil.inputs.bohrungsdurchmesser;
             dimensions.hoehe = bauteil.inputs.breite;
             dimensions.schulterdurchmesser = bauteil.inputs.schulterdurchmesser;
             break;
         case 'IR-NJ':
             model = createIRNJ(bauteil.inputs);
             dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
-            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
+            dimensions.innendurchmesser = bauteil.inputs.bohrungsdurchmesser;
             dimensions.hoehe = bauteil.inputs.breite;
             dimensions.schulterdurchmesser = bauteil.inputs.schulterdurchmesser;
             break;
@@ -574,13 +574,13 @@ export async function createSTL(bauteil) {
         case 'IR-NU':
             model = createIRNU(bauteil.inputs);
             dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
-            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
+            dimensions.innendurchmesser = bauteil.inputs.bohrungsdurchmesser;
             dimensions.hoehe = bauteil.inputs.breite;
             break;
         case 'IR-NUP':
             model = createIRNJ(bauteil.inputs);
             dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
-            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
+            dimensions.innendurchmesser = bauteil.inputs.bohrungsdurchmesser;
             dimensions.hoehe = bauteil.inputs.breite;
             dimensions.schulterdurchmesser = bauteil.inputs.schulterdurchmesser;
             break;

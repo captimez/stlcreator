@@ -161,11 +161,33 @@ const BauteilInput = () => {
                 aria-labelledby="image-popup-title"
                 aria-describedby="image-popup-description"
             >
-                <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', boxShadow: 24, p: 4 }}>
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: 600, // ⬅️ Hier die Breite erhöhen
+                        maxWidth: '90vw',
+                        bgcolor: 'background.paper',
+                        boxShadow: 24,
+                        p: 4
+                    }}
+                >
                     <Typography id="image-popup-title" variant="h6" component="h2">
                         {selectedBauteil?.name}
                     </Typography>
-                    {imageSrc && <img src={imageSrc} alt="Popup" style={{ width: '100%' }} />}
+                    {imageSrc && (
+                        <img
+                            src={imageSrc}
+                            alt="Popup"
+                            style={{
+                                width: '100%',
+                                maxHeight: '70vh', // ⬅️ Maximale Höhe setzen
+                                objectFit: 'contain'
+                            }}
+                        />
+                    )}
                 </Box>
             </Modal>
         </Box>

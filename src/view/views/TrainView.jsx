@@ -136,7 +136,7 @@ const TrainView = () => {
                             {
                                 isChecked.Aussenring && (
                                     <FormControl  style={{ marginBottom: "10px" }}>
-                                        <FormLabel>Aussendurchmesser</FormLabel>
+                                        <FormLabel>Manteldurchmesser</FormLabel>
                                         <TextField id="standard-basic" value={aussendurchmesser} onChange={(event) => setAussendurchmesser(event.target.value)} size='small'/>
                                         <FormLabel>Laufbahndurchmesser / Innendurchmesser</FormLabel>
                                         <TextField id="standard-basic" value={innendurchmesser} onChange={(event) => setInnendurchmesser(event.target.value)} size='small' />
@@ -146,9 +146,9 @@ const TrainView = () => {
                                 ) ||
                                 isChecked.Innenring&& (
                                     <FormControl  style={{ marginBottom: "10px" }}>
-                                        <FormLabel>Laufbahndurchmesser</FormLabel>
+                                        <FormLabel>Laufbahndurchmesser / Aussendurchmesser</FormLabel>
                                         <TextField id="standard-basic" value={aussendurchmesser} onChange={(event) => setAussendurchmesser(event.target.value)} size='small'/>
-                                        <FormLabel>Innendurchmesser</FormLabel>
+                                        <FormLabel>Bohrungsdurchmesser</FormLabel>
                                         <TextField id="standard-basic" value={innendurchmesser} onChange={(event) => setInnendurchmesser(event.target.value)} size='small' />
                                         <FormLabel>Schulterdurchmesser</FormLabel>
                                         <TextField id="standard-basic" value={innendurchmesser} onChange={(event) => setSchulterdurchmesser(event.target.value)} size='small' />
