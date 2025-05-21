@@ -55,11 +55,4 @@ contextBridge.exposeInMainWorld('api', {
     onMaximized: (callback) => ipcRenderer.on("window_maximized", callback),
     onUnmaximized: (callback) => ipcRenderer.on("window_unmaximized", callback), 
     checkOpcuaConnection: () => ipcRenderer.invoke("check-opcua-connection"),
-    sendDimensionsToSps: (aussendurchmesser, innendurchmesser, hoehe) => ipcRenderer.invoke("send-dimensions-to-sps", aussendurchmesser, innendurchmesser, hoehe),
-    receive: (channel, func) => {
-        const validChannels = ["opcua-status"];
-        if (validChannels.includes(channel)) {
-            ipcRenderer.on(channel, (event, ...args) => func(...args));
-        }
-    },
 });

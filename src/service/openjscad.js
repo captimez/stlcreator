@@ -363,6 +363,25 @@ function createTstueck({
   }
 }
 
+function createRohr({ zylinder_durchmesser, laenge, half}){
+  zylinder_durchmesser = Number(zylinder_durchmesser);
+  laenge = Number(laenge);
+
+  const zylinder = cylinder({ radius: zylinder_durchmesser / 2, height: laenge, segments: resolution });
+
+  if(half){
+      let rectangle = cuboid({size:[laenge + laenge,laenge + laenge,zylinder_durchmesser / 2], segments:resolution})
+      rectangle = rotate([0, 0, 0],rectangle)
+      rectangle = translate([0, 0, - (zylinder_durchmesser / 4)],rectangle)
+
+      let rohr_half = subtract(zylinder, rectangle)
+      return translate([0,laenge / 2,0],rohr_half);
+  }
+  else {
+      return zylinder;
+  }
+}
+
 
 function createRohrbogen({
   durchmesser,
@@ -585,6 +604,11 @@ export async function createSTL(bauteil) {
         case 'T-Stueck':
             model = createTstueck(bauteil.inputs);
             dimensions.thoehe = bauteil.inputs.hoehe;
+            break;
+        case 'Rohr':
+            model = createRohr(bauteil.inputs);
+            dimensions.laenge = bauteil.inputs.laenge;
+            dimensions.durchmesser = bauteil.inputs.zylinder_durchmesser;
             break;
         case "Rohrbogen":
             model = createRohrbogen(bauteil.inputs);

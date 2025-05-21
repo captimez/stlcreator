@@ -2,7 +2,6 @@ const { app, Menu, BrowserWindow, ipcMain } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
 const { dialog } = require('electron');
-const opcua = require('./service/opcua');
 
 const { preload } = require('react-dom');
 
@@ -48,17 +47,6 @@ app.on('ready', async () => {
         mainWindow.webContents.send("window_unmaximized");
     });
 
-    // Verbindungsaufbau im Hintergrund
-    setTimeout(async () => {
-        try {
-            await opcua.connectionStrategy();
-            console.log("Connected to OPC UA server");
-            mainWindow.webContents.send("opcua-status", { success: true, message: "Connected to OPC UA server successfully." });
-        } catch (error) {
-            console.error("Error connecting to OPC UA server:", error);
-            mainWindow.webContents.send("opcua-status", { success: false, message: `Failed to connect to OPC UA server: ${error.message}` });
-        }
-    }, 100); // Verbindung 100ms nach dem Start der App beginnen
 });
 
 function loadConfig() {
@@ -196,8 +184,9 @@ ipcMain.handle("updated-stl", () => {
 ipcMain.handle("start-python-script", (event, scriptName, args) => {
     const { spawn } = require('child_process');
     const pythonPath = path.join(__dirname,"../python",scriptName);
+    const pythonVenvPath = path.join(__dirname,"python/venv/bin/python3.exe");
     console.log("python path: ", pythonPath)
-    const pythonProcess = spawn('python', ["-u", pythonPath, ...args]);
+    const pythonProcess = spawn(pythonVenvPath, ["-u", pythonPath, ...args]);
 
     pythonProcess.stdout.on('data', (data) => {
         console.log(`stdout: ${data}`);
@@ -214,7 +203,7 @@ ipcMain.handle("start-python-script", (event, scriptName, args) => {
 
     pythonProcess.stderr.on('data', (data) => {
         console.error(`stderr: ${data}`);
-        const parsedJson = JSON.parse(data.toString());
+        const parsedJson = data.toString();
         mainWindow.webContents.send("python-error", parsedJson);
     });
 
@@ -223,27 +212,6 @@ ipcMain.handle("start-python-script", (event, scriptName, args) => {
     });
 });
 
-ipcMain.handle("check-opcua-connection", async () => {
-    try {
-        await opcua.connectionStrategy();
-        return { success: true, message: "Connected to OPC UA server successfully." };
-    } catch (error) {
-        return { success: false, message: `Failed to connect to OPC UA server: ${error.message}` };
-    }
-});
-
-ipcMain.handle("send-dimensions-to-sps", async (event, aussendurchmesser, innendurchmesser, hoehe) => {
-    try {
-        console.log("Sending dimensions to SPS:", { aussendurchmesser, innendurchmesser, hoehe });
-        await opcua.writeNodeValue("ns=3;s=Typdaten_DB.Aussendurchmesser", aussendurchmesser);
-        await opcua.writeNodeValue("ns=3;s=Typedaten_DB.Innendurchmesser", innendurchmesser);
-        await opcua.writeNodeValue("ns=3;s=Typdaten_DB.Breite", hoehe);
-
-        return { success: true, message: "Dimensions sent to SPS successfully." };
-    } catch (error) {
-        return { success: false, message: `Failed to send dimensions to SPS: ${error.message}` };
-    }
-});
 
 
 

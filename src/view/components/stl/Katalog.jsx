@@ -11,86 +11,86 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 
 //Bauteile definieren
 const bauteile = [
-    {
-            name: "Ringe",
-            teile: [
-            {
-                name: "OR-N",
-                demoName: "OR-N",
-                shortcut: ["D1","D2","A","B","C",""],
-                inputs: {
-                    aussendurchmesser: 0,
-                    laufbahndurchmesser: 0,
-                    breite: 0,
-                },
-            },
-            {
-                name: "OR-NU",
-                demoName: "OR-NU",
-                shortcut: ["D1","D2","A","B","C",""],
-                inputs: {
-                    aussendurchmesser: 0,
-                    schulterdurchmesser: 0,
-                    laufbahndurchmesser: 0,
-                    lichteweite: 0,
-                    breite: 0,
-                },
-            },
-            {
-                name: "IR-N",
-                demoName: "IR-N",
-                shortcut: ["D1","D2","A","B"],
-                inputs: {
-                    innendurchmesser: 0,
-                    laufbahndurchmesser: 0,
-                    schulterdurchmesser: 0,
-                    breite: 0,
-                }
-            },
-            {
-                name: "IR-NJ",
-                demoName: "IR-NJ",
-                shortcut: ["SD","D2","A","B"],
-                inputs: {
-                    innendurchmesser: 0,
-                    laufbahndurchmesser: 0,
-                    schulterdurchmesser: 0,
-                    breite: 0,
-                }
-            },
-            {
-                name: "IR-NJP",
-                demoName: "IR-NJP",
-                shortcut: ["D1","D2","A","B"],
-                inputs: {
-                    innendurchmesser: 0,
-                    laufbahndurchmesser: 0,
-                    breite: 0,
-                }
-            },
-            {
-                name: "IR-NU",
-                demoName: "IR-NU",
-                shortcut: ["D1","D2","A","B"],
-                inputs: {
-                    innendurchmesser: 0,
-                    laufbahndurchmesser: 0,
-                    breite: 0,
-                }
-            },
-            {
-                name: "IR-NUP",
-                demoName: "IR-NUP",
-                shortcut: ["D1","D2","A","B"],
-                inputs: {
-                    innendurchmesser: 0,
-                    laufbahndurchmesser: 0,
-                    schulterdurchmesser: 0,
-                    breite: 0,
-                }
-            },
-        ]
-     },
+    //{
+            //name: "Ringe",
+            //teile: [
+            //{
+                //name: "OR-N",
+                //demoName: "OR-N",
+                //shortcut: ["D1","D2","A","B","C",""],
+                //inputs: {
+                    //aussendurchmesser: 0,
+                    //laufbahndurchmesser: 0,
+                    //breite: 0,
+                //},
+            //},
+            //{
+                //name: "OR-NU",
+                //demoName: "OR-NU",
+                //shortcut: ["D1","D2","A","B","C",""],
+                //inputs: {
+                    //aussendurchmesser: 0,
+                    //schulterdurchmesser: 0,
+                    //laufbahndurchmesser: 0,
+                    //lichteweite: 0,
+                    //breite: 0,
+                //},
+            //},
+            //{
+                //name: "IR-N",
+                //demoName: "IR-N",
+                //shortcut: ["D1","D2","A","B"],
+                //inputs: {
+                    //innendurchmesser: 0,
+                    //laufbahndurchmesser: 0,
+                    //schulterdurchmesser: 0,
+                    //breite: 0,
+                //}
+            //},
+            //{
+                //name: "IR-NJ",
+                //demoName: "IR-NJ",
+                //shortcut: ["SD","D2","A","B"],
+                //inputs: {
+                    //innendurchmesser: 0,
+                    //laufbahndurchmesser: 0,
+                    //schulterdurchmesser: 0,
+                    //breite: 0,
+                //}
+            //},
+            //{
+                //name: "IR-NJP",
+                //demoName: "IR-NJP",
+                //shortcut: ["D1","D2","A","B"],
+                //inputs: {
+                    //innendurchmesser: 0,
+                    //laufbahndurchmesser: 0,
+                    //breite: 0,
+                //}
+            //},
+            //{
+                //name: "IR-NU",
+                //demoName: "IR-NU",
+                //shortcut: ["D1","D2","A","B"],
+                //inputs: {
+                    //innendurchmesser: 0,
+                    //laufbahndurchmesser: 0,
+                    //breite: 0,
+                //}
+            //},
+            //{
+                //name: "IR-NUP",
+                //demoName: "IR-NUP",
+                //shortcut: ["D1","D2","A","B"],
+                //inputs: {
+                    //innendurchmesser: 0,
+                    //laufbahndurchmesser: 0,
+                    //schulterdurchmesser: 0,
+                    //breite: 0,
+                //}
+            //},
+        //]
+     //},
     {
         name:"T-Stuecke",
         teile: [
@@ -105,7 +105,18 @@ const bauteile = [
                     hoehe: 0,
                     half: false,
                 }
-            },]},
+            },
+            {
+                name: "Rohr",
+                demoName: "Rohr",
+                shortcut: ["AD1","AD2","L","H"],
+                inputs:{
+                    zylinder_durchmesser: 0,
+                    laenge: 0,
+                    half: false,
+                }
+            }
+            ,]},
     {
         name:"Winkel",
         teile: [
