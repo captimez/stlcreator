@@ -605,6 +605,7 @@ export async function createSTL(bauteil) {
         case 'T-Stueck':
             model = createTstueck(bauteil.inputs);
             dimensions.thoehe = bauteil.inputs.hoehe;
+            dimensions.rohrdurchmesser = bauteil.inputs.zylinder_durchmesser_aussen;
             break;
         case 'Rohr':
             model = createRohr(bauteil.inputs);

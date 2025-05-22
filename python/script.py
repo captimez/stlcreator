@@ -58,7 +58,6 @@ try:
         workpiece_laenge = config['laenge']
         workpiece_verschiebung = config['verschiebung']
 
-    send_to_sps(workpiece_innendurchmesser)
     send_progress(5, "Loaded configuration file successfully.")
 except Exception as e:
     send_progress(0, f"Error loading config file: {e}")

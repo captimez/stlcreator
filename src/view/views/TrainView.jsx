@@ -12,12 +12,13 @@ const TrainView = () => {
     // Initialize state for isSymmetric
     const [isSymmetric, setIsSymmetric] = useState(false);
     const { selectedBauteil } = useAppContext();
-    const [ isChecked, setIsChecked ] = useState({Ring: false, Winkel: false, TStueck: false});
+    const [ isChecked, setIsChecked ] = useState({Winkel: false, TStueck: false});
     const [solutionName, setSolutionName] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
 
     const [aussendurchmesser, setAussendurchmesser] = useState(0);
     const [innendurchmesser, setInnendurchmesser] = useState(0);
+    const [rohrdurchmesser, setRohrdurchmesser] = useState(0);
     const [hoehe, setHoehe] = useState(0);
     const [laenge, setLaenge] = useState(0);
     const [thoehe, setThoehe] = useState(0);
@@ -31,7 +32,7 @@ const TrainView = () => {
         window.api.getDimensions().then((dimensions) => {
             
             console.log("Dimensions loaded: ", dimensions);
-
+            setRohrdurchmesser(dimensions.rohrdurchmesser);
             setAussendurchmesser(dimensions.aussendurchmesser);
             setInnendurchmesser(dimensions.innendurchmesser);
             setHoehe(dimensions.hoehe);
@@ -52,7 +53,7 @@ const TrainView = () => {
     }, []);
 
     const handleCheckboxChange = (event) => {
-        const newCheckedState = { Ring: false, Winkel: false, TStueck: false, [event.target.name]: true };
+        const newCheckedState = { Winkel: false, TStueck: false, [event.target.name]: true };
         setIsChecked(newCheckedState);
         console.log(newCheckedState);
     };
@@ -81,6 +82,7 @@ const TrainView = () => {
             hoehe: hoehe,
             laenge: laenge,
             thoehe: thoehe,
+            rohrdurchmesser: rohrdurchmesser,
             gp_count: gp_count
         };
         
@@ -128,7 +130,6 @@ const TrainView = () => {
                                     </Typography>
                                 )}
                             </FormControl>
-                            <FormControlLabel control={<Checkbox name='Ring' checked={isChecked.Ring} color="primary" onChange={handleCheckboxChange}/>} label="Ring" />
                             <FormControlLabel control={<Checkbox name='Winkel' checked={isChecked.Winkel} color="primary" onChange={handleCheckboxChange}/>} label="Winkel" />
                             <FormControlLabel control={<Checkbox name='TStueck' color="primary" checked={isChecked.TStueck} onChange={handleCheckboxChange}/>} label="TStueck" />
                             {
@@ -145,13 +146,15 @@ const TrainView = () => {
                                 isChecked.Winkel && (
                                     <FormControl  style={{ marginBottom: "10px" }}>
                                         <FormLabel>Schenkel Länge</FormLabel>
-                                        <TextField id="standard-basic" value={laenge} onChange={(event) => setLaenge(event.target.value)} size='small' label="Winkel" />
+                                        <TextField id="standard-basic" value={laenge} onChange={(event) => setLaenge(event.target.value)} size='small' />
                                     </FormControl>
                                 ) ||
                                 isChecked.TStueck && (
                                     <FormControl  style={{ marginBottom: "10px" }}>
+                                        <FormLabel>Durchmesser Rohr 1</FormLabel>
+                                        <TextField id="standard-basic" value={rohrdurchmesser} onChange={(event) => setRohrdurchmesser(event.target.value)} size='small' />
                                         <FormLabel>T-Stück Höhe</FormLabel>
-                                        <TextField id="standard-basic" value={thoehe} onChange={(event) => setThoehe(event.target.value)} size='small' label="tHoehe" />
+                                        <TextField id="standard-basic" value={thoehe} onChange={(event) => setThoehe(event.target.value)} size='small' />
                                     </FormControl>
                                 )
                             }
