@@ -348,15 +348,16 @@ function createTstueck({
   // Innerer Hohlraum: Subtrahiere die inneren Zylinder
   /* const tStueck = subtract(tStueckAussen, innerTopZylinder, innerBottomZylinder); */
   let tStueck = tStueckAussen;
-  tStueck = rotate([0, Math.PI / 2, Math.PI / 2],tStueck)
-  
+  tStueck = rotate([-(Math.PI / 2), 0, Math.PI / 2],tStueck)
+  tStueck = translate([(zylinderBottomHeight / 2), 0, 0],tStueck)
+
   if(half){
-      let rectangle = cuboid({size:[laenge + laenge,laenge + laenge,zylinder_durchmesser_aussen / 2], segments:resolution})
-      rectangle = rotate([0, 0, 0],rectangle)
-      rectangle = translate([0, 0, - (zylinder_durchmesser_aussen / 4)],rectangle)
+      let rectangle = cuboid({size:[laenge + laenge + hoehe,laenge + laenge + hoehe,zylinder_durchmesser_aussen / 2], segments:resolution})
+      rectangle = rotate([-Math.PI / 2, 0, 0],rectangle)
+      rectangle = translate([0,(zylinder_durchmesser_aussen / 2) / 2 , 0],rectangle)
 
       let tstueck_half = subtract(tStueck, rectangle)
-      return translate([0,zylinderBottomHeight / 2,0],tstueck_half);
+      return translate([0,0,0],tstueck_half);
   }
   else {
       return tStueck;
@@ -371,11 +372,11 @@ function createRohr({ zylinder_durchmesser, laenge, half}){
 
   if(half){
       let rectangle = cuboid({size:[laenge + laenge,laenge + laenge,zylinder_durchmesser / 2], segments:resolution})
-      rectangle = rotate([0, 0, 0],rectangle)
-      rectangle = translate([0, 0, - (zylinder_durchmesser / 4)],rectangle)
+      rectangle = rotate([-Math.PI / 2, 0, 0],rectangle)
+      rectangle = translate([0, zylinder_durchmesser / 4, 0],rectangle)
 
       let rohr_half = subtract(zylinder, rectangle)
-      return translate([0,laenge / 2,0],rohr_half);
+      return translate([0,0,0],rohr_half);
   }
   else {
       return zylinder;
