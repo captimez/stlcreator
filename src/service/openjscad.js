@@ -348,13 +348,14 @@ function createTstueck({
   // Innerer Hohlraum: Subtrahiere die inneren Zylinder
   /* const tStueck = subtract(tStueckAussen, innerTopZylinder, innerBottomZylinder); */
   let tStueck = tStueckAussen;
-  tStueck = rotate([-(Math.PI / 2), 0, Math.PI / 2],tStueck)
-  tStueck = translate([(zylinderBottomHeight / 2), 0, 0],tStueck)
+  tStueck = rotate([Math.PI / 2 , 0, Math.PI],tStueck)
+  tStueck = rotate([0, 0, Math.PI],tStueck)
+  tStueck = translate([0, zylinderBottomHeight / 2, 0],tStueck)
 
   if(half){
       let rectangle = cuboid({size:[laenge + laenge + hoehe,laenge + laenge + hoehe,zylinder_durchmesser_aussen / 2], segments:resolution})
-      rectangle = rotate([-Math.PI / 2, 0, 0],rectangle)
-      rectangle = translate([0,(zylinder_durchmesser_aussen / 2) / 2 , 0],rectangle)
+      rectangle = rotate([0, Math.PI / 2, Math.PI ],rectangle)
+      rectangle = translate([zylinder_durchmesser_aussen/4, 0 , 0],rectangle)
 
       let tstueck_half = subtract(tStueck, rectangle)
       return translate([0,0,0],tstueck_half);
@@ -533,6 +534,9 @@ export async function createSTL(bauteil) {
       hoehe: 0,
       thoehe: 0,
       laenge: 0,
+      radius: 0,
+      rohrlaenge:0,
+      rohrdurchmesser:0,
     }
     switch(bauteil.name){
         case 'Aussenring1':
@@ -609,12 +613,13 @@ export async function createSTL(bauteil) {
             break;
         case 'Rohr':
             model = createRohr(bauteil.inputs);
-            dimensions.laenge = bauteil.inputs.laenge;
+            dimensions.rohrlaenge = bauteil.inputs.laenge;
             dimensions.durchmesser = bauteil.inputs.zylinder_durchmesser;
             break;
         case "Rohrbogen":
             model = createRohrbogen(bauteil.inputs);
             dimensions.laenge = bauteil.inputs.schenkel_laenge_1;
+            dimensions.radius = bauteil.inputs.durchmesser / 2;
             
             break;
 

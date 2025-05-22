@@ -51,20 +51,28 @@ try:
         filename = config["selectedFile"].split(".")[0]
         objectType = config["type"][0]
         solution_name = config["solutionName"]
-        workpiece_aussendurchmesser = config['aussendurchmesser']
-        workpiece_innendurchmesser = config['innendurchmesser']
-        workpiece_hoehe = config['hoehe']
-        workpiece_thoehe = config['thoehe']
-        workpiece_laenge = config['laenge']
-        workpiece_verschiebung = config['verschiebung']
+
+        if(objectType == "Rohr"):
+            workpiece_rohrlaenge = config['rohrlaenge']
+        elif(objectType == "LStueck"):
+            workpiece_laenge = config['laenge']
+            workpiece_radius = config['radius']
+            workpiece_verschiebung = config['verschiebung']
+        elif(objectType == "TStueck"):
+            workpiece_thoehe = config['thoehe']
+        elif(objectType == "Ring"):
+            workpiece_aussendurchmesser = config['aussendurchmesser']
+            workpiece_innendurchmesser = config['innendurchmesser']
+            workpiece_hoehe = config['hoehe']
+            
+            workpiece_innenradius = workpiece_innendurchmesser / 2
+            workpiece_aussenradius = workpiece_aussendurchmesser / 2
 
     send_progress(5, "Loaded configuration file successfully.")
 except Exception as e:
     send_progress(0, f"Error loading config file: {e}")
     exit(1)
 
-workpiece_innenradius = workpiece_innendurchmesser / 2
-workpiece_aussenradius = workpiece_aussendurchmesser / 2
 
 grip_depth = 17.5
 grip_tolerance = 4
@@ -84,14 +92,23 @@ elif(objectType == "TStueck"):
         "x": 0,
         "y": workpiece_thoehe / 2, 
         "z": 0,
-        "rx": 180, 
+        "rx": 90, 
+        "ry": 90, 
+        "rz": 0,
+    }
+elif(objectType == "Rohr"):
+    gp = {
+        "x": 0, 
+        "y": workpiece_rohrlaenge / 2, 
+        "z": 0, 
+        "rx": 0, 
         "ry": 0, 
         "rz": 0,
     }
-elif(objectType == "Winkel"):
+elif(objectType == "LStueck"):
     gp = {
-        "x": 0, 
-        "y": workpiece_laenge / 2, 
+        "x": workpiece_laenge + workpiece_radius + (workpiece_radius / 2), 
+        "y": -(workpiece_radius / 2), 
         "z": 0, 
         "rx": 0, 
         "ry": 0, 
@@ -117,10 +134,10 @@ try:
     
     options = get_default_chrome_options()
     options.page_load_strategy = 'eager'
-    driver = webdriver.Chrome(service=service, options=options)
-    #driver = webdriver.Edge()
+    #driver = webdriver.Chrome(service=service, options=options)
+    driver = webdriver.Edge()
     driver.implicitly_wait(10)
-    send_to_sps(workpiece_innendurchmesser)
+    #send_to_sps(workpiece_innendurchmesser)
     send_progress(10, "Initialized WebDriver successfully.")
 except Exception as e:
     send_progress(0, f"Error initializing WebDriver: {e}")
@@ -132,7 +149,7 @@ try:
     driver.find_element(By.ID, "id_username").send_keys("rbc@rbc-robotics.de")
     driver.find_element(By.ID, "id_password").send_keys("rbc001rbc001rbc001")
     driver.find_element(By.ID, "login_button").click()
-    time.sleep(2)
+    time.sleep(1)
     send_progress(20, "Logged into Photoneo BPS successfully.")
 except Exception as e:
     send_progress(0, f"Error logging into Photoneo BPS: {e}")
@@ -141,13 +158,20 @@ except Exception as e:
 
 try:
     driver.get(f"{photoneo_ip}/deployment")
-    stop_button = driver.find_element(By.ID, "btn-deployment-action-stop")
-    driver.execute_script("arguments[0].scrollIntoView();", stop_button)
-    stop_button.click()
-    send_progress(25, "Stopped deployment successfully.")
+    try:
+        stop_button = WebDriverWait(driver, 2).until(
+            EC.presence_of_element_located((By.ID, "btn-deployment-action-stop"))
+        )
+        driver.execute_script("arguments[0].scrollIntoView();", stop_button)
+        stop_button.click()
+        send_progress(25, "Stopped deployment successfully.")
+    except Exception:
+        send_progress(25, "No Deployment, continuing...")
     driver.get(f"{photoneo_ip}/solutions/")
-except NoSuchElementException:
-    send_progress(25, "No Deployment, continuing...")
+except Exception as e:
+    send_progress(0, f"Error during deployment stop check: {e}")
+    driver.quit()
+    exit(1)
 
 try:
     # Get all existing Solution IDs
@@ -158,15 +182,18 @@ try:
         match = re.search(r'solution/(\d+)/detail', href)
         if match:
             solution_ids.append(int(match.group(1)))
+    
+    solution_ids.sort()
+    send_progress(25, str(solution_ids))
     if not solution_ids:
         raise ValueError("No solutions found.")
-    
-    if objectType == "Ring":
-        template_id = solution_ids[0]
+      # Sort in descending order
     elif objectType == "TStueck":
-        template_id = solution_ids[1]
-    elif objectType == "Winkel":
+        template_id = solution_ids[0]
+    elif objectType == "Rohr":
         template_id = solution_ids[2]
+    elif objectType == "LStueck":
+        template_id = solution_ids[1]
     
 
     send_progress(30, "Retrieved all existing solution IDs.")
@@ -178,7 +205,7 @@ except Exception as e:
 try:
     # Duplicate Template Solution
     driver.get(f'{photoneo_ip}/solution/{template_id}/duplicate')
-    time.sleep(1)
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "id_name")))
     name_input = driver.find_element(By.ID, "id_name")
     name_input.clear()
     name_input.send_keys(solution_name)
@@ -233,7 +260,6 @@ except Exception as e:
 try:
     # Save Workpiece
     save_button = driver.find_element(By.XPATH, "//button[@type='submit']")
-    time.sleep(2)
     save_button.click()
     time.sleep(2)
     send_progress(70, "Saved workpiece successfully.")
@@ -345,62 +371,64 @@ try:
                 driver.execute_script("arguments[0].click();", checkbox)
 	
         elif(objectType == "TStueck"):
-            if(gp_count == 0):
-                driver.get(f'{href}')
-            else:
-                href.replace("edit", "delete")
-                driver.get(f'{href}')
-                delete_button = WebDriverWait(driver, 10).until(
-                    EC.element_to_be_clickable((By.ID, "delete-grasping-point"))
-                )
-                driver.execute_script("arguments[0].scrollIntoView();", delete_button)
-            
+            driver.get(f'{href}')
+
+
             input_rotation_x = driver.find_element(By.NAME,"rotation_x")
             input_rotation_x.clear()
             input_rotation_x.send_keys(gp["rx"])
+
+            input_rotation_y = driver.find_element(By.NAME,"rotation_y")
+            input_rotation_y.clear()
+            input_rotation_y.send_keys(gp["ry"])
 
             input_gripping_point_y = driver.find_element(By.NAME,"position_y")
             input_gripping_point_y.clear()
             input_gripping_point_y.send_keys(gp["y"])
         
-            checkbox = driver.find_element(By.NAME, "is_rot_inv_enabled")
+        elif(objectType == "Rohr"):
+            driver.get(f'{href}')
 
-            if checkbox.is_selected():
-                driver.execute_script("arguments[0].click();", checkbox)
-
-        elif(objectType == "Winkel"):
             if(gp_count == 0):
-                driver.get(f'{href}')
-
-                input_gripping_point_x = driver.find_element(By.NAME,"position_x")
-                input_gripping_point_x.clear()
-                input_gripping_point_x.send_keys(0)
-                input_gripping_point_y = driver.find_element(By.NAME,"position_y")
-                input_gripping_point_y.clear()
-                input_gripping_point_y.send_keys(gp["y"])
-
-                checkbox = driver.find_element(By.NAME, "is_rot_inv_enabled")
-
-                if not checkbox.is_selected():
-                    driver.execute_script("arguments[0].click();", checkbox)
-                rot_y_checkbox = driver.find_element(By.ID, "id_rot_inv_axis_choice_2")
-
+                input_rotation_y = driver.find_element(By.NAME,"rotation_y")
+                input_rotation_y.clear()
+                input_rotation_y.send_keys(-90)
             elif(gp_count == 1):
-                driver.get(f'{href}')
-                input_gripping_point_y.clear()
-                input_gripping_point_y.send_keys(workpiece_verschiebung["y"])
-
-                input_gripping_point_x = driver.find_element(By.NAME,"position_x")
-                input_gripping_point_x.clear()
-                input_gripping_point_x.send_keys(workpiece_verschiebung["z"])
+                input_rotation_y = driver.find_element(By.NAME,"rotation_y")
+                input_rotation_y.clear()
+                input_rotation_y.send_keys(-90)
 
                 input_rotation_z = driver.find_element(By.NAME,"rotation_z")
                 input_rotation_z.clear()
-                input_rotation_z.send_keys(-workpiece_verschiebung["w"])
-            elif(gp_count > 1):
-                driver.get(f"{photoneo_ip}/solution/{solution_id}/gripping_points/")  
+                input_rotation_z.send_keys(180)
 
-        time.sleep(2)
+        elif(objectType == "LStueck"):
+            driver.get(f'{href}')
+
+            input_rotation_x = driver.find_element(By.NAME,"rotation_x")
+            input_rotation_x.clear()
+            input_rotation_x.send_keys(0)
+
+            input_rotation_z = driver.find_element(By.NAME,"rotation_z")
+            input_rotation_z.clear()
+            input_rotation_z.send_keys(0)
+
+            input_gripping_point_x = driver.find_element(By.NAME,"position_x")
+            input_gripping_point_x.clear()
+            input_gripping_point_x.send_keys(gp["x"])
+            
+            input_gripping_point_y = driver.find_element(By.NAME,"position_y")
+            input_gripping_point_y.clear()
+            input_gripping_point_y.send_keys(gp["y"])
+
+            input_rotation_x = driver.find_element(By.NAME,"rotation_x")
+            input_rotation_x.clear()
+            input_rotation_x.send_keys(180)
+
+            input_rotation_z = driver.find_element(By.NAME,"rotation_z")
+            input_rotation_z.clear()
+            input_rotation_z.send_keys(-145)
+
 
         # Set Rotation Invariant if object is ring type
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -414,7 +442,6 @@ try:
         save_gripping_point_button.click()
         send_progress(70 + gp_count, "Adjusting Gripping Points")
         gp_count += 1
-        time.sleep(1)
     send_progress(80, "Adjusted gripping points successfully.")
 except Exception as e:
     send_progress(0, f"Error navigating to or adjusting gripping points: {e}")
@@ -438,7 +465,9 @@ try:
     for href in box_hrefs:
         driver.get(href)
         time.sleep(1)
-
+        select_element = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "id_picking_object"))
+        )
         # Find the Select Element
         select_element = driver.find_element(By.ID, "id_picking_object")
 
@@ -447,12 +476,12 @@ try:
 
         # Select by visible text
         select.select_by_visible_text(filename)
-        time.sleep(1)
-
-        save_button = driver.find_element(By.XPATH, "//button[@type='submit']")
+        # Wait for the save button to be clickable instead of sleep
+        save_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']"))
+        )
         save_button.click()
-        time.sleep(2)
-
+        # Wait for navigation to localization page
         localization_path = href.replace("/edit/", "/localization/")
         driver.get(localization_path)
 
@@ -460,18 +489,15 @@ try:
         WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "id-loca-start-edit"))).click()
 
         # STEP 7.2: Wait for UI to settle (optional)
-        time.sleep(1)
-        select_element = driver.find_element(By.CSS_SELECTOR, "select.select.form-control")
+        select_element = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "select.select.form-control"))
+        )
         select = Select(select_element)
-        
         select.select_by_visible_text(f"Picked object ({filename})")
-        time.sleep(2)
 
         # STEP 7.3: Scan & Locate
         WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "id-scan-and-locate"))).click()
 
-        # STEP 7.4: Wait for scan to complete
-        time.sleep(2)
 
         # STEP 7.5: Save configuration
         save_button = WebDriverWait(driver, 10).until(

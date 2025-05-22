@@ -184,21 +184,23 @@ ipcMain.handle("updated-stl", () => {
 ipcMain.handle("start-python-script", (event, scriptName, args) => {
     const { spawn } = require('child_process');
     const pythonPath = path.join(__dirname,"../python",scriptName);
-    const pythonVenvPath = path.join(__dirname,"python/venv/bin/python3.exe");
+    const pythonVenvPath = path.join(__dirname,"../python/venv/Scripts/python.exe");
     console.log("python path: ", pythonPath)
     const pythonProcess = spawn(pythonVenvPath, ["-u", pythonPath, ...args]);
 
     pythonProcess.stdout.on('data', (data) => {
-        console.log(`stdout: ${data}`);
-        try {
-            const parsedJSon = JSON.parse(data.toString());
-            mainWindow.webContents.send("python-output", parsedJSon);
-        } catch (error) {
-            console.error("Error parsing JSON from Python script:", error);
-            console.error("Received data:", data.toString());
+        const lines = data.toString().split('\n');
+        for (const line of lines) {
+            if (line.trim().startsWith('{') && line.trim().endsWith('}')) {
+                try {
+                    const parsedJSon = JSON.parse(line.trim());
+                    mainWindow.webContents.send("python-output", parsedJSon);
+                } catch (error) {
+                    console.error("Error parsing JSON from Python script:", error);
+                    console.error("Received data:", line);
+                }
+            }
         }
-        const parsedJSon = JSON.parse(data.toString());
-        mainWindow.webContents.send("python-output", parsedJSon);
     });
 
     pythonProcess.stderr.on('data', (data) => {

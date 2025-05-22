@@ -12,7 +12,7 @@ const TrainView = () => {
     // Initialize state for isSymmetric
     const [isSymmetric, setIsSymmetric] = useState(false);
     const { selectedBauteil } = useAppContext();
-    const [ isChecked, setIsChecked ] = useState({Winkel: false, TStueck: false});
+    const [ isChecked, setIsChecked ] = useState({Rohr: false, LStueck: false, TStueck: false});
     const [solutionName, setSolutionName] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
 
@@ -21,6 +21,8 @@ const TrainView = () => {
     const [rohrdurchmesser, setRohrdurchmesser] = useState(0);
     const [hoehe, setHoehe] = useState(0);
     const [laenge, setLaenge] = useState(0);
+    const [radius, setRadius] = useState(0);
+    const [rohrlaenge, setRohrlaenge]= useState(0);
     const [thoehe, setThoehe] = useState(0);
     const [gp_count, setGpCount] = useState(0);
 
@@ -35,6 +37,8 @@ const TrainView = () => {
             setRohrdurchmesser(dimensions.rohrdurchmesser);
             setAussendurchmesser(dimensions.aussendurchmesser);
             setInnendurchmesser(dimensions.innendurchmesser);
+            setRohrlaenge(dimensions.rohrlaenge);
+            setRadius(dimensions.radius);
             setHoehe(dimensions.hoehe);
             setLaenge(dimensions.laenge);
             setThoehe(dimensions.thoehe);
@@ -53,7 +57,7 @@ const TrainView = () => {
     }, []);
 
     const handleCheckboxChange = (event) => {
-        const newCheckedState = { Winkel: false, TStueck: false, [event.target.name]: true };
+        const newCheckedState = {Rohr: false, LStueck: false, TStueck: false, [event.target.name]: true };
         setIsChecked(newCheckedState);
         console.log(newCheckedState);
     };
@@ -82,12 +86,13 @@ const TrainView = () => {
             hoehe: hoehe,
             laenge: laenge,
             thoehe: thoehe,
+            radius: radius,
             rohrdurchmesser: rohrdurchmesser,
+            rohrlaenge: rohrlaenge,
             gp_count: gp_count
         };
         
         console.log(selectedFile.name)
-        await window.api.sendDimensionsToSps(config.aussendurchmesser, config.innendurchmesser, config.hoehe)
         await window.api.savePythonConfig('pythonConfig.json', JSON.stringify(config));
         await window.api.startPythonScript('script.py');
 
@@ -130,23 +135,22 @@ const TrainView = () => {
                                     </Typography>
                                 )}
                             </FormControl>
-                            <FormControlLabel control={<Checkbox name='Winkel' checked={isChecked.Winkel} color="primary" onChange={handleCheckboxChange}/>} label="Winkel" />
+                            <FormControlLabel control={<Checkbox name='LStueck' checked={isChecked.Winkel} color="primary" onChange={handleCheckboxChange}/>} label="LStueck" />
                             <FormControlLabel control={<Checkbox name='TStueck' color="primary" checked={isChecked.TStueck} onChange={handleCheckboxChange}/>} label="TStueck" />
+                            <FormControlLabel control={<Checkbox name='Rohr' color="primary" checked={isChecked.Rohr} onChange={handleCheckboxChange}/>} label="Rohr" />
                             {
-                                isChecked.Ring && (
+                                isChecked.Rohr && (
                                     <FormControl  style={{ marginBottom: "10px" }}>
-                                        <FormLabel>Aussendurchmesser</FormLabel>
-                                        <TextField id="standard-basic" value={aussendurchmesser} onChange={(event) => setAussendurchmesser(event.target.value)} size='small' label="Aussendurchmesser" />
-                                        <FormLabel>Innendurchmesser</FormLabel>
-                                        <TextField id="standard-basic" value={innendurchmesser} onChange={(event) => setInnendurchmesser(event.target.value)} size='small' label="Innendurchmesser" />
-                                        <FormLabel>Höhe</FormLabel>
-                                        <TextField id="standard-basic" value={hoehe} onChange={(event) => setHoehe(event.target.value)} size='small' label="Hoehe" />
+                                        <FormLabel>Länge</FormLabel>
+                                        <TextField id="standard-basic" value={rohrlaenge} onChange={(event) => setRohrlaenge(event.target.value)} size='small' />
                                     </FormControl>
                                 ) ||
-                                isChecked.Winkel && (
+                                isChecked.LStueck && (
                                     <FormControl  style={{ marginBottom: "10px" }}>
                                         <FormLabel>Schenkel Länge</FormLabel>
                                         <TextField id="standard-basic" value={laenge} onChange={(event) => setLaenge(event.target.value)} size='small' />
+                                        <FormLabel>Schenkel Radius</FormLabel>
+                                        <TextField id="standard-basic" value={radius} onChange={(event) => setRadius(event.target.value)} size='small' />
                                     </FormControl>
                                 ) ||
                                 isChecked.TStueck && (
