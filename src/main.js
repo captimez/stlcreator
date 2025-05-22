@@ -30,7 +30,7 @@ app.on('ready', async () => {
 
     const startURL = `file://${path.join(__dirname, "../dist/index.html")}`;
     console.log("loading: ", startURL);
-    mainWindow.webContents.openDevTools({ mode: "detach" });
+    //mainWindow.webContents.openDevTools({ mode: "detach" });
 
     mainWindow.loadURL(startURL).catch((err) => {
         console.error("Failed to load index.html: ", err);
@@ -184,7 +184,7 @@ ipcMain.handle("updated-stl", () => {
 ipcMain.handle("start-python-script", (event, scriptName, args) => {
     const { spawn } = require('child_process');
     const pythonPath = path.join(__dirname,"../python",scriptName);
-    const pythonVenvPath = path.join(__dirname,"../python/venv/Scripts/python.exe");
+    const pythonVenvPath = path.join(__dirname,"/python/venv/bin/python.exe");
     console.log("python path: ", pythonPath)
     const pythonProcess = spawn(pythonVenvPath, ["-u", pythonPath, ...args]);
 
