@@ -510,6 +510,7 @@ export async function createSTL(bauteil) {
     let dimensions = {
       aussendurchmesser: 0,
       innendurchmesser: 0,
+      schulterdurchmesser: 0,
       hoehe: 0,
       thoehe: 0,
       laenge: 0,
@@ -544,12 +545,15 @@ export async function createSTL(bauteil) {
             dimensions.aussendurchmesser = bauteil.inputs.manteldurchmesser;
             dimensions.innendurchmesser = bauteil.inputs.laufbahndurchmesser;
             dimensions.hoehe = bauteil.inputs.breite;
+            dimensions.schulterdurchmesser = 0;
             break;
         case 'OR-NU':
             model = createORNU(bauteil.inputs);
             dimensions.aussendurchmesser = bauteil.inputs.manteldurchmesser;
             dimensions.innendurchmesser = bauteil.inputs.laufbahndurchmesser;
             dimensions.hoehe = bauteil.inputs.breite;
+            dimensions.schulterdurchmesser = 0;
+
             break;
         case 'IR-N':
             model = createIRN(bauteil.inputs);
@@ -570,12 +574,14 @@ export async function createSTL(bauteil) {
             dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
             dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
             dimensions.hoehe = bauteil.inputs.breite;
+            dimensions.schulterdurchmesser = 0;
             break;
         case 'IR-NU':
             model = createIRNU(bauteil.inputs);
             dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
             dimensions.innendurchmesser = bauteil.inputs.bohrungsdurchmesser;
             dimensions.hoehe = bauteil.inputs.breite;
+            dimensions.schulterdurchmesser = 0;
             break;
         case 'IR-NUP':
             model = createIRNJ(bauteil.inputs);

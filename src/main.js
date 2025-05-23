@@ -185,27 +185,53 @@ ipcMain.handle("updated-stl", () => {
 
 ipcMain.handle("start-python-script", (event, scriptName, args) => {
     const { spawn } = require('child_process');
-    const pythonPath = path.join(__dirname,"../python",scriptName);
-    console.log("python path: ", pythonPath)
-    const pythonProcess = spawn('python', ["-u", pythonPath, ...args]);
+    // Passe den Pfad zu deiner venv an:
+    const venvPython = path.join(__dirname, "../python/venv/bin/python");
+    const pythonPath = path.join(__dirname, "../python", scriptName);
+    console.log("python path: ", pythonPath);
+
+    const pythonProcess = spawn(venvPython, ["-u", pythonPath, ...args]);
 
     pythonProcess.stdout.on('data', (data) => {
-        console.log(`stdout: ${data}`);
-        try {
-            const parsedJSon = JSON.parse(data.toString());
-            mainWindow.webContents.send("python-output", parsedJSon);
-        } catch (error) {
-            console.error("Error parsing JSON from Python script:", error);
-            console.error("Received data:", data.toString());
+        const lines = data.toString().split('\n');
+        for (let line of lines) {
+            const str = line.trim();
+            if (!str) continue;
+            console.log(`stdout: ${str}`);
+            if (str.startsWith("{") && str.endsWith("}")) {
+                try {
+                    const parsedJson = JSON.parse(str);
+                    mainWindow.webContents.send("python-output", parsedJson);
+                } catch (error) {
+                    console.error("Error parsing JSON from Python script:", error);
+                    console.error("Received data:", str);
+                }
+            } else {
+                mainWindow.webContents.send("python-output", { message: str });
+                console.error("Received non-JSON stdout:", str);
+            }
         }
-        const parsedJSon = JSON.parse(data.toString());
-        mainWindow.webContents.send("python-output", parsedJSon);
     });
 
     pythonProcess.stderr.on('data', (data) => {
-        console.error(`stderr: ${data}`);
-        const parsedJson = JSON.parse(data.toString());
-        mainWindow.webContents.send("python-error", parsedJson);
+        const lines = data.toString().split('\n');
+        for (let line of lines) {
+            const str = line.trim();
+            if (!str) continue;
+            console.error(`stderr: ${str}`);
+            if (str.startsWith("{") && str.endsWith("}")) {
+                try {
+                    const parsedJson = JSON.parse(str);
+                    mainWindow.webContents.send("python-error", parsedJson);
+                } catch (error) {
+                    console.error("Error parsing JSON from Python stderr:", error);
+                    console.error("Received stderr:", str);
+                }
+            } else {
+                mainWindow.webContents.send("python-error", str);
+                console.error("Received non-JSON stderr:", str);
+            }
+        }
     });
 
     pythonProcess.on('close', (code) => {
