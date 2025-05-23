@@ -16,6 +16,8 @@ PLC_IP = "192.168.1.5"
 client = Client(f"opc.tcp://{PLC_IP}:4840")
 client_connected = False
 
+
+
 # Function to send progress updates
 def send_progress(percentage, message):
     progress_data = {
@@ -32,11 +34,12 @@ def send_to_sps(nodeId,value):
 
         client_node = client.get_node(nodeId)
         client_node_value = float(value)
-        client_node_dv = ua.DataValue(ua.Variant(client_node_value, ua.VariantType.Doublbe))
+        client_node_dv = ua.DataValue(ua.Variant(client_node_value, ua.VariantType.Double))
         
         client_node.set_value(client_node_dv)
         send_progress(5, f"Value {client_node_value} sent to node SPS successfully.")
-    except:
+    except Exception as e:
+        send_progress(0, f"Error sending value to SPS: {e}")
         client.disconnect()
         client_connected = False
 
@@ -52,7 +55,8 @@ def send_string_to_sps(nodeId, value):
         
         client_node.set_value(client_node_dv)
         send_progress(5, f"String {client_node_value} sent to node SPS successfully.")
-    except:
+    except Exception as e:
+        send_progress(0, f"Error sending string to SPS: {e}")
         client.disconnect()
         client_connected = False
 
@@ -67,6 +71,27 @@ def cleanup_and_exit(code=1):
     except:
         pass
     exit(code)
+    
+def send_all_to_sps(stl_file_name, uid, aussendurchmesser, innendurchmesser, schulterdurchmesser, hoehe):
+    try:
+        global client_connected
+        if not client_connected:
+            client.connect()
+            client_connected = True
+
+        send_string_to_sps('ns=3;s="Edit_DB"."Aktiv"."StlName"', stl_file_name)
+        send_to_sps('ns=3;s="Edit_DB"."Aktiv"."ProgVision"', uid)
+        send_to_sps('ns=3;s="Edit_DB"."Aktiv"."Aussendurchmesser"', aussendurchmesser)
+        send_to_sps('ns=3;s="Edit_DB"."Aktiv"."Innendurchmesser"', innendurchmesser)
+        send_to_sps('ns=3;s="Edit_DB"."Aktiv"."Schulterdurchmesser"', schulterdurchmesser)
+        send_to_sps('ns=3;s="Edit_DB"."Aktiv"."Teilbreite"', hoehe)
+        send_progress(15, "Alle SPS-Werte erfolgreich gesendet.")
+    except Exception as e:
+        send_progress(0, f"Fehler beim Senden an SPS: {e}")
+        client.disconnect()
+        client_connected = False
+        cleanup_and_exit(1)
+
 
 def update_thumbnail(driver):
     for toggle in all_toggles:
@@ -114,15 +139,6 @@ if(objectType == "Aussenring" or objectType == "Innenring"):
         "ry": 0, 
         "rz": 0,
     }
-    try:
-        send_string_to_sps('ns=3;s="Edit_DB"."Aktiv"."StlName"', stl_file_name)
-        send_to_sps('ns=3;s="Edit_DB"."Aktiv"."Aussendurchmesser"', workpiece_aussendurchmesser)
-        send_to_sps('ns=3;s="Edit_DB"."Aktiv"."Innendurchmesser"', workpiece_innendurchmesser)
-        send_to_sps('ns=3;s="Edit_DB"."Aktiv"."Schulterdurchmesser"', workpiece_schulterdurchmesser)
-        send_to_sps('ns=3;s="Edit_DB"."Aktiv"."Teilbreite"', workpiece_hoehe)
-    except Exception as e:
-        send_progress(0, f"Error sending values to SPS: {e}")
-        cleanup_and_exit(1)
 
 
 
@@ -214,7 +230,8 @@ try:
 
     uid_input = driver.find_element(By.ID, "id_uid")
     uid = uid_input.get_attribute("value")
-    send_to_sps('ns=3;s="Edit_DB"."Aktiv"."ProgVision"', uid)
+    send_all_to_sps(filename, uid, workpiece_aussendurchmesser, workpiece_innendurchmesser, workpiece_schulterdurchmesser, workpiece_hoehe)
+    time.sleep(2)
     duplicate_button = driver.find_element(By.ID, "duplicate-solution-btn")
     duplicate_button.click()
     send_progress(40, "Duplicated template solution successfully.")
