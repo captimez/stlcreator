@@ -28,23 +28,26 @@ def send_progress(percentage, message):
 
 def send_to_sps(nodeId,value):
     try:
+        global client_connected
         if not client_connected:
             client.connect()
             client_connected = True
 
         client_node = client.get_node(nodeId)
-        client_node_value = float(value)
-        client_node_dv = ua.DataValue(ua.Variant(client_node_value, ua.VariantType.Double))
-        
+        datatype = client_node.get_data_type_as_variant_type()
+        client_node_dv = create_data_value(value, datatype)       
         client_node.set_value(client_node_dv)
-        send_progress(5, f"Value {client_node_value} sent to node SPS successfully.")
+        
+        send_progress(5, f"Value {value} sent to node SPS successfully.")
     except Exception as e:
         send_progress(0, f"Error sending value to SPS: {e}")
-        client.disconnect()
-        client_connected = False
+        if client_connected:
+            client.disconnect()
+            client_connected = False
 
 def send_string_to_sps(nodeId, value):
     try:
+        global client_connected
         if not client_connected:
             client.connect()
             client_connected = True
@@ -57,8 +60,9 @@ def send_string_to_sps(nodeId, value):
         send_progress(5, f"String {client_node_value} sent to node SPS successfully.")
     except Exception as e:
         send_progress(0, f"Error sending string to SPS: {e}")
-        client.disconnect()
-        client_connected = False
+        if client_connected:
+            client.disconnect()
+            client_connected = False
 
 def cleanup_and_exit(code=1):
     try:
@@ -71,25 +75,107 @@ def cleanup_and_exit(code=1):
     except:
         pass
     exit(code)
+
+def create_data_value(value, datatype):
+    try:
+        if datatype == ua.VariantType.String:
+            value = str(value)
+            return ua.DataValue(ua.Variant(value, ua.VariantType.String))
+        elif datatype == ua.VariantType.Double:
+            value = float(value)
+            return ua.DataValue(ua.Variant(value, ua.VariantType.Double))
+        elif datatype == ua.VariantType.Float:
+            value = float(value)
+            return ua.DataValue(ua.Variant(value, ua.VariantType.Float))
+        elif datatype == ua.VariantType.Int32 or datatype == ua.VariantType.Int64:
+            value = int(value)
+            return ua.DataValue(ua.Variant(value, datatype))
+        elif datatype == ua.VariantType.UInt16:
+            value = int(value)
+            return ua.Variant(value, ua.VariantType.UInt16)
+        elif datatype == ua.VariantType.Boolean:
+            value = bool(value)
+            return ua.DataValue(ua.Variant(value, ua.VariantType.Boolean))
+        else:
+            raise ValueError(f"Unsupported datatype: {datatype}")
+    except Exception as e:
+        send_progress(0, f"Error creating data value: {e}")
+
+    
     
 def send_all_to_sps(stl_file_name, uid, aussendurchmesser, innendurchmesser, schulterdurchmesser, hoehe):
     try:
+        delay = 0.2
         global client_connected
         if not client_connected:
             client.connect()
             client_connected = True
 
-        send_string_to_sps('ns=3;s="Edit_DB"."Aktiv"."StlName"', stl_file_name)
-        send_to_sps('ns=3;s="Edit_DB"."Aktiv"."ProgVision"', uid)
-        send_to_sps('ns=3;s="Edit_DB"."Aktiv"."Aussendurchmesser"', aussendurchmesser)
-        send_to_sps('ns=3;s="Edit_DB"."Aktiv"."Innendurchmesser"', innendurchmesser)
-        send_to_sps('ns=3;s="Edit_DB"."Aktiv"."Schulterdurchmesser"', schulterdurchmesser)
-        send_to_sps('ns=3;s="Edit_DB"."Aktiv"."Teilbreite"', hoehe)
+        nodeId = 'ns=3;s="Edit_DB"."Aktiv"."StlName"'
+        value = stl_file_name
+        client_node = client.get_node(nodeId)
+        datatype = client_node.get_data_type_as_variant_type()
+        client_node_dv = create_data_value(value, datatype)       
+        client_node.set_value(client_node_dv)
+        time.sleep(delay)
+
+        nodeId = 'ns=3;s="Edit_DB"."Aktiv"."ProgVision"'
+        value = uid
+        client_node = client.get_node(nodeId)
+        datatype = client_node.get_data_type_as_variant_type()
+        client_node_dv = create_data_value(value, datatype)       
+        client_node.set_value(client_node_dv)
+        time.sleep(delay)
+
+        nodeId = 'ns=3;s="Edit_DB"."Aktiv"."Aussendurchmesser"'
+        value = aussendurchmesser
+        client_node = client.get_node(nodeId)
+        datatype = client_node.get_data_type_as_variant_type()
+        client_node_dv = create_data_value(value, datatype)       
+        client_node.set_value(client_node_dv)
+        time.sleep(delay)
+
+        nodeId = 'ns=3;s="Edit_DB"."Aktiv"."Innendurchmesser"'
+        value = innendurchmesser
+        client_node = client.get_node(nodeId)
+        datatype = client_node.get_data_type_as_variant_type()
+        client_node_dv = create_data_value(value, datatype)       
+        client_node.set_value(client_node_dv)
+        time.sleep(delay)
+
+        nodeId = 'ns=3;s="Edit_DB"."Aktiv"."Schulterdurchmesser"'
+        value = schulterdurchmesser
+        client_node = client.get_node(nodeId)
+        datatype = client_node.get_data_type_as_variant_type()
+        client_node_dv = create_data_value(value, datatype)       
+        client_node.set_value(client_node_dv)
+        time.sleep(delay)
+
+        nodeId = 'ns=3;s="Edit_DB"."Aktiv"."Teilbreite"'
+        value = hoehe
+        client_node = client.get_node(nodeId)
+        datatype = client_node.get_data_type_as_variant_type()
+        client_node_dv = create_data_value(value, datatype)       
+        client_node.set_value(client_node_dv)
+
+        nodeId = 'ns=3;s="Edit_DB"."Aktiv"."WerteGueltig"'
+        value = 1
+        client_node = client.get_node(nodeId)
+        datatype = client_node.get_data_type_as_variant_type()
+        client_node_dv = create_data_value(value, datatype)
+        client_node.set_value(client_node_dv)
+        time.sleep(delay)
+        
         send_progress(15, "Alle SPS-Werte erfolgreich gesendet.")
+
+        if client_connected:
+            client.disconnect()
+            client_connected = False
     except Exception as e:
         send_progress(0, f"Fehler beim Senden an SPS: {e}")
-        client.disconnect()
-        client_connected = False
+        if client_connected:
+            client.disconnect()
+            client_connected = False
         cleanup_and_exit(1)
 
 
@@ -147,7 +233,7 @@ if(objectType == "Aussenring" or objectType == "Innenring"):
 photoneo_ip = "http://127.0.0.1"  # Localhost for testing
 def get_default_chrome_options():
     options = webdriver.ChromeOptions()
-    #options.add_argument("--headless=new")  # Verwende den neuen Headless-Modus
+    #options.add_argument("--headless=inew")  # Verwende den neuen Headless-Modus
     options.add_argument("--window-size=1920,1080")
     options.add_argument("--no-sandbox")
     return options
@@ -156,7 +242,7 @@ try:
     # Initialize WebDriver
     base = os.path.dirname(os.path.abspath(__file__))
     chromedriver_path = os.path.join(base, 'chromedriver')
-    service = Service(exectuable_path= chromedriver_path)
+    service = Service(executable_path= chromedriver_path)
     
     options = get_default_chrome_options()
     options.page_load_strategy = 'eager'

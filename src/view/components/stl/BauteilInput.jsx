@@ -103,7 +103,7 @@ const BauteilInput = () => {
                                 <div className="input-box">
                                     <TextField
                                         name={key}
-                                        type='number'
+                                        type='text'
                                         label={`${key}${shortcut ? ` (${shortcut})` : ''}`}
                                         variant="filled"
                                         slotProps={{
