@@ -84,7 +84,7 @@ function MyThree(props) {
 
     // Initiale Breite und Höhe berechnen
     const { width } = container.getBoundingClientRect();
-    const height = 500;
+    const height = 300
 
     // THREE.js Kamera, Szene und Renderer initialisieren
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);

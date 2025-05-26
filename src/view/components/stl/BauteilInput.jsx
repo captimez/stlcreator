@@ -10,6 +10,7 @@ import { createSTL } from '../../../service/openjscad';
 import MyThree from '../threejs/viewer';
 import { IconButton, Modal, Typography } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
+import { use } from 'react';
 
 /**
  * BauteilInput Komponente
@@ -24,6 +25,65 @@ const BauteilInput = () => {
     const [open, setOpen] = React.useState(false); // Zustand für das Modal
     const [imageSrc, setImageSrc] = React.useState(null); // Zustand für das Bild im Modal
 
+
+    const [solutionName, setSolutionName] = useState('');
+
+    const [aussendurchmesser, setAussendurchmesser] = useState(0);
+    const [innendurchmesser, setInnendurchmesser] = useState(0);
+    const [schulterdurchmesser, setSchulterdurchmesser] = useState(0);
+    const [hoehe, setHoehe] = useState(0);
+
+    const [progress, setProgress] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
+    const [message, setMessage] = useState('');
+
+    useEffect(() => {
+        window.api.getDimensions().then((dimensions) => {
+            
+            console.log("Dimensions loaded: ", dimensions);
+
+            setAussendurchmesser(dimensions.aussendurchmesser);
+            setInnendurchmesser(dimensions.innendurchmesser);
+            setSchulterdurchmesser(dimensions.schulterdurchmesser);
+            setHoehe(dimensions.hoehe);
+
+        });
+        window.api.onPythonOutput((output) => {
+            setProgress(output.percentage);
+            setMessage(output.message);
+            console.log("Python Output: ", output);
+        });
+        window.api.onPythonError((error) => {
+            setProgress(0);
+            setMessage("Python Error: " + error);
+            console.error("Python Error: ", error);
+        });
+    }, []);
+
+    
+    const startTraining = async() => {
+        const type = Object.keys(isChecked).filter(key => isChecked[key]);
+        if (selectedBauteil.name.split("-")[0] == "IR"){
+            type = "Innenring";
+        }else if (selectedBauteil.name.split("-")[0] == "OR"){
+            type = "Aussenring";
+        }
+        const config = {
+            solutionName: solutionName,
+            selectedFile: selectedBauteil.stlName,
+            type: type,
+            aussendurchmesser: aussendurchmesser,
+            innendurchmesser: innendurchmesser,
+            hoehe: hoehe,
+            schulterdurchmesser: schulterdurchmesser,
+        };
+        
+        await window.api.savePythonConfig('pythonConfig.json', JSON.stringify(config));
+        await window.api.startPythonScript('script.py');
+
+        setIsLoading(true);
+        setProgress(0);
+    }
     /**
      * Aktualisiert die Eingabewerte des ausgewählten Bauteils im Zustand.
      * 
@@ -70,6 +130,7 @@ const BauteilInput = () => {
            if(response){
              showSnackbar("STL-Datei erfolgreich erstellt", "success");
              window.api.updatedStl(); // Aktualisiert die STL-Datei im Hauptprozess
+             startTraining();
            }
 
         } catch (error) {
@@ -95,11 +156,11 @@ const BauteilInput = () => {
                     </IconButton>
                 </Box>
                 {/* Dynamische Eingabefelder für die Bauteilparameter */}
-                <Grid2 container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+                <Grid2 container spacing={{ xs: 3, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                     {Object.entries(selectedBauteil?.inputs).map(([key, value], index) => {
                         const shortcut = selectedBauteil?.shortcut?.[index] || '';
                         return key !== "half" ? (
-                            <Grid2 key={key}>
+                            <Grid2 key={key} xs={4} sm={4} md={4}>
                                 <div className="input-box">
                                     <TextField
                                         name={key}
@@ -145,7 +206,7 @@ const BauteilInput = () => {
                 <Grid2>
                     <div class="input-box">
                         <Button sx={{ mt: 1.5 }} variant="contained" onClick={handleCreateSTL}>
-                            Erstelle STL
+                            Bauteil anlegen
                         </Button>
                     </div>
                 </Grid2>

@@ -16,8 +16,8 @@ app.on('ready', async () => {
     Menu.setApplicationMenu(null);
 
     mainWindow = new BrowserWindow({
-        width: 1920,
-        height: 1080,
+        width: 1280,
+        height: 800,
         show: true,
         frame: false,
         title: "STL Creator",

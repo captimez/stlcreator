@@ -22,6 +22,7 @@ const bauteile = [
                     manteldurchmesser: 0,
                     laufbahndurchmesser: 0,
                     breite: 0,
+                    gewicht: 0,
                 },
             },
             {
@@ -34,6 +35,7 @@ const bauteile = [
                     laufbahndurchmesser: 0,
                     lichteweite: 0,
                     breite: 0,
+                    gewicht: 0,
                 },
             },
             {
@@ -45,6 +47,7 @@ const bauteile = [
                     laufbahndurchmesser: 0,
                     schulterdurchmesser: 0,
                     breite: 0,
+                    gewicht: 0,
                 }
             },
             {
@@ -56,6 +59,7 @@ const bauteile = [
                     laufbahndurchmesser: 0,
                     schulterdurchmesser: 0,
                     breite: 0,
+                    gewicht: 0,
                 }
             },
             //{
@@ -76,6 +80,7 @@ const bauteile = [
                     bohrungsdurchmesser: 0,
                     laufbahndurchmesser: 0,
                     breite: 0,
+                    gewicht: 0,
                 }
             },
             //{
@@ -154,7 +159,7 @@ const Katalog = () => {
                         <Collapse in={katalogOpen.get(reiter)} timeout="auto">
                             <List>
                                 {reiter.teile.map((bauteil, index) => (
-                                    <ListItem key={index}>
+                                    <ListItem key={index} onClick={() => handleBauteilSelect(bauteil)} button>
                                         <ListItemAvatar>
                                             <Avatar src={`images/${bauteil.name}.png`} sx={{ mr: 3, height: 40, width: 40 }} />
                                         </ListItemAvatar>

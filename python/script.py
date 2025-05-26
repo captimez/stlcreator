@@ -92,7 +92,7 @@ def create_data_value(value, datatype):
             return ua.DataValue(ua.Variant(value, datatype))
         elif datatype == ua.VariantType.UInt16:
             value = int(value)
-            return ua.Variant(value, ua.VariantType.UInt16)
+            return ua.DataValue(ua.Variant(value, ua.VariantType.UInt16))
         elif datatype == ua.VariantType.Boolean:
             value = bool(value)
             return ua.DataValue(ua.Variant(value, ua.VariantType.Boolean))
