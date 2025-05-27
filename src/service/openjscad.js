@@ -482,9 +482,9 @@ async function exportSTL(fileName, demoName, model,dimensions) {
           window.api.saveSTL(outputPath, finalBuffer).then(() => {
             console.log("✅ STL file saved at:", outputPath); 
             // Save the dimensions using the API
-            window.api.updateDimensions(dimensions).then(() => {
-              console.log("✅ Dimensions saved at:", dimensions);
-            });
+            //window.api.updateDimensions(dimensions).then(() => {
+              //console.log("✅ Dimensions saved at:", dimensions);
+            //});
           });
         });
     }
@@ -515,89 +515,92 @@ export async function createSTL(bauteil) {
       thoehe: 0,
       laenge: 0,
     }
+    for(const key in bauteil.inputs){
+      if(bauteil.inputs[key] === "" ){
+        throw Error("Bitte alle Felder ausfüllen!")
+      }
+    }
     switch(bauteil.name){
         case 'Aussenring1':
             model = createAussenring1(bauteil.inputs);
-            dimensions.aussendurchmesser = bauteil.inputs.aussendurchmesser;
-            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
-            dimensions.hoehe = bauteil.inputs.hoehe;
+            dimensions.aussendurchmesser = Number(bauteil.inputs.aussendurchmesser);
+            dimensions.innendurchmesser = Number(bauteil.inputs.innendurchmesser);
+            dimensions.hoehe = Number(bauteil.inputs.hoehe);
             break;
         case 'Aussenring2':
             model = createAussenring2(bauteil.inputs);
-            dimensions.aussendurchmesser = bauteil.inputs.aussendurchmesser;
-            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser_klein;
-            dimensions.hoehe = bauteil.inputs.hoehe;
+            dimensions.aussendurchmesser = Number(bauteil.inputs.aussendurchmesser);
+            dimensions.innendurchmesser = Number(bauteil.inputs.innendurchmesser_klein);
+            dimensions.hoehe = Number(bauteil.inputs.hoehe);
             break;
         case 'Innenring1':
             model = createInnenring1(bauteil.inputs);
-            dimensions.aussendurchmesser = bauteil.inputs.durchmesser_or;
-            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
-            dimensions.hoehe = bauteil.inputs.hoehe; 
+            dimensions.aussendurchmesser = Number(bauteil.inputs.durchmesser_or);
+            dimensions.innendurchmesser = Number(bauteil.inputs.innendurchmesser);
+            dimensions.hoehe = Number(bauteil.inputs.hoehe); 
             break;
         case 'Innenring2':
             model = createInnenring2(bauteil.inputs);
-            dimensions.aussendurchmesser = bauteil.inputs.aussendurchmesser;
-            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
-            dimensions.hoehe = bauteil.inputs.hoehe;
+            dimensions.aussendurchmesser = Number(bauteil.inputs.aussendurchmesser);
+            dimensions.innendurchmesser = Number(bauteil.inputs.innendurchmesser);
+            dimensions.hoehe = Number(bauteil.inputs.hoehe);
             break;
         case 'OR-N':
             model = createORN(bauteil.inputs);
-            dimensions.aussendurchmesser = bauteil.inputs.manteldurchmesser;
-            dimensions.innendurchmesser = bauteil.inputs.laufbahndurchmesser;
-            dimensions.hoehe = bauteil.inputs.breite;
+            dimensions.aussendurchmesser = Number(bauteil.inputs.manteldurchmesser);
+            dimensions.innendurchmesser = Number(bauteil.inputs.laufbahndurchmesser);
+            dimensions.hoehe = Number(bauteil.inputs.breite);
             dimensions.schulterdurchmesser = 0;
             break;
         case 'OR-NU':
             model = createORNU(bauteil.inputs);
-            dimensions.aussendurchmesser = bauteil.inputs.manteldurchmesser;
-            dimensions.innendurchmesser = bauteil.inputs.laufbahndurchmesser;
-            dimensions.hoehe = bauteil.inputs.breite;
+            dimensions.aussendurchmesser = Number(bauteil.inputs.manteldurchmesser);
+            dimensions.innendurchmesser = Number(bauteil.inputs.laufbahndurchmesser);
+            dimensions.hoehe = Number(bauteil.inputs.breite);
             dimensions.schulterdurchmesser = 0;
-
             break;
         case 'IR-N':
             model = createIRN(bauteil.inputs);
-            dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
-            dimensions.innendurchmesser = bauteil.inputs.bohrungsdurchmesser;
-            dimensions.hoehe = bauteil.inputs.breite;
-            dimensions.schulterdurchmesser = bauteil.inputs.schulterdurchmesser;
+            dimensions.aussendurchmesser = Number(bauteil.inputs.laufbahndurchmesser);
+            dimensions.innendurchmesser = Number(bauteil.inputs.bohrungsdurchmesser);
+            dimensions.hoehe = Number(bauteil.inputs.breite);
+            dimensions.schulterdurchmesser = Number(bauteil.inputs.schulterdurchmesser);
             break;
         case 'IR-NJ':
             model = createIRNJ(bauteil.inputs);
-            dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
-            dimensions.innendurchmesser = bauteil.inputs.bohrungsdurchmesser;
-            dimensions.hoehe = bauteil.inputs.breite;
-            dimensions.schulterdurchmesser = bauteil.inputs.schulterdurchmesser;
+            dimensions.aussendurchmesser = Number(bauteil.inputs.laufbahndurchmesser);
+            dimensions.innendurchmesser = Number(bauteil.inputs.bohrungsdurchmesser);
+            dimensions.hoehe = Number(bauteil.inputs.breite);
+            dimensions.schulterdurchmesser = Number(bauteil.inputs.schulterdurchmesser);
             break;
         case 'IR-NJP':
             model = createIRNU(bauteil.inputs);
-            dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
-            dimensions.innendurchmesser = bauteil.inputs.innendurchmesser;
-            dimensions.hoehe = bauteil.inputs.breite;
+            dimensions.aussendurchmesser = Number(bauteil.inputs.laufbahndurchmesser);
+            dimensions.innendurchmesser = Number(bauteil.inputs.innendurchmesser);
+            dimensions.hoehe = Number(bauteil.inputs.breite);
             dimensions.schulterdurchmesser = 0;
             break;
         case 'IR-NU':
             model = createIRNU(bauteil.inputs);
-            dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
-            dimensions.innendurchmesser = bauteil.inputs.bohrungsdurchmesser;
-            dimensions.hoehe = bauteil.inputs.breite;
+            dimensions.aussendurchmesser = Number(bauteil.inputs.laufbahndurchmesser);
+            dimensions.innendurchmesser = Number(bauteil.inputs.bohrungsdurchmesser);
+            dimensions.hoehe = Number(bauteil.inputs.breite);
             dimensions.schulterdurchmesser = 0;
             break;
         case 'IR-NUP':
             model = createIRNJ(bauteil.inputs);
-            dimensions.aussendurchmesser = bauteil.inputs.laufbahndurchmesser;
-            dimensions.innendurchmesser = bauteil.inputs.bohrungsdurchmesser;
-            dimensions.hoehe = bauteil.inputs.breite;
-            dimensions.schulterdurchmesser = bauteil.inputs.schulterdurchmesser;
+            dimensions.aussendurchmesser = Number(bauteil.inputs.laufbahndurchmesser);
+            dimensions.innendurchmesser = Number(bauteil.inputs.bohrungsdurchmesser);
+            dimensions.hoehe = Number(bauteil.inputs.breite);
+            dimensions.schulterdurchmesser = Number(bauteil.inputs.schulterdurchmesser);
             break;
         case 'T-Stueck':
             model = createTstueck(bauteil.inputs);
-            dimensions.thoehe = bauteil.inputs.hoehe;
+            dimensions.thoehe = Number(bauteil.inputs.hoehe);
             break;
         case "Rohrbogen":
             model = createRohrbogen(bauteil.inputs);
-            dimensions.laenge = bauteil.inputs.schenkel_laenge_1;
-            
+            dimensions.laenge = Number(bauteil.inputs.schenkel_laenge_1);
             break;
 
     }
@@ -608,5 +611,5 @@ export async function createSTL(bauteil) {
       await exportSTL(bauteil.stlName, bauteil.name, model, dimensions);
     
     }
-    return true;
+    return {success: true, dimensions: dimensions};
 }

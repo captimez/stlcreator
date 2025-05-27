@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useState, useEffect } from 'react';
 import Grid2 from '@mui/material/Grid2';
 import Box from '@mui/material/Box';
 import { CheckBox, Info as InfoIcon } from '@mui/icons-material';
@@ -11,7 +12,9 @@ import MyThree from '../threejs/viewer';
 import { IconButton, Modal, Typography } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import { use } from 'react';
-
+import LinearProgress from '@mui/material/LinearProgress';
+import CloseIcon from '@mui/icons-material/Close';
+import Alert from '@mui/material/Alert';
 /**
  * BauteilInput Komponente
  * 
@@ -28,56 +31,54 @@ const BauteilInput = () => {
 
     const [solutionName, setSolutionName] = useState('');
 
-    const [aussendurchmesser, setAussendurchmesser] = useState(0);
-    const [innendurchmesser, setInnendurchmesser] = useState(0);
-    const [schulterdurchmesser, setSchulterdurchmesser] = useState(0);
-    const [hoehe, setHoehe] = useState(0);
-
     const [progress, setProgress] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
+    const [showMessage, setShowMessage] = useState(true);
 
     useEffect(() => {
-        window.api.getDimensions().then((dimensions) => {
-            
-            console.log("Dimensions loaded: ", dimensions);
-
-            setAussendurchmesser(dimensions.aussendurchmesser);
-            setInnendurchmesser(dimensions.innendurchmesser);
-            setSchulterdurchmesser(dimensions.schulterdurchmesser);
-            setHoehe(dimensions.hoehe);
-
-        });
         window.api.onPythonOutput((output) => {
             setProgress(output.percentage);
             setMessage(output.message);
+            if (output.error) {
+                setMessage("Python Error: " + output.error);
+                setShowMessage(true);
+                console.error("Python Error: ", output.error);
+            }
             console.log("Python Output: ", output);
         });
         window.api.onPythonError((error) => {
             setProgress(0);
+            setIsLoading(false);
             setMessage("Python Error: " + error);
             console.error("Python Error: ", error);
         });
     }, []);
 
+    useEffect(() => {
+        if (message) setShowMessage(true);
+    }, [message]);
+
     
-    const startTraining = async() => {
-        const type = Object.keys(isChecked).filter(key => isChecked[key]);
+    const startTraining = async(dimensions) => {
+        let type; 
         if (selectedBauteil.name.split("-")[0] == "IR"){
             type = "Innenring";
         }else if (selectedBauteil.name.split("-")[0] == "OR"){
             type = "Aussenring";
         }
+
         const config = {
-            solutionName: solutionName,
+            solutionName: selectedBauteil.stlName + "-solution",
             selectedFile: selectedBauteil.stlName,
             type: type,
-            aussendurchmesser: aussendurchmesser,
-            innendurchmesser: innendurchmesser,
-            hoehe: hoehe,
-            schulterdurchmesser: schulterdurchmesser,
+            gewicht: selectedBauteil.inputs.gewicht,
+            aussendurchmesser: dimensions.aussendurchmesser,
+            innendurchmesser: dimensions.innendurchmesser,
+            hoehe: dimensions.hoehe,
+            schulterdurchmesser: dimensions.schulterdurchmesser,
         };
-        
+
         await window.api.savePythonConfig('pythonConfig.json', JSON.stringify(config));
         await window.api.startPythonScript('script.py');
 
@@ -95,7 +96,7 @@ const BauteilInput = () => {
             ...selectedBauteil,
             inputs: {
                 ...selectedBauteil.inputs,
-                [key]: Number(value),
+                [key]: value, 
             },
         });
     };
@@ -125,13 +126,19 @@ const BauteilInput = () => {
      */
     const handleCreateSTL = async () => {
         try {
-            console.log(selectedBauteil);
-           const response = await createSTL(selectedBauteil);
-           if(response){
-             showSnackbar("STL-Datei erfolgreich erstellt", "success");
-             window.api.updatedStl(); // Aktualisiert die STL-Datei im Hauptprozess
-             startTraining();
-           }
+            for (const key in selectedBauteil.inputs) {            
+                // Ersetze Komma durch Punkt für korrekte Zahleneingabe
+                if (typeof selectedBauteil.inputs[key] === 'string') {
+                    selectedBauteil.inputs[key] = selectedBauteil.inputs[key].replace(',', '.');
+                }
+            }
+            console.log("Selected Bauteil Inputs: ", selectedBauteil.inputs);
+            const response = await createSTL(selectedBauteil);
+            if(response.success){
+                showSnackbar("STL-Datei erfolgreich erstellt", "success");
+                window.api.updatedStl(); // Aktualisiert die STL-Datei im Hauptprozess
+                startTraining(response.dimensions);
+            }
 
         } catch (error) {
             showSnackbar(`Fehler beim Erstellen der STL-Datei \n ${error} `, "error");
@@ -145,6 +152,38 @@ const BauteilInput = () => {
 
     return (
         <Box id="boxbox" sx={{ flexGrow: 1, p: 1 }}>
+            {isLoading && (
+                <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column', mt: 2 }}>
+                    <Box sx={{ width: '100%', mr: 1 }}>
+                        <LinearProgress variant="determinate" value={progress || 0} />
+                    </Box>
+                    <Box sx={{ minWidth: 35, mt: 1 }}>
+                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                            {`${progress || 0}%`}
+                        </Typography>
+                    </Box>         
+                </Box>
+            )}
+            {/* Message Alert */}
+            {message && showMessage && (
+                <Box sx={{ width: '100%', mt: 2 }}>
+                    <Alert
+                        severity={message.startsWith("Python Error") || progress === 0 ? "error" : "info"}
+                        action={
+                            <IconButton
+                                aria-label="close"
+                                color="inherit"
+                                size="small"
+                                onClick={() => setShowMessage(false)}
+                            >
+                                <CloseIcon fontSize="inherit" />
+                            </IconButton>
+                        }
+                    >
+                        {message}
+                    </Alert>
+                </Box>
+            )}
             <div id="bauteilInputs">
                 {/* Titel mit Bauteilnamen und Info-Button */}
                 <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
@@ -164,15 +203,20 @@ const BauteilInput = () => {
                                 <div className="input-box">
                                     <TextField
                                         name={key}
-                                        type='text'
+                                        type="text"
                                         label={`${key}${shortcut ? ` (${shortcut})` : ''}`}
                                         variant="filled"
                                         slotProps={{
                                             input: { sx: { color: 'black' } },
-                                            inputLabel: { style: { color: '#000' } } // Setzt die Label-Farbe auf Schwarz
+                                            inputLabel: { style: { color: '#000' } }
                                         }}
-                                        size='small'
-                                        onChange={(e) => handleInputChange(key, e.target.value)}
+                                        size="small"
+                                        value={value}
+                                        onChange={(e) => {
+                                                let val = e.target.value;
+                                                handleInputChange(key, val); // Ersetze Komma durch Punkt für korrekte Zahleneingabe
+                                            }
+                                        }
                                     />
                                 </div>
                             </Grid2>
@@ -251,6 +295,7 @@ const BauteilInput = () => {
                     )}
                 </Box>
             </Modal>
+
         </Box>
     );
 };

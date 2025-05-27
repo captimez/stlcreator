@@ -151,12 +151,20 @@ def send_all_to_sps(stl_file_name, uid, aussendurchmesser, innendurchmesser, sch
         client_node.set_value(client_node_dv)
         time.sleep(delay)
 
-        nodeId = 'ns=3;s="Edit_DB"."Aktiv"."Teilbreite"'
+        nodeId = 'ns=3;s="Edit_DB"."Aktiv"."Teilebreite"'
         value = hoehe
         client_node = client.get_node(nodeId)
         datatype = client_node.get_data_type_as_variant_type()
         client_node_dv = create_data_value(value, datatype)       
         client_node.set_value(client_node_dv)
+
+        nodeId = 'ns=3;s="Edit_DB"."Aktiv"."Teilegewicht"'
+        value = workpiece_gewicht
+        client_node = client.get_node(nodeId)
+        datatype = client_node.get_data_type_as_variant_type()
+        client_node_dv = create_data_value(value, datatype)
+        client_node.set_value(client_node_dv)
+        time.sleep(delay)
 
         nodeId = 'ns=3;s="Edit_DB"."Aktiv"."WerteGueltig"'
         value = 1
@@ -194,11 +202,12 @@ try:
     with open("pythonConfig.json") as f:
         config = json.load(f)
         stl_file_name = config["selectedFile"]
-        stl_file_path = f'{config["stlSavePath"]}/{config["selectedFile"]}'
+        stl_file_path = f'{config["stlSavePath"]}/{config["selectedFile"]}.stl'
         filename = config["selectedFile"].split(".")[0]
-        objectType = config["type"][0]
+        objectType = config["type"]
         solution_name = config["solutionName"]
         if objectType == "Aussenring" or objectType == "Innenring":
+            workpiece_gewicht = config['gewicht']
             workpiece_aussendurchmesser = config['aussendurchmesser']
             workpiece_innendurchmesser = config['innendurchmesser']
             workpiece_schulterdurchmesser = config['schulterdurchmesser']
@@ -242,11 +251,11 @@ try:
     # Initialize WebDriver
     base = os.path.dirname(os.path.abspath(__file__))
     chromedriver_path = os.path.join(base, 'chromedriver')
-    service = Service(executable_path= chromedriver_path)
+    #service = Service(exectuable_path= chromedriver_path)
     
     options = get_default_chrome_options()
     options.page_load_strategy = 'eager'
-    driver = webdriver.Chrome(service=service, options=options)
+    driver = webdriver.Chrome(options=options)
     #driver = webdriver.Edge()
     driver.implicitly_wait(10)
     send_progress(10, "Initialized WebDriver successfully.")
@@ -610,7 +619,6 @@ try:
         EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[name="deployment-action"][value="start-solution-list"]'))
     ).click()
     send_progress(100, "Solution deployed successfully. Process completed.")
-    send_to_sps('ns=3;s="Edit_DB"."Aktiv"."WerteGueltig"', 1)
 except Exception as e:
     send_progress(0, f"Error during deployment or finalization: {e}")
     cleanup_and_exit(1)

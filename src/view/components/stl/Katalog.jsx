@@ -12,54 +12,54 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 //Bauteile definieren
 const bauteile = [
     {
-            name: "Ringe",
+            name: "SKF",
             teile: [
             {
                 name: "OR-N",
                 demoName: "OR-N",
-                shortcut: ["D1","D2","A","B","C",""],
+                shortcut: ["mm","mm","mm","kg"],
                 inputs: {
-                    manteldurchmesser: 0,
-                    laufbahndurchmesser: 0,
-                    breite: 0,
-                    gewicht: 0,
+                    manteldurchmesser: "",
+                    laufbahndurchmesser: "",
+                    breite: "",
+                    gewicht: "",
                 },
             },
             {
                 name: "OR-NU",
                 demoName: "OR-NU",
-                shortcut: ["D1","D2","A","B","C",""],
+                shortcut: ["mm","mm","mm","mm","mm","kg"],
                 inputs: {
-                    manteldurchmesser: 0,
-                    schulterdurchmesser: 0,
-                    laufbahndurchmesser: 0,
-                    lichteweite: 0,
-                    breite: 0,
-                    gewicht: 0,
+                    manteldurchmesser: "",
+                    schulterdurchmesser: "",
+                    laufbahndurchmesser: "",
+                    lichteweite: "",
+                    breite: "",
+                    gewicht: "",
                 },
             },
             {
                 name: "IR-N",
                 demoName: "IR-N",
-                shortcut: ["D1","D2","A","B"],
+                shortcut: ["mm","mm","mm","mm","kg"],
                 inputs: {
-                    bohrungsdurchmesser: 0,
-                    laufbahndurchmesser: 0,
-                    schulterdurchmesser: 0,
-                    breite: 0,
-                    gewicht: 0,
+                    bohrungsdurchmesser: "",
+                    laufbahndurchmesser: "",
+                    schulterdurchmesser: "",
+                    breite: "",
+                    gewicht: "",
                 }
             },
             {
                 name: "IR-NJ",
                 demoName: "IR-NJ",
-                shortcut: ["SD","D2","A","B"],
+                shortcut: ["mm","mm","mm","mm","kg"],
                 inputs: {
-                    bohrungsdurchmesser: 0,
-                    laufbahndurchmesser: 0,
-                    schulterdurchmesser: 0,
-                    breite: 0,
-                    gewicht: 0,
+                    bohrungsdurchmesser: "",
+                    laufbahndurchmesser: "",
+                    schulterdurchmesser: "",
+                    breite: "",
+                    gewicht: "",
                 }
             },
             //{
@@ -75,12 +75,12 @@ const bauteile = [
             {
                 name: "IR-NU",
                 demoName: "IR-NU",
-                shortcut: ["D1","D2","A","B"],
+                shortcut: ["mm","mm","mm","kg"],
                 inputs: {
-                    bohrungsdurchmesser: 0,
-                    laufbahndurchmesser: 0,
-                    breite: 0,
-                    gewicht: 0,
+                    bohrungsdurchmesser: "",
+                    laufbahndurchmesser: "",
+                    breite: "",
+                    gewicht: "",
                 }
             },
             //{
