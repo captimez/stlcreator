@@ -15,6 +15,7 @@ const TrainView = () => {
     const [ isChecked, setIsChecked ] = useState({Rohr: false, LStueck: false, TStueck: false});
     const [solutionName, setSolutionName] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
+    const [copySolutionId, setCopySolutionId] = useState('');
 
     const [aussendurchmesser, setAussendurchmesser] = useState(0);
     const [innendurchmesser, setInnendurchmesser] = useState(0);
@@ -79,6 +80,7 @@ const TrainView = () => {
 
         const config = {
             solutionName: solutionName,
+            copySolutionId: copySolutionId,
             selectedFile: selectedFile.name,
             type: type,
             aussendurchmesser: aussendurchmesser,
@@ -109,7 +111,11 @@ const TrainView = () => {
                         <FormGroup sx={{ml:2}}>
                             <FormControl style={{ marginBottom: "10px" }}>
                                 <FormLabel>Solution Name</FormLabel>
-                                <TextField id="standard-basic"  onChange={(event) => setSolutionName(event.target.value)}  size='small' label="Name" />
+                                <TextField id="standard-basic"  onChange={(event) => setSolutionName(event.target.value)}  size='small' />
+                            </FormControl>
+                            <FormControl style={{ marginBottom: "10py"}}>
+                                <FormLabel>Copy Solution ID</FormLabel>
+                                <TextField id="standard-basic" onChange={(event) => setCopySolutionId(event.target.value)} size='small'/>
                             </FormControl>
                             <FormControl style={{ marginBottom: "10px" }}>
                                 <FormLabel>Datei Auswahl</FormLabel>
@@ -135,30 +141,30 @@ const TrainView = () => {
                                     </Typography>
                                 )}
                             </FormControl>
-                            <FormControlLabel control={<Checkbox name='LStueck' checked={isChecked.Winkel} color="primary" onChange={handleCheckboxChange}/>} label="LStueck" />
+                            <FormControlLabel control={<Checkbox name='LStueck' checked={isChecked.LStueck} color="primary" onChange={handleCheckboxChange}/>} label="LStueck" />
                             <FormControlLabel control={<Checkbox name='TStueck' color="primary" checked={isChecked.TStueck} onChange={handleCheckboxChange}/>} label="TStueck" />
                             <FormControlLabel control={<Checkbox name='Rohr' color="primary" checked={isChecked.Rohr} onChange={handleCheckboxChange}/>} label="Rohr" />
                             {
                                 isChecked.Rohr && (
                                     <FormControl  style={{ marginBottom: "10px" }}>
                                         <FormLabel>Länge</FormLabel>
-                                        <TextField id="standard-basic" value={rohrlaenge} onChange={(event) => setRohrlaenge(event.target.value)} size='small' />
+                                        <TextField id="standard-basic" value={rohrlaenge} onChange={(event) => setRohrlaenge(Number(event.target.value))} size='small' />
                                     </FormControl>
                                 ) ||
                                 isChecked.LStueck && (
                                     <FormControl  style={{ marginBottom: "10px" }}>
                                         <FormLabel>Schenkel Länge</FormLabel>
-                                        <TextField id="standard-basic" value={laenge} onChange={(event) => setLaenge(event.target.value)} size='small' />
+                                        <TextField id="standard-basic" value={laenge} onChange={(event) => setLaenge(Number(event.target.value))} size='small' />
                                         <FormLabel>Schenkel Radius</FormLabel>
-                                        <TextField id="standard-basic" value={radius} onChange={(event) => setRadius(event.target.value)} size='small' />
+                                        <TextField id="standard-basic" value={radius} onChange={(event) => setRadius(Number(event.target.value))} size='small' />
                                     </FormControl>
                                 ) ||
                                 isChecked.TStueck && (
                                     <FormControl  style={{ marginBottom: "10px" }}>
                                         <FormLabel>Durchmesser Rohr 1</FormLabel>
-                                        <TextField id="standard-basic" value={rohrdurchmesser} onChange={(event) => setRohrdurchmesser(event.target.value)} size='small' />
+                                        <TextField id="standard-basic" value={rohrdurchmesser} onChange={(event) => setRohrdurchmesser(Number(event.target.value))} size='small' />
                                         <FormLabel>T-Stück Höhe</FormLabel>
-                                        <TextField id="standard-basic" value={thoehe} onChange={(event) => setThoehe(event.target.value)} size='small' />
+                                        <TextField id="standard-basic" value={thoehe} onChange={(event) => setThoehe(Number(event.target.value))} size='small' />
                                     </FormControl>
                                 )
                             }

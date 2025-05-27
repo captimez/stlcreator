@@ -393,8 +393,8 @@ function createRohrbogen({
 }) {
 
   durchmesser = Number(durchmesser) 
-  schenkel_laenge_1 = Number(schenkel_laenge_1) 
-  schenkel_laenge_2 = Number(schenkel_laenge_2) 
+  schenkel_laenge_1 = Number(schenkel_laenge_1-durchmesser) 
+  schenkel_laenge_2 = Number(schenkel_laenge_2-durchmesser) 
 
   const radius = Number(durchmesser / 2); // Außenradius des Rohres
   const winkelInRad = (winkel * Math.PI) / 180; // Winkel in Radiant umrechnen

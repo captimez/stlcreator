@@ -51,12 +51,14 @@ try:
         filename = config["selectedFile"].split(".")[0]
         objectType = config["type"][0]
         solution_name = config["solutionName"]
+        copySolutionId = config["copySolutionId"]
 
         if(objectType == "Rohr"):
             workpiece_rohrlaenge = config['rohrlaenge']
         elif(objectType == "LStueck"):
             workpiece_laenge = config['laenge']
             workpiece_radius = config['radius']
+            workpiece_laenge = workpiece_laenge - (workpiece_radius * 2)
             workpiece_verschiebung = config['verschiebung']
         elif(objectType == "TStueck"):
             workpiece_thoehe = config['thoehe']
@@ -188,12 +190,8 @@ try:
     if not solution_ids:
         raise ValueError("No solutions found.")
       # Sort in descending order
-    elif objectType == "TStueck":
-        template_id = solution_ids[0]
-    elif objectType == "Rohr":
-        template_id = solution_ids[2]
-    elif objectType == "LStueck":
-        template_id = solution_ids[1]
+    else:
+        template_id = copySolutionId
     
 
     send_progress(30, "Retrieved all existing solution IDs.")
@@ -209,6 +207,10 @@ try:
     name_input = driver.find_element(By.ID, "id_name")
     name_input.clear()
     name_input.send_keys(solution_name)
+
+    uid_input = driver.find_element(By.ID, "id_uid")
+    uid = uid_input.get_attribute("value")
+
     duplicate_button = driver.find_element(By.ID, "duplicate-solution-btn")
     duplicate_button.click()
     send_progress(40, "Duplicated template solution successfully.")
@@ -276,103 +278,8 @@ try:
     gp_count = 0
     for href in gripping_point_hrefs:
 
-        if(objectType == "Ring"):
+        if(objectType == "TStueck"):
             driver.get(f'{href}')
-            
-            # Adjust Gripping Point
-            input_gripping_point_x = driver.find_element(By.NAME,"position_x")
-            input_gripping_point_x.clear()
-
-            input_gripping_point_z = driver.find_element(By.NAME,"position_z")
-            input_gripping_rot_x = driver.find_element(By.NAME,"rotation_x")
-            input_gripping_rot_y = driver.find_element(By.NAME,"rotation_y")
-            rotation_x_value = input_gripping_rot_x.get_attribute("value")
-        
-            #Gripping Point Position X
-            if(gp_count < 6):
-                input_gripping_point_x.send_keys(gp["x"])
-            else:
-                input_gripping_point_x.send_keys(-gp["x"])	
-
-            if gp_count == 0:
-                input_gripping_rot_x.clear()
-                input_gripping_rot_x.send_keys(0)
-                input_gripping_rot_y.clear()
-                input_gripping_rot_y.send_keys(0)
-            elif gp_count == 1:
-                input_gripping_rot_x.clear()
-                input_gripping_rot_x.send_keys(180)
-                input_gripping_rot_y.clear()
-                input_gripping_rot_y.send_keys(0)
-            elif gp_count == 2:
-                input_gripping_rot_x.clear()
-                input_gripping_rot_x.send_keys(0)
-                input_gripping_rot_y.clear()
-                input_gripping_rot_y.send_keys(15)
-            elif gp_count == 3:
-                input_gripping_rot_x.clear()
-                input_gripping_rot_x.send_keys(180)
-                input_gripping_rot_y.clear()
-                input_gripping_rot_y.send_keys(15)
-            elif gp_count == 4:
-                input_gripping_rot_x.clear()
-                input_gripping_rot_x.send_keys(0)
-                input_gripping_rot_y.clear()
-                input_gripping_rot_y.send_keys(-15)
-            elif gp_count == 5:
-                input_gripping_rot_y.clear()
-                input_gripping_rot_y.send_keys(-15)
-                input_gripping_rot_x.clear()
-                input_gripping_rot_x.send_keys(180)
-            elif gp_count == 6:
-                input_gripping_rot_y.clear()
-                input_gripping_rot_y.send_keys(0)
-                input_gripping_rot_x.clear()
-                input_gripping_rot_x.send_keys(0)
-            elif gp_count == 7:
-                input_gripping_rot_x.clear()
-                input_gripping_rot_x.send_keys(180)
-            elif gp_count == 8:
-                input_gripping_rot_x.clear()
-                input_gripping_rot_x.send_keys(0)
-                input_gripping_rot_y.clear()
-                input_gripping_rot_y.send_keys(15)
-            elif gp_count == 9:
-                input_gripping_rot_x.clear()
-                input_gripping_rot_y.clear()
-                input_gripping_rot_x.send_keys(180)
-                input_gripping_rot_y.send_keys(15)
-            elif gp_count == 10:
-                input_gripping_rot_x.clear()
-                input_gripping_rot_x.send_keys(0)
-                input_gripping_rot_y.clear()
-                input_gripping_rot_y.send_keys(-5)
-            elif gp_count == 11:
-                input_gripping_rot_x.clear()
-                input_gripping_rot_x.send_keys(0)
-                input_gripping_rot_y.clear()
-                input_gripping_rot_y.send_keys(15)
-            # Gripping Point Position Z
-            input_gripping_point_z.clear()
-
-            #Gripping Point x,y rotation Adjustment
-            if((workpiece_hoehe/2) > max_grip_depth):
-                if(float(rotation_x_value) == 180):
-                    input_gripping_point_z.send_keys(gp["z"])
-                else:
-                    input_gripping_point_z.send_keys(-gp["z"])
-            else:
-                input_gripping_point_z.send_keys(0)
-            
-
-            checkbox = driver.find_element(By.NAME, "is_rot_inv_enabled")
-
-            if not checkbox.is_selected():
-                driver.execute_script("arguments[0].click();", checkbox)
-	
-        elif(objectType == "TStueck"):
-            driver.get(f'{href}')
-
 
             input_rotation_x = driver.find_element(By.NAME,"rotation_x")
             input_rotation_x.clear()
@@ -545,7 +452,7 @@ try:
     WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[name="deployment-action"][value="start-solution-list"]'))
     ).click()
-    send_progress(100, "Solution deployed successfully. Process completed.")
+    send_progress(100, f"Solution deployed successfully. ProgVision ID: {uid}")
 except Exception as e:
     send_progress(0, f"Error during deployment or finalization: {e}")
     driver.quit()

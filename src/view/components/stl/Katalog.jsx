@@ -92,7 +92,7 @@ const bauteile = [
         //]
      //},
     {
-        name:"T-Stuecke",
+        name:"Sanha",
         teile: [
             {
                 name: "T-Stueck",
@@ -115,11 +115,7 @@ const bauteile = [
                     laenge: 0,
                     half: false,
                 }
-            }
-            ,]},
-    {
-        name:"Winkel",
-        teile: [
+            },
             {
                 name: "Rohrbogen",
                 demoName: "Rohrbogen",
@@ -131,7 +127,7 @@ const bauteile = [
                     schenkel_laenge_2: 60,
                 }
             },
-    ]}
+            ,]},
     
 ];
 
@@ -143,7 +139,11 @@ const bauteile = [
  */
 const Katalog = () => {
     const { selectedBauteil, setSelectedBauteil } = useAppContext();
-    const [katalogOpen, setKatalogOpen] = React.useState(new Map());
+    const [katalogOpen, setKatalogOpen] = React.useState(() => {
+        const map = new Map();
+        if (bauteile.length > 0) map.set(bauteile[0], true); // Ersten Reiter öffnen
+        return map;
+    });
 
     /**
      * Öffnet oder schließt eine Bauteilkategorie.
@@ -178,21 +178,21 @@ const Katalog = () => {
                 {bauteile.map((reiter, index) => (
                     <div key={index}>
                         {/* Kategorie-Listenelement mit Expand/Collapse-Button */}
-                        <ListItem
+                        <ListItem onclick={() => handleOpen(reiter)}
                             secondaryAction={
                                 <IconButton edge="end" aria-label="expand" onClick={() => handleOpen(reiter)}>
                                     {katalogOpen.get(reiter) ? <ExpandLess /> : <ExpandMore />}  
                                 </IconButton>
                             }
                         >
-                            <ListItemText primary={reiter.name} />
+                            <ListItemText primary={reiter.name}/>
                         </ListItem>
 
                         {/* Collapsible List für die Bauteile in der Kategorie */}
                         <Collapse in={katalogOpen.get(reiter)} timeout="auto">
                             <List>
                                 {reiter.teile.map((bauteil, index) => (
-                                    <ListItem key={index}>
+                                    <ListItem key={index} onClick={() => handleBauteilSelect(bauteil)} >
                                         <ListItemAvatar>
                                             <Avatar src={`images/${bauteil.name}.png`} sx={{ mr: 3, height: 40, width: 40 }} />
                                         </ListItemAvatar>
