@@ -186,7 +186,7 @@ ipcMain.handle("start-python-script", (event, scriptName, args) => {
     const pythonPath = path.join(__dirname,"../python",scriptName);
     const pythonVenvPath = path.join(__dirname,"/python/venv/bin/python.exe");
     console.log("python path: ", pythonPath)
-    const pythonProcess = spawn(pythonVenvPath, ["-u", pythonPath, ...args]);
+    const pythonProcess = spawn("python", ["-u", pythonPath, ...args]);
 
     pythonProcess.stdout.on('data', (data) => {
         const lines = data.toString().split('\n');

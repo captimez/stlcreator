@@ -2,8 +2,6 @@ import json
 import time
 import re
 import os
-from opcua import Client
-from opcua import ua
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -12,8 +10,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 
-PLC_IP = "192.168.1.5"
-client = Client(f"opc.tcp://{PLC_IP}:4840")
 
 
 # Function to send progress updates
@@ -24,14 +20,6 @@ def send_progress(percentage, message):
     }
     print(json.dumps(progress_data))  # Send JSON data to the console or UI
 
-def send_to_sps(value):
-    try:
-        client.connect()
-
-        node = client.get_node('ns=3, s="Typdaten_DB".innendurchmesser')
-        node.set_value(ua.Variant(value,ua.VariantType.UInt))
-    finally:
-        client.disconnect()
 
 def update_thumbnail(driver):
     for toggle in all_toggles:
@@ -45,7 +33,7 @@ def update_thumbnail(driver):
 
 # Load Config File, created by STL-Creator 
 try:
-    with open("pythonConfig.json") as f:
+    with open("../pythonConfig.json") as f:
         config = json.load(f)
         stl_file_path = f'{config["stlSavePath"]}/{config["selectedFile"]}'
         filename = config["selectedFile"].split(".")[0]
@@ -119,8 +107,8 @@ elif(objectType == "LStueck"):
 
 
 #Photoneo BPS IP
-#photoneo_ip = "http://192.168.2.1" 
-photoneo_ip = "http://127.0.0.1"  # Localhost for testing
+photoneo_ip = "http://192.168.2.1" 
+#photoneo_ip = "http://127.0.0.1"  # Localhost for testing
 def get_default_chrome_options():
     options = webdriver.ChromeOptions()
     #options.add_argument("--headless=new")  # Verwende den neuen Headless-Modus
@@ -131,13 +119,13 @@ def get_default_chrome_options():
 try:
     # Initialize WebDriver
     base = os.path.dirname(os.path.abspath(__file__))
-    chromedriver_path = os.path.join(base, 'chromedriver')
-    service = Service(exectuable_path= chromedriver_path)
+    chromedriver_path = os.path.join(base, 'chromedriver/chromedriver.exe')
+    service = Service(executable_path= chromedriver_path)
     
     options = get_default_chrome_options()
     options.page_load_strategy = 'eager'
-    #driver = webdriver.Chrome(service=service, options=options)
-    driver = webdriver.Edge()
+    driver = webdriver.Chrome(service=service, options=options)
+    #driver = webdriver.Edge()
     driver.implicitly_wait(10)
     #send_to_sps(workpiece_innendurchmesser)
     send_progress(10, "Initialized WebDriver successfully.")
