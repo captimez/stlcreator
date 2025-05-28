@@ -33,7 +33,7 @@ def update_thumbnail(driver):
 
 # Load Config File, created by STL-Creator 
 try:
-    with open("../pythonConfig.json") as f:
+    with open("pythonConfig.json") as f:
         config = json.load(f)
         stl_file_path = f'{config["stlSavePath"]}/{config["selectedFile"]}'
         filename = config["selectedFile"].split(".")[0]
@@ -124,8 +124,9 @@ try:
     
     options = get_default_chrome_options()
     options.page_load_strategy = 'eager'
-    driver = webdriver.Chrome(service=service, options=options)
-    #driver = webdriver.Edge()
+    #driver = webdriver.Chrome(service=service, options=options)
+    driver = webdriver.Edge()
+    driver.set_window_size(1920, 1080)
     driver.implicitly_wait(10)
     #send_to_sps(workpiece_innendurchmesser)
     send_progress(10, "Initialized WebDriver successfully.")
@@ -230,17 +231,17 @@ try:
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "id_name")))
     name_input = driver.find_element(By.ID, "id_name")
     name_input.clear()
+    name_input.send_keys(filename)
     
+    file_input = driver.find_element(By.ID, "id-mesh")
+    driver.execute_script("arguments[0].style.display = 'block';", file_input)
+    file_input.send_keys(stl_file_path)
     # Alle span.widget-title Elemente holen
     all_toggles = driver.find_elements(By.CSS_SELECTOR, "span.widget-title")
 
     # Durchgehen und das mit "Thumbnail" im Textinhalt finden
     update_thumbnail(driver)
     send_progress(55, "Updated Thumbnail successfully.")
-    name_input.send_keys("" + filename)
-    file_input = driver.find_element(By.ID, "id-mesh")
-    driver.execute_script("arguments[0].style.display = 'block';", file_input)
-    file_input.send_keys(stl_file_path)
     send_progress(60, "Changed CAD file of existing workpiece successfully.")
 except Exception as e:
     send_progress(0, f"Error changing CAD file: {e}")
@@ -376,19 +377,101 @@ try:
             EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']"))
         )
         save_button.click()
+
+
         # Wait for navigation to localization page
         localization_path = href.replace("/edit/", "/localization/")
         driver.get(localization_path)
 
         # STEP 7.1: Edit Current
         WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "id-loca-start-edit"))).click()
-
+        
         # STEP 7.2: Wait for UI to settle (optional)
         select_element = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "select.select.form-control"))
         )
         select = Select(select_element)
         select.select_by_visible_text(f"Picked object ({filename})")
+
+        model_feature_path = f"{localization_path}features/start-edit/"
+        driver.get(model_feature_path)
+
+        feature_elements =  driver.find_elements(By.CSS_SELECTOR, ".item[data-item-id]")
+        feature_count = 0
+        for ele in feature_elements:
+            driver.execute_script("arguments[0].click();", ele)
+            if(objectType == "LStueck" ):
+                if feature_count == 0:
+                    height_input = driver.find_element(By.ID, "id_size_height")
+                    depth_input = driver.find_element(By.ID, "id_size_depth")
+
+                    height_input.clear()
+                    height_input.send_keys(workpiece_radius * 2)
+                    depth_input.clear()
+                    depth_input.send_keys(workpiece_radius * 2)
+
+                    pos_x_input = driver.find_element(By.ID, "id_position_x")
+                    pos_y_input = driver.find_element(By.ID, "id_position_y")
+                    pos_z_input = driver.find_element(By.ID, "id_position_z")
+
+                    pos_x_input.clear()
+                    pos_x_input.send_keys(0)
+                    pos_y_input.clear()
+                    pos_y_input.send_keys(0)
+                    pos_z_input.clear()
+                    pos_z_input.send_keys(0)
+
+                elif feature_count == 1:
+                    height_input = driver.find_element(By.ID, "id_size_height")
+                    depth_input = driver.find_element(By.ID, "id_size_depth")
+
+                    height_input.clear()
+                    height_input.send_keys(workpiece_radius * 2)
+                    depth_input.clear()
+                    depth_input.send_keys(workpiece_radius * 2)
+
+                    pos_x_input = driver.find_element(By.ID, "id_position_x")
+                    pos_y_input = driver.find_element(By.ID, "id_position_y")
+                    pos_z_input = driver.find_element(By.ID, "id_position_z")
+                    rot_z_input = driver.find_element(By.ID, "id_rotation_z")
+
+                    pos_x_input.clear()
+                    pos_x_input.send_keys(workpiece_laenge)
+                    pos_y_input.clear()
+                    pos_y_input.send_keys(workpiece_laenge)
+                    pos_z_input.clear()
+                    pos_z_input.send_keys(0)
+                    rot_z_input.clear()
+                    rot_z_input.send_keys(-90)
+                elif feature_count == 2:
+                    height_input = driver.find_element(By.ID, "id_size_height")
+                    depth_input = driver.find_element(By.ID, "id_size_depth")
+
+                    height_input.clear()
+                    height_input.send_keys(workpiece_radius * 2)
+                    depth_input.clear()
+                    depth_input.send_keys(workpiece_radius * 2)
+
+                    pos_x_input = driver.find_element(By.ID, "id_position_x")
+                    pos_y_input = driver.find_element(By.ID, "id_position_y")
+                    pos_z_input = driver.find_element(By.ID, "id_position_z")
+
+                    pos_x_input.clear()
+                    pos_x_input.send_keys(workpiece_laenge + workpiece_radius)
+                    pos_y_input.clear()
+                    pos_y_input.send_keys(workpiece_radius)
+                    pos_z_input.clear()
+                    pos_z_input.send_keys(0)
+                    
+            feature_count += 1
+
+        save_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.ID, "save-button"))
+        )
+        save_button.click()
+
+        driver.get(localization_path +"start-edit/")
+
 
         # STEP 7.3: Scan & Locate
         WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "id-scan-and-locate"))).click()
