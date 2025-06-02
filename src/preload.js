@@ -48,6 +48,7 @@ contextBridge.exposeInMainWorld('api', {
     getResolution: () => ipcRenderer.invoke("get-resolution"),
     getSolutionId: () => ipcRenderer.invoke("get-solution-id"),
     updateSolutionId: (solutionId) => ipcRenderer.invoke("update-solution-id", solutionId),
+    updateSolutionIdOr: (solutionIdOr) => ipcRenderer.invoke("update-solution-id-or", solutionIdOr),
     minimizeWindow: () => ipcRenderer.invoke("window_minimize"),
     closeWindow: () => ipcRenderer.invoke("window_close"),
     maximizeWindow: () => ipcRenderer.invoke("window_maximize"),

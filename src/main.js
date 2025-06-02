@@ -66,24 +66,9 @@ function loadConfig() {
      }; // Default path
 }
 
-function saveConfig(newPath, newResolution, solutionId,dimensions,verschiebung) {
+function saveConfig(updates = {}) {
     const config = loadConfig();
-
-    if(newPath){
-        config.stlSavePath = newPath;
-    }
-    if(newResolution){
-        config.resolution = newResolution;
-    }
-    if(solutionId){
-        config.solutionId = solutionId;
-    }
-    if(dimensions){
-        config.dimensions = dimensions;
-    }
-    if(verschiebung){
-        config.verschiebung = verschiebung;
-    }
+    Object.assign(config, updates)
     fs.writeFileSync(configPath, JSON.stringify(config), 'utf-8');
 }
 
@@ -92,8 +77,8 @@ ipcMain.handle("save-python-config", (event, outputPath, data) => {
     const pythonConfig = JSON.parse(data);
     
     pythonConfig.stlSavePath = settingsConfig.stlSavePath;
-    pythonConfig.solutionId = settingsConfig.solutionId;
-    pythonConfig.verschiebung = settingsConfig.verschiebung;
+    pythonConfig.solutionIdIr = settingsConfig.solutionIdIr;
+    pythonConfig.solutionIdOr = settingsConfig.solutionIdOr;
 
     fs.writeFileSync(outputPath, JSON.stringify(pythonConfig), 'utf-8');
     return true;
@@ -101,29 +86,37 @@ ipcMain.handle("save-python-config", (event, outputPath, data) => {
 })
 
 ipcMain.handle("update-resolution", (event, newResolution) => {
-    saveConfig(null, newResolution);
+    saveConfig({ resolution: newResolution});
     return loadConfig();
 });
 
 ipcMain.handle("update-solution-id", (event, solutionId) => {
-    saveConfig(null, null, solutionId);
+    saveConfig({ solutionIdIr: solutionId });
     return loadConfig();
 });
 
+ipcMain.handle("update-solution-id-or", (event, solutionIdOr) => {
+    saveConfig({ solutionIdOr: solutionIdOr})
+    return loadConfig();
+})
+
 ipcMain.handle("get-solution-id", () => {
-    return loadConfig().solutionId;
+    const config = loadConfig()
+    const solutionIdIr = config.solutionIdIr
+    const solutionIdOr = config.solutionIdOr
+    return { ir: solutionIdIr, or: solutionIdOr};
 });
 
 ipcMain.handle("get-resolution", () => {
     return loadConfig().resolution;
 });
 ipcMain.handle("update-verschiebung", (event, verschiebung) => {
-    saveConfig(null, null, null, null, verschiebung);
+    saveConfig({ verschiebung: verschiebung});
     return loadConfig()
 });
 
 ipcMain.handle("update-dimensions", (event, dimensions) => {
-    saveConfig(null,null,null,dimensions);
+    saveConfig({ dimensions: dimensions});
     return loadConfig()
 });
 
@@ -138,7 +131,7 @@ ipcMain.handle("select-folder", async () => {
     });
 
     if (!result.canceled && result.filePaths.length > 0) {
-        saveConfig(result.filePaths[0]); // Save selected directory
+        saveConfig({ stlSavePath: result.filePaths[0]}); // Save selected directory
         return result.filePaths[0]; // Return new path to renderer
     }
     return null; // User canceled selection

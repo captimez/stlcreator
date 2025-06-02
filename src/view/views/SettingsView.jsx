@@ -9,14 +9,17 @@ import { styled } from '@mui/material/styles';
 const SettingsView = () => {
 const [saveFolder, setSaveFolder] = useState("");
 const [resolution, setResolution] = useState(null);
-const [solution_id, setSolutionId] = useState(1);
-const [opcuaStatus, setOpcuaStatus] = useState("");
+const [solutionIdIr, setSolutionIdIr] = useState(1);
+const [solutionIdOr,setSolutionIdOr] = useState(1);
 
 // Load initial save folder on mount
 useEffect(() => {
     window.api.getSaveFolder().then(setSaveFolder);
     window.api.getResolution().then(setResolution); 
-    window.api.getSolutionId().then(setSolutionId); // Load initial solution ID
+    window.api.getSolutionId().then((data) => {
+        setSolutionIdIr(data.ir)
+        setSolutionIdOr(data.or)
+    });
 }, []);
 
 const Input = styled(MuiInput)`
@@ -85,33 +88,30 @@ return (
                             />
 
                         </Box>
-                        <FormLabel sx={{ mt: 1}}>BPS COPY Solution ID</FormLabel>
+                        <FormLabel sx={{ mt: 1}}>BPS COPY SolutionID IR</FormLabel>
                         <Box sx={{ display: "flex", alignItems: "center", mt: 2, mb: 1 }}>
                             <Input type="number"
                                 min={1} max={100} id="solution-id" 
-                                value={solution_id} 
+                                value={solutionIdIr} 
                                 onChange={(e) => { 
-                                    setSolutionId(e.target.value)
+                                    setSolutionIdIr(e.target.value)
                                     window.api.updateSolutionId(e.target.value)
                                     }} 
                                 size='small' 
                                 label="BPS COPY Solution ID" 
                             />
                         </Box>
-                        <Box sx = {{ display: "flex", alignItems: "center", mt: 2, mb: 1 }}>
-                            <Button 
-                                variant="contained" 
-                                color="primary" 
-                                onClick={handleCheckOpcuaConnection}
-                                style={{ marginTop: "20px" }}
-                            >
-                                Check OPC UA Connection
-                            </Button>
-                            {opcuaStatus && (
-                                <Typography sx={{ mt: 2, color: opcuaStatus.includes("successfully") ? "green" : "red" }}>
-                                    {opcuaStatus}
-                                </Typography>
-                            )}
+                        <FormLabel sx={{ mt: 1 }}>BPS COPY SolutionID OR</FormLabel>
+                        <Box sx={{ display: "flex", alignItems: "center", mt: 2, mb: 1 }}>
+                            <Input type="number" min={1} max={100} id="solution-id-or"
+                                value={solutionIdOr} 
+                                onChange={(e) => { 
+                                    setSolutionIdOr(e.target.value)
+                                    window.api.updateSolutionIdOr(e.target.value)
+                                    }} 
+                                size='small' 
+                                label="BPS COPY Solution ID OR"
+                            />
                         </Box>
                     </FormControl>
                 </Box>

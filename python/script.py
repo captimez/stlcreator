@@ -205,6 +205,8 @@ try:
         stl_file_path = f'{config["stlSavePath"]}/{config["selectedFile"]}.stl'
         filename = config["selectedFile"].split(".")[0]
         objectType = config["type"]
+        copyIdOr = config["solutionIdOr"]
+        copyIdIr = config["solutionIdIr"]
         solution_name = config["solutionName"]
         if objectType == "Aussenring" or objectType == "Innenring":
             workpiece_gewicht = config['gewicht']
@@ -222,7 +224,7 @@ workpiece_innenradius = workpiece_innendurchmesser / 2
 workpiece_aussenradius = workpiece_aussendurchmesser / 2
 
 grip_depth = 17.5
-grip_tolerance = 4
+grip_tolerance = 1 
 max_grip_depth = grip_depth - grip_tolerance 
 
 if(objectType == "Aussenring" or objectType == "Innenring"):
@@ -302,13 +304,12 @@ try:
     if not solution_ids:
         raise ValueError("No solutions found.")
     
-    if objectType == "Aussenring" or objectType == "Innenring":
-        template_id = solution_ids[0]
-    elif objectType == "TStueck":
-        template_id = solution_ids[1]
-    elif objectType == "Winkel":
-        template_id = solution_ids[2]
-    
+    if objectType == "Aussenring":
+        template_id = solution_ids.find(lambda x: x == copyIdOr)
+    elif objectType == "Innenring": 
+        template_id = solution_ids.find(lambda x: x == copyIdIr)
+    if template_id is None:
+        raise ValueError(f"No template solution found for type {objectType} with ID {copyIdOr if objectType == 'Aussenring' else copyIdIr}.")
 
     send_progress(30, "Retrieved all existing solution IDs.")
 except Exception as e:
