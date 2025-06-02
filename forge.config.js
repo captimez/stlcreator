@@ -14,7 +14,7 @@ module.exports = {
       config: {
         asar: false, 
         executableName: 'stlcreator',
-        version: '1.3',
+        version: '1.3.2',
         icon: './assets/taskbar',
       },
     }, 

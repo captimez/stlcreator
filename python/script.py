@@ -187,7 +187,7 @@ def send_all_to_sps(stl_file_name, uid, aussendurchmesser, innendurchmesser, sch
         cleanup_and_exit(1)
 
 
-def update_thumbnail(driver):
+def update_thumbnail(driver, all_toggles):
     for toggle in all_toggles:
         if "Thumbnail" in toggle.text:
             toggle.click()
@@ -224,7 +224,7 @@ workpiece_innenradius = workpiece_innendurchmesser / 2
 workpiece_aussenradius = workpiece_aussendurchmesser / 2
 
 grip_depth = 17.5
-grip_tolerance = 1 
+grip_tolerance = 2 
 max_grip_depth = grip_depth - grip_tolerance 
 
 if(objectType == "Aussenring" or objectType == "Innenring"):
@@ -305,9 +305,9 @@ try:
         raise ValueError("No solutions found.")
     
     if objectType == "Aussenring":
-        template_id = solution_ids.find(lambda x: x == copyIdOr)
+        template_id = copyIdOr
     elif objectType == "Innenring": 
-        template_id = solution_ids.find(lambda x: x == copyIdIr)
+        template_id = copyIdIr
     if template_id is None:
         raise ValueError(f"No template solution found for type {objectType} with ID {copyIdOr if objectType == 'Aussenring' else copyIdIr}.")
 
@@ -362,7 +362,7 @@ try:
     all_toggles = driver.find_elements(By.CSS_SELECTOR, "span.widget-title")
 
     # Durchgehen und das mit "Thumbnail" im Textinhalt finden
-    update_thumbnail(driver)
+    update_thumbnail(driver,all_toggles)
     send_progress(55, "Updated Thumbnail successfully.")
     name_input.send_keys("" + filename)
     file_input = driver.find_element(By.ID, "id-mesh")
@@ -534,6 +534,8 @@ try:
             EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']"))
         )
 
+
+
         save_button = driver.find_element(By.XPATH, "//button[@type='submit']")
         save_button.click()
 
@@ -548,6 +550,49 @@ try:
         # STEP 7.1: Edit Current
         WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "id-loca-start-edit"))).click()
 
+        #Go To Features
+        if(objectType == "Aussenring"):
+            model_feature_path = f"{localization_path}features/start-edit/"
+            driver.get(model_feature_path)
+
+            feature_elements =  driver.find_elements(By.CSS_SELECTOR, ".item[data-item-id]")
+            feature_count = 0
+            for ele in feature_elements:
+                driver.execute_script("arguments[0].click();", ele)
+                width_input = WebDriverWait(driver,10).until(
+                    EC.presence_of_element_located((By.ID, "id_size_width"))
+                )
+                height_input = WebDriverWait(driver,10).until(
+                    EC.presence_of_element_located((By.ID, "id_size_height"))
+                )
+                depth_input = WebDriverWait(driver,10).until(
+                    EC.presence_of_element_located((By.ID, "id_size_depth"))
+                )
+            
+                pos_z_input = WebDriverWait(driver,10).until(
+                    EC.presence_of_element_located((By.ID, "id_position_z"))
+                )
+
+                depth = workpiece_hoehe / 5
+                alignment_pos_z = (workpiece_hoehe / 2) - (depth * 0.25)
+
+                width_input.clear()
+                width_input.send_keys(workpiece_aussendurchmesser + (workpiece_aussendurchmesser / 10))
+                height_input.clear()
+                height_input.send_keys(workpiece_aussendurchmesser + (workpiece_aussendurchmesser / 10))
+                depth_input.clear()
+                depth_input.send_keys(depth)
+
+                pos_z_input.clear()
+                pos_z_input.send_keys(alignment_pos_z)
+            
+                save_button = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.ID, "save-button"))
+                )
+                save_button.click()
+
+
+            driver.get(localization_path +"start-edit/")
         # STEP 7.2: Wait for UI to settle (optional)
         # time.sleep(1)
         # Stattdessen: Warte, bis das Select-Element sichtbar ist
@@ -576,14 +621,14 @@ try:
         save_button.click()
 
         # STEP 7.5: Save configuration
-        save_button = WebDriverWait(driver, 10).until(
+        save_button = WebDriverWait(driver, 30).until(
             EC.element_to_be_clickable((By.ID, "id-save-localization_profile"))
         )
         driver.execute_script("arguments[0].removeAttribute('disabled')", save_button)
         save_button.click()
 
         # STEP 7.6: Quit localization
-        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "id-exit-localization"))).click()
+        WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.ID, "id-exit-localization"))).click()
 
         # STEP 7.7: Read notification
         try:
